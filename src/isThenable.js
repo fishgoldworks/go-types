@@ -1,21 +1,16 @@
+var isObject = require("./isObject");
+
 /**
- * Determines whether the value is an object that defines a <code>then</code> method.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a thenable object; <code>false</code> otherwise.
- * @example <caption>Thenable objects</caption>
- * // returns true
- * isThenable(new Promise(resolve, reject));
- * isThenable({then: function() {}});
- * @example <caption>Non-thenable values</caption>
- * // returns false
- * isThenable(null);
- * isThenable({then: true});
- * @since 1.1.0
- * @memberof Object
- * @static
+ * Checks for a non-null object/function with a callable then method.
+ * Includes foreign/null-prototype objects. Does not invoke then. Shape detection is not proof of Promise/A+ behaviour.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isThenable({then(){}}); // => true
+ * @example isThenable({then:1});   // => false
  */
 function isThenable(value) {
-    return value instanceof Object && typeof value.then === "function";
+    // Include foreign and null-prototype objects without invoking then.
+    return isObject(value) && typeof value.then === "function";
 }
 
 module.exports = isThenable;

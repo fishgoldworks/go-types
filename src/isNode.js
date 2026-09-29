@@ -1,20 +1,10 @@
 /**
- * Determines whether the value is a DOM <code>Node</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a DOM <code>Node</code> object; <code>false</code> otherwise.
- * @example <caption>Node objects</caption>
- * // returns true
- * isNode(document);
- * isNode(document.createElement("div"));
- * isNode(new DocumentFragment());
- * @example <caption>Non-Node values</caption>
- * // returns false
- * isNode(Node);
- * isNode(window);
- * @see Node
- * @since 1.1.0
- * @memberof Node
- * @static
+ * Checks instanceof the available local Node constructor.
+ * Browser-only positive example. Returns false when the global constructor is absent. Foreign-realm nodes are outside this local-instance contract; no property-shape or security guarantee.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isNode(document);     // => true
+ * @example isNode({nodeType:1}); // => false
  */
 function isNode(value) {
     return typeof Node === "function" && value instanceof Node;

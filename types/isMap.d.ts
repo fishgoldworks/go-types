@@ -1,0 +1,3 @@
+import Types = require('../index.js');
+declare const check: typeof Types.isMap;
+export = check;

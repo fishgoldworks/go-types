@@ -1,28 +1,18 @@
-var MAX_SAFE_INTEGER = 9007199254740991;
+// Share a single integer-length contract with the array-like consumers.
+var getArrayLikeLength = require("./util/getArrayLikeLength");
 
 /**
- * Determines whether the value is an array-like object with a "length" property 
- * whose value is an integer and is within 0 ~ Number.MAX_SAFE_INTEGER (both inclusive).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an array-like object; <code>false</code> otherwise.
- * @example <caption>Array-like objects</caption>
- * // returns true
- * isArrayLike([]);
- * isArrayLike("abc");
- * isArrayLike({length: 0});
- * isArrayLike(new Int8Array());
- * @example <caption>Non-array-like values</caption>
- * // returns false
- * isArrayLike({});
- * isArrayLike({length: -1})
- * isArrayLike(new Set());
- * isArrayLike(Array);
- * @since 1.0.0
- * @memberof Array
- * @static
+ * Checks for a non-function value whose numeric length is an integer from zero through Number.MAX_SAFE_INTEGER.
+ * Reads length once and does not require every index to exist. Boxed length numbers, negative lengths, fractions, NaN and infinities are invalid. Accessors/proxy traps can run and throw.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isArrayLike("");           // => true
+ * @example isArrayLike({length:0});   // => true
+ * @example isArrayLike({length:0.5}); // => false
+ * @example isArrayLike(() => {});     // => false
  */
 function isArrayLike(value) {
-    return value != null && typeof value.length === "number" && value.length >= 0 && value.length <= MAX_SAFE_INTEGER && typeof value !== "function";
+    return getArrayLikeLength(value) !== undefined;
 }
 
 module.exports = isArrayLike;

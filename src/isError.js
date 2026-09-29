@@ -1,24 +1,31 @@
+var nativeIsError = Error.isError;
+var objectToString = Object.prototype.toString;
+
 /**
- * Determines whether the value is an <code>Error</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Error</code> object; <code>false</code> otherwise.
- * @example <caption>Error objects</caption>
- * // returns true
- * isError(new Error("Validation error"));
- * isError(new TypeError("Expected a number, but found: " + value));
- * @example <caption>Non-Error values</caption>
- * // returns false
- * isError(null);
- * isError(NaN);
- * isError(Promise.reject());
- * isError({name: "TypeError", message: "Expected a number"});
- * @see Error
- * @since 1.0.0
- * @memberof Object
- * @static
+ * Uses captured Error.isError when available; otherwise checks ordinary untagged Error objects conservatively.
+ * Fallback refuses custom/inherited Symbol.toStringTag without reading its getter, so genuine tagged errors/DOMExceptions may return false on older runtimes. Native branch follows the runtime. Not a security boundary; proxy traps may run.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isError(new Error("x"));                 // => true
+ * @example isError(Object.create(Error.prototype)); // => false
+ * @example isError({name:"Error",message:"x"});     // => false
  */
 function isError(value) {
-    return value instanceof Error;
+    // Prefer the standardized native brand check when the runtime provides it.
+    if (typeof nativeIsError === "function") {
+        return nativeIsError(value);
+    }
+    if (value === null || typeof value !== "object") {
+        return false;
+    }
+    // Conservative legacy fallback: refuse customisable tags rather than
+    // accepting a spoofed "Error" tag or running its getter. Genuine tagged Errors
+    // (including some DOMException implementations) may be false without Error.isError.
+    // Proxy traps can still execute; this fallback is not a security boundary.
+    if (typeof Symbol === "function" && Symbol.toStringTag && Symbol.toStringTag in value) {
+        return false;
+    }
+    return objectToString.call(value) === "[object Error]";
 }
 
 module.exports = isError;

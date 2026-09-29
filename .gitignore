@@ -1,3 +1,6 @@
-/nbproject
-/node_modules
-/**/.tmp
+node_modules/
+coverage/
+*.tgz
+.go-types-build-*/
+.tmp/
+.go-types-typecheck-*/

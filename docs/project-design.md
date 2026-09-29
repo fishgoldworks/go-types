@@ -1,0 +1,18 @@
+# Library design
+
+This guide records go-types design constraints. The library provides small, composable checks and explicit conversions with stable, documented contracts.
+
+- Keep zero runtime dependencies and small CommonJS source modules. Preserve 46 original root export names. The 80-function API also includes reusable checkers, typed Map/Set validators and 18 conversions.
+- Prefer captured standard intrinsics where their contracts match; no speculative legacy polyfills and no security claims about a compromised runtime.
+- Compile and fully validate matcher configuration before checking any input. No constructor bodies or predicates run during compilation. Compile a compact directed acyclic graph of unions using an explicit stack, reject cyclic unions, snapshot each array once per compilation, and preserve callback order and number of calls. Native instance prototype errors are deferred until evaluation rather than inferred from constructibility. Instance matching remains native instanceof.
+- `isArrayOf` and `isArrayLikeOf` accept empty inputs. Holes are read through ordinary indexed access. Non-empty array detection is separate.
+- Include null-prototype plain dictionaries. Reject whitespace-only numeric strings. Preserve boxed Number/String/Boolean support and primitive-only Symbol/BigInt checks.
+- Default empty/blank operations inspect sized containers and plain dictionaries without advancing caller iterators. Unsized iterable/iterator inputs throw. Provide explicit iterable variants with documented consumption/closing and termination limitations. Map blankness concerns values; Set blankness concerns items.
+- Binary checks establish native identity across realms; detached buffers/views remain their respective types. Protocol checks do not invoke the checked methods.
+- Keep existing cycle traversal scope: enumerable string properties, including inherited; no symbols, non-enumerables or Map/Set entries.
+- Keep local-realm Promise and DOM instance checks and document their prototype-chain and realm limitations.
+- Type declarations are conservative: no unsafe integer/blank/plain-object/boxed-primitive negative-branch narrowing. Exact primitive checks and non-nullish filtering narrow.
+- Use `node:test` for public-API tests, alongside independent generated graph/model tests, TypeScript consumer tests, browser tests and packed-package checks.
+- Publish supported source, entries, declarations, bundles and documentation. Keep private helpers, tests and development tooling outside the public API.
+- Expose all nine native-first conversions and their nine conditional counterparts. Document nullish input, output identity, exceptions, precision and iteration; skipped conversions do not inspect the input.
+- Target Node >=22 and ES2020-capable browsers with the required standard built-ins. Keep measured verification evidence separate from product documentation.

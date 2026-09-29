@@ -1,63 +1,53 @@
-var isEmpty = require("./isEmpty");
-var isString = require("./isString");
-var isArrayLike = require("./isArrayLike");
-var isPlainObject = require("./isPlainObject");
-var isNullish = require("./isNullish");
-var isIterable = require("./isIterable");
-
-var NON_SPACE_REGEX = new RegExp("\\S");
-
+const isArray = require('./isArray');
+const isString = require('./isString');
+const isMap = require('./isMap');
+const isSet = require('./isSet');
+const getArrayLikeLength = require('./util/getArrayLikeLength');
+const isPlainObject = require('./isPlainObject');
+const assertSizedInput = require('./util/assertSizedInput');
+const keys = Object.keys;
+const stringValueOf = String.prototype.valueOf;
+const mapValues = Map.prototype.values;
+const setValues = Set.prototype.values;
+const nonSpace = /\S/;
 /**
- * Determines whether the value is a blank value which can be one of the following: 
- * - <code>null</code>
- * - <code>undefined</code>
- * - A string whose length is zero or has only space characters
- * - An array that has no elements or has only nullish values
- * - A plain object that has no enumerable keys or has only nullish values
- * - An iterable that has no iterable values or has only nullish values.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a blank value; <code>false</code> otherwise.
- * @example <caption>Blank values</caption>
- * // returns true
- * isBlank(null);
- * isBlank(undefined);
- * isBlank(" \t\n ");
- * isBlank([undefined, null]);
- * isBlank({a: null, b: undefined});
- * isBlank(new Set(null));
- * @example <caption>Non-blank values</caption>
- * // returns false
- * isBlank(0);
- * isBlank(false);
- * isBlank(" a ");
- * isBlank([""]);
- * isBlank({a: ""});
- * isBlank(NaN);
- * @since 1.0.0
- * @memberof Utility
- * @static
+ * Non-consuming shallow blankness check: nullish, whitespace-only string, or supported container holding only nullish values.
+ * Uses the same dispatch order and unsized-input errors as isEmpty. Map blankness concerns values, Set blankness concerns items, and dictionary blankness concerns own enumerable string-keyed values. Unsized protocol capabilities take precedence over plain-dictionary handling. Not recursive: an empty string or object inside a container is not nullish.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isBlank(" \t\n");                 // => true
+ * @example isBlank([null,undefined]);        // => true
+ * @example isBlank(new Map([["key",null]])); // => true
+ * @example isBlank([""]);                    // => false
+ * @example isBlank(0);                       // => false
  */
 function isBlank(value) {
-    if (isEmpty(value)) {
-        return true;
-    } else if (isString(value)) {
-        return !NON_SPACE_REGEX.test(value);
-    } else if (isArrayLike(value)) {
-        return Array.prototype.every.call(value, isNullish);
-    } else if (isPlainObject(value)) {
-        return Array.prototype.every.call(Object.values(value), isNullish);
-    } else if (isIterable(value)) {
-        var iter = value[Symbol.iterator]();
-        var entry;
-
-        while ((entry = iter.next()).done !== true) {
-            if (entry.value != null) {
-                return false;
-            }
+    if (value === null || value === undefined) return true;
+    if (!isArray(value)) {
+        if (isString(value)) return !nonSpace.test(stringValueOf.call(value));
+        const map = isMap(value);
+        if (map || isSet(value)) {
+            // Use one brand check per collection and private native iterators.
+            const values = map ? mapValues.call(value) : setValues.call(value);
+            for (const item of values) if (item !== null && item !== undefined) return false;
+            return true;
+        }
+    }
+    const length = getArrayLikeLength(value);
+    if (length !== undefined) {
+        for (let index = 0; index < length; index++) {
+            const item = value[index];
+            if (item !== null && item !== undefined) return false;
         }
         return true;
     }
-    return false;
+    assertSizedInput(value);
+    if (!isPlainObject(value)) return false;
+    const names = keys(value);
+    for (let index = 0; index < names.length; index++) {
+        const item = value[names[index]];
+        if (item !== null && item !== undefined) return false;
+    }
+    return true;
 }
-
 module.exports = isBlank;

@@ -1,27 +1,17 @@
+var isObject = require("./isObject");
+
 /**
- * Determines whether the value is a primitive value.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive value; <code>false</code> otherwise.
- * @example <caption>Primitive values</caption>
- * // returns true
- * isPrimitive(undefined);
- * isPrimitive(null);
- * isPrimitive(false);
- * isPrimitive(0);
- * isPrimitive("abc");
- * isPrimitive(Symbol("abc"));
- * isPrimitive(BigInt(1234567890));
- * @example <caption>Non-primitive values</caption>
- * // returns false
- * isPrimitive(new Number(1));
- * isPrimitive([1, 2, 3]);
- * isPrimitive(function () {});
- * @since 1.0.0
- * @memberof Primitive
- * @static
+ * Checks for null, undefined, boolean, number, bigint, string or symbol primitives.
+ * The complement of isObject, including browser document.all as non-primitive. This differs from blindly treating every typeof-undefined value as the undefined primitive.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isPrimitive(null);          // => true
+ * @example isPrimitive(1n);            // => true
+ * @example isPrimitive(new Number(1)); // => false
  */
 function isPrimitive(value) {
-    return !(value instanceof Object);
+    // Share the object/primitive boundary, including foreign and null-prototype objects.
+    return !isObject(value);
 }
 
 module.exports = isPrimitive;

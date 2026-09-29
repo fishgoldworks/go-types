@@ -1,25 +1,22 @@
-var isNaN = require("./isNaN");
+// Share Date identity and ignore overridden instance methods.
+var isDate = require("./isDate");
+var getTime = Date.prototype.getTime;
 
 /**
- * Determines whether the value is an invalid <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an invalid <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Invalid Date objects</caption>
- * // returns true
- * isInvalidDate(new Date(""));
- * isInvalidDate(new Date(NaN));
- * @example <caption>Valid Date & non-date values</caption>
- * // returns false
- * isInvalidDate(new Date());
- * isInvalidDate("2001-01-01T00:00:00.000Z");
- * isInvalidDate(978307200000);
- * @see Date
- * @since 1.3.0
- * @memberof Object
- * @static
+ * Checks Date identity and NaN timestamp invalidity.
+ * Foreign dates are supported; overridden instance getTime methods are ignored. Non-Dates return false.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isInvalidDate(new Date(NaN)); // => true
+ * @example isInvalidDate(new Date(0));   // => false
+ * @example isInvalidDate(0);             // => false
  */
 function isInvalidDate(value) {
-    return value instanceof Date && isNaN(value.getTime());
+    if (!isDate(value)) {
+        return false;
+    }
+    var time = getTime.call(value);
+    return time !== time;
 }
 
 module.exports = isInvalidDate;

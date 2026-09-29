@@ -1,34 +1,31 @@
+var nonSpace = /\S/;
+var stringValueOf = String.prototype.valueOf;
 var isFinite = require("./isFinite");
 var isString = require("./isString");
 var isBigInt = require("./isBigInt");
 
 /**
- * Determines whether the value is a numeric value which can be one of the following:
- * - A primitive number or <code>Number</code> object that has a finite value
- * - A primitive string or <code>String</code> object that represents a finite number
- * - A BigInt
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a numeric value; <code>false</code> otherwise.
- * @example <caption>Numeric values</caption>
- * // returns true
- * isNumeric(1);
- * isNumeric(new Number(1));
- * isNumeric("1.0");
- * isNumeric(new String("-1.234e+8"))
- * isNumeric(BigInt(1234567890));
- * isNumeric(Infinity);
- * @example <caption>Non-numeric values</caption>
- * // returns false
- * isNumeric(NaN);
- * isNumeric(Infinity);
- * isNumeric("12000n");
- * isNumeric("1*2");
- * @since 1.0.0
- * @memberof Number
- * @static
+ * Accepts finite primitive/boxed numbers, primitive bigint values and non-whitespace strings that convert to finite numbers.
+ * Uses standard numeric conversion syntax, not a decimal-only grammar. It rejects NaN, Infinity, empty/whitespace-only strings, boolean values, boxed BigInt values and arbitrary coercible objects.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isNumeric(" 1e3 ");  // => true
+ * @example isNumeric("0x10");   // => true
+ * @example isNumeric(1n);       // => true
+ * @example isNumeric("   ");    // => false
+ * @example isNumeric(Infinity); // => false
  */
 function isNumeric(value) {
-    return isFinite(value) || (isString(value) && value.length > 0 && isFinite(value * 1)) || isBigInt(value);
+    if (isFinite(value) || isBigInt(value)) {
+        return true;
+    }
+    if (!isString(value)) {
+        return false;
+    }
+    // Read the real string payload instead of invoking user-defined coercion.
+    // Whitespace alone does not represent a number.
+    var text = stringValueOf.call(value);
+    return nonSpace.test(text) && isFinite(text * 1);
 }
 
 module.exports = isNumeric;

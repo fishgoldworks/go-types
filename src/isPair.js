@@ -1,21 +1,12 @@
 var isArray = require("./isArray");
 
 /**
- * Determines whether the value is an array with two elements.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an array with two elements; <code>false</code> otherwise.
- * @example <caption>Pair values</caption>
- * // returns true
- * isPair([1, 2]);
- * isPair([null, {}]);
- * @example <caption>Non-pair values</caption>
- * // returns false
- * isPair([]);
- * isPair({a: 1, b: 2});
- * isPair("ab");
- * @since 1.2.0
- * @memberof Array
- * @static
+ * Checks actual array identity and length exactly two.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isPair([1,2]);        // => true
+ * @example isPair(new Array(2)); // => true
+ * @example isPair([1]);          // => false
  */
 function isPair(value) {
     return isArray(value) && value.length === 2;

@@ -1,81 +1,82 @@
-/**
-* @namespace  Primitive 
-*/
+'use strict';
 
-/** 
-* @namespace Utility 
-*/
-
-/**
-* @namespace Number 
-*/
-
-/**
-* @namespace Object 
-*/
-
-/**
-* @namespace Array 
-*/
-
-/**
-* @namespace Collection 
-*/
-
-/**
-* @namespace Node 
-*/
-
-module.exports.isUndefined = require('./src/isUndefined');
-module.exports.isNull = require('./src/isNull');
-module.exports.isBoolean = require('./src/isBoolean');
-module.exports.isNumber = require('./src/isNumber');
-module.exports.isString = require('./src/isString');
-module.exports.isSymbol = require('./src/isSymbol');
-module.exports.isBigInt = require('./src/isBigInt');
-module.exports.isPrimitive = require('./src/isPrimitive');
-
-module.exports.isNullish = require('./src/isNullish');
-module.exports.isEmpty = require('./src/isEmpty');
-module.exports.isBlank = require('./src/isBlank');
-module.exports.isTruthy = require('./src/isTruthy');
-module.exports.isFalsy = require('./src/isFalsy');
-
-module.exports.isInteger = require('./src/isInteger');
-module.exports.isFloat = require('./src/isFloat');
-module.exports.isFinite = require('./src/isFinite');
-module.exports.isInfinite = require('./src/isInfinite');
-module.exports.isNaN = require('./src/isNaN');
-module.exports.isNumeric = require('./src/isNumeric');
-module.exports.isTypeOf = require('./src/isTypeOf');
-
-module.exports.isObject = require('./src/isObject');
-module.exports.isPlainObject = require('./src/isPlainObject');
-module.exports.isCyclic = require('./src/isCyclic');
-module.exports.isIterable = require('./src/isIterable');
-module.exports.isArray = require('./src/isArray');
-module.exports.isArrayOf = require('./src/isArrayOf');
-module.exports.isArrayLike = require('./src/isArrayLike');
-module.exports.isArrayLikeOf = require('./src/isArrayLikeOf');
-module.exports.isPair = require('./src/isPair');
-module.exports.isMap = require('./src/isMap');
-module.exports.isSet = require('./src/isSet');
-module.exports.isWeakMap = require('./src/isWeakMap');
-module.exports.isWeakSet = require('./src/isWeakSet');
-module.exports.isFunction = require('./src/isFunction');
-
-module.exports.isDate = require('./src/isDate');
-module.exports.isValidDate = require('./src/isValidDate');
-module.exports.isInvalidDate = require('./src/isInvalidDate');
-module.exports.isRegExp = require('./src/isRegExp');
-module.exports.isPromise = require('./src/isPromise');
-module.exports.isPromiseLike = require('./src/isPromiseLike');
-module.exports.isThenable = require('./src/isThenable');
-module.exports.isError = require('./src/isError');
-module.exports.isNode = require('./src/isNode');
-module.exports.isElement = require('./src/isElement');
-module.exports.isFragment = require('./src/isFragment');
-
-
-
-
+exports.isUndefined = require('./src/isUndefined.js');
+exports.isNull = require('./src/isNull.js');
+exports.isBoolean = require('./src/isBoolean.js');
+exports.isNumber = require('./src/isNumber.js');
+exports.isString = require('./src/isString.js');
+exports.isSymbol = require('./src/isSymbol.js');
+exports.isBigInt = require('./src/isBigInt.js');
+exports.isPrimitive = require('./src/isPrimitive.js');
+exports.isNullish = require('./src/isNullish.js');
+exports.isEmpty = require('./src/isEmpty.js');
+exports.isBlank = require('./src/isBlank.js');
+exports.isTruthy = require('./src/isTruthy.js');
+exports.isFalsy = require('./src/isFalsy.js');
+exports.isInteger = require('./src/isInteger.js');
+exports.isSafeInteger = require('./src/isSafeInteger.js');
+exports.isFloat = require('./src/isFloat.js');
+exports.isFinite = require('./src/isFinite.js');
+exports.isInfinite = require('./src/isInfinite.js');
+exports.isNaN = require('./src/isNaN.js');
+exports.isNumeric = require('./src/isNumeric.js');
+exports.isTypeOf = require('./src/isTypeOf.js');
+exports.isObject = require('./src/isObject.js');
+exports.isPlainObject = require('./src/isPlainObject.js');
+exports.isCyclic = require('./src/isCyclic.js');
+exports.isIterable = require('./src/isIterable.js');
+exports.isArray = require('./src/isArray.js');
+exports.isArrayOf = require('./src/isArrayOf.js');
+exports.isArrayLike = require('./src/isArrayLike.js');
+exports.isArrayLikeOf = require('./src/isArrayLikeOf.js');
+exports.isPair = require('./src/isPair.js');
+exports.isMap = require('./src/isMap.js');
+exports.isSet = require('./src/isSet.js');
+exports.isWeakMap = require('./src/isWeakMap.js');
+exports.isWeakSet = require('./src/isWeakSet.js');
+exports.isFunction = require('./src/isFunction.js');
+exports.isDate = require('./src/isDate.js');
+exports.isValidDate = require('./src/isValidDate.js');
+exports.isInvalidDate = require('./src/isInvalidDate.js');
+exports.isRegExp = require('./src/isRegExp.js');
+exports.isPromise = require('./src/isPromise.js');
+exports.isPromiseLike = require('./src/isPromiseLike.js');
+exports.isThenable = require('./src/isThenable.js');
+exports.isError = require('./src/isError.js');
+exports.isNode = require('./src/isNode.js');
+exports.isElement = require('./src/isElement.js');
+exports.isFragment = require('./src/isFragment.js');
+exports.isArrayBuffer = require('./src/isArrayBuffer.js');
+exports.isSharedArrayBuffer = require('./src/isSharedArrayBuffer.js');
+exports.isArrayBufferView = require('./src/isArrayBufferView.js');
+exports.isTypedArray = require('./src/isTypedArray.js');
+exports.isDataView = require('./src/isDataView.js');
+exports.isAsyncIterable = require('./src/isAsyncIterable.js');
+exports.isIteratorLike = require('./src/isIteratorLike.js');
+exports.isNonNullish = require('./src/isNonNullish.js');
+exports.isObjectLike = require('./src/isObjectLike.js');
+exports.isNonEmptyArray = require('./src/isNonEmptyArray.js');
+exports.isJson = require('./src/isJson.js');
+exports.createTypeChecker = require('./src/createTypeChecker.js');
+exports.isSetOf = require('./src/isSetOf.js');
+exports.isMapOf = require('./src/isMapOf.js');
+exports.isEmptyIterable = require('./src/isEmptyIterable.js');
+exports.isBlankIterable = require('./src/isBlankIterable.js');
+exports.toArray = require('./src/conversion/toArray.js');
+exports.toArrayIf = require('./src/conversion/toArrayIf.js');
+exports.toBigInt = require('./src/conversion/toBigInt.js');
+exports.toBigIntIf = require('./src/conversion/toBigIntIf.js');
+exports.toBoolean = require('./src/conversion/toBoolean.js');
+exports.toBooleanIf = require('./src/conversion/toBooleanIf.js');
+exports.toDate = require('./src/conversion/toDate.js');
+exports.toDateIf = require('./src/conversion/toDateIf.js');
+exports.toInteger = require('./src/conversion/toInteger.js');
+exports.toIntegerIf = require('./src/conversion/toIntegerIf.js');
+exports.toNumber = require('./src/conversion/toNumber.js');
+exports.toNumberIf = require('./src/conversion/toNumberIf.js');
+exports.toObject = require('./src/conversion/toObject.js');
+exports.toObjectIf = require('./src/conversion/toObjectIf.js');
+exports.toString = require('./src/conversion/toString.js');
+exports.toStringIf = require('./src/conversion/toStringIf.js');
+exports.toSymbol = require('./src/conversion/toSymbol.js');
+exports.toSymbolIf = require('./src/conversion/toSymbolIf.js');

@@ -1,27 +1,19 @@
 /**
- * Determines whether the value is an <code>Object</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Object</code>; <code>false</code> otherwise.
- * @example <caption>Object values</caption>
- * // returns true
- * isObject({a: 1, b: 2});
- * isObject(["a", "b"]);
- * isObject(new Object());
- * isObject(new Number(1));
- * isObject(function() {});
- * @example <caption>Non-object values</caption>
- * // returns false
- * isObject(null);
- * isObject("abc");
- * isObject(Symbol("abc"));
- * isObject(1);
- * isObject(BigInt(1));
- * @since 1.0.0
- * @memberof Object
- * @static
+ * Accepts all non-null objects and functions.
+ * Uses the object/function boundary rather than realm-specific instanceof Object. Includes the browser document.all object despite its legacy typeof-undefined behaviour.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isObject(Object.create(null)); // => true
+ * @example isObject(() => {});            // => true
+ * @example isObject(null);                // => false
  */
 function isObject(value) {
-    return value instanceof Object;
+    // Prototype identity is realm-specific and excludes null-prototype
+    // dictionaries. Functions remain objects under this library's contract.
+    const type = typeof value;
+    // HTML document.all is an object despite its legacy typeof-undefined behaviour.
+    return type === "object" ? value !== null :
+        type === "function" || (type === "undefined" && value !== undefined);
 }
 
 module.exports = isObject;

@@ -1,0 +1,70 @@
+# Performance
+
+## What the implementation optimises
+
+Primitive type-name matchers return shared check functions without compiling a graph. Ordinary flat unions allocate no WeakMap or WeakSet; graph bookkeeping is created only when a nested union is encountered.
+
+Nested unions are compiled as a compact graph. Each distinct union array is snapshotted once per compilation; completed nodes are reused. Pure built-in subunions contain at most ten distinct checks and can be deduplicated. Compilation and evaluation use explicit stacks rather than recursive calls.
+
+Application predicates and custom instance hooks may have side effects. Evaluation preserves their order, number of calls, exceptions and live state. A compact shared graph can still request many callback invocations. There is no hidden result cache or work limit.
+
+Actual-array empty/blank checks bypass irrelevant boxed-String/Map/Set receiver checks. These used to create and catch exceptions on the ordinary array path. Lengths and items are still read according to the same array-like policy, including observable getters, unsupported-size errors and sparse/inherited indices.
+
+Numeric refinements extract a boxed Number payload once rather than repeatedly routing through other validators. Primitive numbers bypass receiver probes; captured native numeric operations are used where their behaviour matches the contract. Prototype and tag imitations still fail; ordinary object negatives for native brands can still require an intrinsic rejection. Fast paths do not substitute weaker string-tag identity checks.
+
+## Non-throwing native-brand paths on Node
+
+When available, captured `node:util.types` predicates handle native brand checks. Ordinary dictionaries no longer create and catch three incompatible-receiver exceptions before reaching empty/blank dictionary logic. Map/Set dispatch and predicate-descriptor compilation also avoid irrelevant receiver errors. Selection happens once through guarded `process.getBuiltinModule`, with no static Node import in browser code.
+
+Browsers and other hosts without the native classifiers retain intrinsic receiver checks. The Node improvement does not establish a browser speed guarantee. Primitive fast paths remain unchanged.
+
+Numeric checks use the captured native Number-object classifier before unboxing on Node. This avoids exception-driven rejection of non-number objects and adds a classifier call for genuine boxed numbers. Hosts without that classifier retain the intrinsic receiver probe.
+
+## Import granularity
+
+Root named ESM exports point directly to per-function implementations so bundlers can omit unused functions. `sideEffects: false` and the existing focused imports are retained. The default export still exposes the full namespace, and CommonJS/ESM share the same function instances.
+
+This is a bundler optimisation, not native Node lazy loading. Use `import isArray from 'go-types/isArray'` to load only that implementation in Node. `npm run test:tree-shaking` performs an actual esbuild consumer-bundle check and compares root named versus focused imports while rejecting unrelated matcher/conversion code in the output.
+
+## Reuse specifications deliberately
+
+```js
+const { createTypeChecker } = require('go-types');
+const acceptsValue = createTypeChecker(['number', null]);
+const values = [1, 'text', null];
+
+for (const value of values) {
+    if (acceptsValue(value)) {
+        // Handle the accepted value.
+    }
+}
+```
+
+Compile reusable specifications outside repeated validation loops. Each call to `isTypeOf(value, mutableSpecification)` validates and snapshots the specification again; caching it across calls would ignore later mutations. Fixed type names do not require graph compilation.
+
+Conversions retain native coercion semantics. Where the converted value is needed, convert once and validate the result rather than performing redundant conversion and validation passes.
+
+## Reproduce measurements
+
+```sh
+npm run benchmark
+node scripts/benchmark-compare.js /path/to/previous-library /path/to/updated-library
+node scripts/benchmark-matcher-scaling.js /path/to/previous-library /path/to/updated-library
+node scripts/benchmark-hot-paths.js /path/to/previous-library /path/to/updated-library
+node scripts/benchmark-native-exceptions.js
+node scripts/benchmark-numeric-paths.js /path/to/previous-library /path/to/updated-library
+```
+
+The comparison uses identical input sequences, consumes results, warms each case and repeats each library in independent processes with alternating order. It reports the median of process medians and keeps every raw sample. The scripts define the batch and process counts. The scaling probe uses fresh subprocesses with deadlines so an exponential case cannot hang the test session.
+
+The comparison and matcher-scaling scripts print JSON when supplied with two source revisions. Keep results, source revisions and environment details in a task-owned temporary directory outside the checkout.
+
+These local microbenchmarks do not guarantee application latency or another runtime's speed. Garbage collection, just-in-time compilation, CPU load and timer resolution affect very small measurements. Timings also include benchmark dispatch and result-consumption overhead. Near-equal nanosecond results are not reliable evidence of improvement or regression.
+
+No timing threshold is a unit-test assertion. The shared-graph regression asserts observable descriptor-read counts, while behaviour tests check answers, exceptions, callback order and mutations independently of timing.
+
+The hot-path comparison also alternates versions in separate processes, warms each case, uses identical inputs and consumes results. It prints every timing sample as JSON. Exception events are counted separately with the Node inspector; timing is never gathered under that debugger. Measurements do not establish a universal speedup or describe unmeasured generated bundles.
+
+## Numeric rejection trade-off
+
+The numeric-path script reports primitive, genuine boxed, non-number object and mixed inputs separately for finite, integer, safe-integer and numeric checks. The Node optimisation targets frequently rejected objects; it does not make every successful boxed-number check faster. Inspect the full results before applying a rejection-path speedup to an application dominated by primitive numbers. Exception instrumentation is disabled during timing.

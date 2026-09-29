@@ -1,0 +1,43 @@
+name: Verify library
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  source-and-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Require a reviewed development lockfile
+        run: node -e "if (!require('node:fs').existsSync('package-lock.json')) throw Error('Generate and commit package-lock.json with npm install before enabling release CI.');"
+      - run: npm ci
+      - run: npm run docs
+      - run: npm run verify
+      - name: Check generated source and entry points
+        run: git diff --exit-code -- README.md src docs/API.md package.json index.js index.mjs index.d.mts esm types dist
+  chromium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:browser

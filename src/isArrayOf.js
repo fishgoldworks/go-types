@@ -1,33 +1,22 @@
-var isTypeOf = require("./isTypeOf");
-
+const isArray = require('./isArray');
+const isValidArrayLength = require('./util/isValidArrayLength');
+const createTypeChecker = require('./createTypeChecker');
 /**
- * Determines whether the value is a non-empty array and all elements in the array have the specified type. 
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The type of elements
- * @returns {boolean} <code>true</code> if the value is a non-empty array and and all elements in the array have the specified type; <code>false</code> otherwise.
- * @example <caption>Matching values</caption>
- * // returns true
- * isArrayOf([1, 2, 3], "number");
- * isArrayOf(["a", "b", null], ["string", null]);
- * isArrayOf([{a: 1}, {b: 2}], Object);
- * @example <caption>Non-matching values</caption>
- * // returns false
- * isArrayOf([1, 2, "c"], "number");
- * isArrayOf([], undefined);
- * @since 1.1.0
- * @memberof Array
- * @static
+ * Checks whether every element of the array matches the supplied type specification.
+ * Compiles and fully validates the matcher before inspecting the input, including empty or non-collection inputs. Empty collections pass. Evaluation short-circuits on the first mismatch. Snapshots length once; reads values live through ordinary numeric property access. Missing indices read undefined unless inherited numeric properties provide values. Appends beyond the original length are ignored. An invalid exposed array length (for example from a Proxy) returns false.
+ * @param {*} value Value to inspect.
+ * @param {*} type Matcher specification.
+ * @returns {boolean}
+ * @example isArrayOf([1,2], "number");   // => true
+ * @example isArrayOf([1,"x"], "number"); // => false
+ * @example isArrayOf([], "number");      // => true
  */
 function isArrayOf(value, type) {
-    if (value instanceof Array && value.length > 0) {
-        for (var i = 0; i < value.length; i++) {
-            if (!isTypeOf(value[i], type)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+    const check = createTypeChecker(type);
+    if (!isArray(value)) return false;
+    const length = value.length;
+    if (!isValidArrayLength(length)) return false;
+    for (let index = 0; index < length; index++) if (!check(value[index])) return false;
+    return true;
 }
-
 module.exports = isArrayOf;

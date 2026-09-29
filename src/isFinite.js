@@ -1,30 +1,16 @@
-var isNumber = require("./isNumber");
+const getNumberValue = require('./util/getNumberValue');
+const nativeCheck = Number.isFinite;
 
 /**
- * Determines whether the value is a finite number (a primitive number or <code>Number</code> object).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a finite number; <code>false</code> otherwise.
- * @example <caption>Finite values</caption>
- * // returns true
- * isFinite(0);
- * isFinite(-0.1);
- * isFinite(Number.MAX_VALUE);
- * @example <caption>Non-finite values</caption>
- * // returns false
- * isFinite(Infinity);
- * isFinite("1");
- * isFinite(NaN);
- * @see isFinite
- * @since 1.0.0
- * @memberof Number
- * @static
+ * Checks for a finite number.
+ * Accepts primitive and boxed Number values, never other coercible values. Reads native boxed payloads without calling overridden coercion methods. Returns boolean rather than claiming that a failed refinement rules out all numbers.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isFinite(1);             // => true
+ * @example isFinite(new Number(1)); // => true
+ * @example isFinite(Infinity);      // => false
  */
 function isFinite(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return val !== Number.POSITIVE_INFINITY && val !== Number.NEGATIVE_INFINITY && val === val;
-    }
-    return false;
+    return nativeCheck(typeof value === 'number' ? value : getNumberValue(value));
 }
-
 module.exports = isFinite;

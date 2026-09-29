@@ -1,22 +1,14 @@
+const nativeIsArray = Array.isArray;
 /**
- * Determines whether the value is an <code>Array</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Array</code> object; <code>false</code> otherwise.
- * @example <caption>Array values</caption>
- * // returns true
- * isArray(["a", "b"]);
- * isArray(new Array());
- * @example <caption>Non-array values</caption>
- * // returns false
- * isArray("abc");
- * isArray({length: 0});
- * isArray(new Int8Array());
- * @since 1.0.0
- * @memberof Array
- * @static
+ * Checks native array identity.
+ * Uses a captured Array.isArray reference. Supports foreign arrays and non-revoked proxies around arrays. A revoked proxy throws TypeError, preserving native behaviour.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isArray([]);                             // => true
+ * @example isArray(new Uint8Array(2));              // => false
+ * @example isArray(Object.create(Array.prototype)); // => false
  */
 function isArray(value) {
-    return value instanceof Array;
+    return nativeIsArray(value);
 }
-
 module.exports = isArray;

@@ -1,32 +1,17 @@
-var isNumber = require("./isNumber");
+const getNumberValue = require('./util/getNumberValue');
+
 
 /**
- * Determines whether the value is <code>NaN</code> (a primitive number or a <code>Number</code> object). 
- * NaN is the only value in javascript that is not equal to itself.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is <code>NaN</code>; <code>false</code> otherwise.
- * @example <caption>NaN values</caption>
- * // returns true
- * isNaN(NaN);
- * isNaN(new Number(NaN));
- * isNaN(0/0);
- * @example <caption>Non-NaN values</caption>
- * // returns false
- * isNaN(undefined);
- * isNaN(null);
- * isNaN("NaN");
- * isNaN(Infinity);
- * @see Number.isNaN
- * @since 1.0.0
- * @memberof Number
- * @static
+ * Checks for NaN.
+ * Accepts primitive and boxed Number values, never other coercible values. Reads native boxed payloads without calling overridden coercion methods. Returns boolean rather than claiming that a failed refinement rules out all numbers.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isNaN(NaN);             // => true
+ * @example isNaN(new Number(NaN)); // => true
+ * @example isNaN("NaN");           // => false
  */
 function isNaN(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return val !== val;
-    }
-    return false;
+    const number = typeof value === 'number' ? value : getNumberValue(value);
+    return number !== number;
 }
-
 module.exports = isNaN;

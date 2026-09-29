@@ -1,28 +1,17 @@
-var isNumber = require("./isNumber");
+const getNumberValue = require('./util/getNumberValue');
+
 
 /**
- * Determines whether the value is a primitive number or <code>Number</code> object that represents positive or negative infinity.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a number that represents positive or negative infinity; <code>false</code> otherwise.
- * @example <caption>Infinite values</caption>
- * // returns true
- * isInfinite(Infinity);
- * isInfinite(Number.NEGATIVE_INFINITY);
- * @example <caption>Non-infinite values</caption>
- * // returns false
- * isInfinite(Number.MAX_VALUE);
- * isInfinite(NaN);
- * @see isFinite
- * @since 1.0.0
- * @memberof Number
- * @static
+ * Checks for positive or negative infinity.
+ * Accepts primitive and boxed Number values, never other coercible values. Reads native boxed payloads without calling overridden coercion methods. Returns boolean rather than claiming that a failed refinement rules out all numbers.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isInfinite(-Infinity);             // => true
+ * @example isInfinite(new Number(-Infinity)); // => true
+ * @example isInfinite(NaN);                   // => false
  */
 function isInfinite(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return  val === Number.POSITIVE_INFINITY || val === Number.NEGATIVE_INFINITY;
-    }
-    return false;
+    const number = typeof value === 'number' ? value : getNumberValue(value);
+    return number === Infinity || number === -Infinity;
 }
-
 module.exports = isInfinite;

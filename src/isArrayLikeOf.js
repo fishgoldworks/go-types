@@ -1,33 +1,20 @@
-var isArrayLike = require("./isArrayLike");
-var isTypeOf = require("./isTypeOf");
-
+const getArrayLikeLength = require('./util/getArrayLikeLength');
+const createTypeChecker = require('./createTypeChecker');
 /**
- * Determines whether the value is a non-empty array-like object and all elements in the object have the specified type.
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The type of elements
- * @returns {boolean} <code>true</code> if the value is a non-empty array-like object and all elements in the object have the specified type; <code>false</code> otherwise.
- * @example <caption>Matching values</caption>
- * // returns true
- * isArrayLikeOf([1, 2, 3], "number");
- * isArrayLikeOf({0: "a", 1: "b", length: 2}, "string");
- * @example <caption>Non-matching values</caption>
- * // returns false
- * isArrayLikeOf([1, 2, "c"], "number");
- * isArrayLikeOf({a: 1, b: 2, length: 2}, "number");
- * @since 1.1.0
- * @memberof Array
- * @static
+ * Checks whether every element of the array-like value matches the supplied type specification.
+ * Compiles and fully validates the matcher before inspecting the input, including empty or non-collection inputs. Empty collections pass. Evaluation short-circuits on the first mismatch. Snapshots length once; reads values live through ordinary numeric property access. Missing indices read undefined unless inherited numeric properties provide values. Appends beyond the original length are ignored.
+ * @param {*} value Value to inspect.
+ * @param {*} type Matcher specification.
+ * @returns {boolean}
+ * @example isArrayLikeOf({0:1,length:1}, "number");   // => true
+ * @example isArrayLikeOf({0:"x",length:1}, "number"); // => false
+ * @example isArrayLikeOf({length:0}, "number");       // => true
  */
 function isArrayLikeOf(value, type) {
-    if (isArrayLike(value) && value.length > 0) {
-        for (var i = 0; i < value.length; i++) {
-            if (!isTypeOf(value[i], type)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+    const check = createTypeChecker(type);
+    const length = getArrayLikeLength(value);
+    if (length === undefined) return false;
+    for (let index = 0; index < length; index++) if (!check(value[index])) return false;
+    return true;
 }
-
 module.exports = isArrayLikeOf;

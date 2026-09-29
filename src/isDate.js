@@ -1,23 +1,24 @@
+var hasNativeBrand = require("./util/hasNativeBrand");
+var getTime = Date.prototype.getTime;
+
+const nativeTypes = require('./util/nativeTypes');
+// Resolve the platform implementation once; never inspect user prototypes or tags.
+const checkNativeBrand = nativeTypes && typeof nativeTypes.isDate === 'function'
+    ? nativeTypes.isDate
+    : value => hasNativeBrand(value, getTime);
+
 /**
- * Determines whether the value is a <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Date values</caption>
- * // returns true
- * isDate(new Date());
- * isDate(new Date(""));
- * @example <caption>Non-date values</caption>
- * // returns false
- * isDate("2001-01-01T00:00:00.000Z");
- * isDate(978307200000);
- * @see Date
- * @since 1.0.0
- * @memberof Object
- * @static
+ * Checks genuine Date identity, regardless of timestamp validity.
+ * Uses native identity checks across realms, not local instanceof. Ignores overridden getTime methods.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isDate(new Date(NaN)); // => true
+ * @example isDate("2026-01-01");  // => false
  */
 function isDate(value) {
-    return value instanceof Date;
+    // getTime validates the native Date receiver without calling value.getTime.
+    // Invalid Dates still have the Date brand and are intentionally accepted here.
+    return checkNativeBrand(value);
 }
-
 
 module.exports = isDate;

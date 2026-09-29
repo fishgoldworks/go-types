@@ -1,30 +1,16 @@
 var hasCircularReference = require("./hasCircularReference");
 
 /**
- * Determines whether the value is an cyclic object with a circular reference.
- * A cycle object has an enumerable property (or a sub-property) whose value points 
- * to the object itself or a property of the object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a cyclic object with a circular reference; <code>false</code> otherwise.
- * @example <caption>Cyclic object</caption>
- * // returns true
- * var obj = {};
- * obj.ref = obj;
- * 
- * isCyclic(obj);
- * @example <caption>Non-cyclic values</caption>
- * // returns false
- * isCyclic({a: 1, b: 2});
- * isCyclic([1, 2, 3]);
- * isCyclic("abc");
- * isCyclic(function() {});
- * @since 1.2.0
- * @memberof Object
- * @static
+ * Detects a cycle through enumerable string-keyed properties, including inherited properties.
+ * An active-ancestor edge is a cycle; repeated primitives or shared acyclic children are not. Traversal is iterative and completed shared nodes are visited once. Ignores symbols, non-enumerables and Map/Set entries. Assumes a stable graph; getters and proxy traps can run, mutate the graph or throw.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isCyclic({a:1,b:{c:1}});                           // => false
+ * @example isCyclic((()=>{const x={};x.self=x;return x;})()); // => true
  */
 function isCyclic(value) {
-    return value instanceof Object && hasCircularReference(value, [], [value]);
+    // The helper owns root validation, including foreign/null-prototype objects.
+    return hasCircularReference(value);
 }
 
 module.exports = isCyclic;
-

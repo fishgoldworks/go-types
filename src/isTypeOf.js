@@ -1,46 +1,16 @@
-var isString = require("./isString");
-
+const createTypeChecker = require('./createTypeChecker');
 /**
- * Determines whether the value has a specified type.
- * Based on the type of the type value, it will check the following:
- * - string - checks if the type matches (case-sensitive) using the <code>typeof</code> operator.
- * - function - checks if the value is an instance of the function/class using the <code>instanceof</code> operator; if the test returns <code>false</code>, it checks if the function returns a truthy value when invoked with the value.
- * - null/undefined - checks if the value is equal to the type using the strict equality (<code>===</code>) operator.
- * - array - checks if the value has any type defined in the array.
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The expected type
- * @returns {boolean} <code>true</code> if the value is of the type; <code>false</code> otherwise.
- * @example <caption>Matching type values</caption>
- * // returns true
- * isTypeOf(1, "number");
- * isTypeOf({a: 1}, Object);
- * isTypeOf("abc", ["string", undefined]);
- * @example <caption>Non-matching type values</caption>
- * // returns false
- * isTypeOf(1, "boolean");
- * isTypeOf("", String);
- * isTypeOf(null, ["string", String]);
- * @since 1.0.0
- * @memberof Utility
- * @static
+ * Validates a type specification and checks a value against it.
+ * See Type specifications for the matcher contract. No constructor coercion. Invalid type names, descriptors, union arrays and non-callable instance hooks are rejected before value matching. Callable instance targets are evaluated with native instanceof: prototype errors can occur at evaluation time. Omitted type means strict undefined, unlike the native typeof name "undefined", which also matches browser document.all.
+ * @param {*} value Value to inspect.
+ * @param {*} type Matcher specification.
+ * @returns {boolean}
+ * @example isTypeOf(1,"number");                    // => true
+ * @example isTypeOf(null,"object");                 // => true
+ * @example isTypeOf("12",Number);                   // => false
+ * @example isTypeOf([], {predicate:Array.isArray}); // => true
  */
 function isTypeOf(value, type) {
-    if (isString(type)) {
-        return typeof value === type;
-    } else if (typeof type === "function") {
-        return value instanceof type || !!type(value);
-    } else if (type instanceof Array) {
-        for (var i = 0; i < type.length; i++) {
-            if (isTypeOf(value, type[i])) {
-                return true;
-            }
-        }
-        return false;
-    } else if (type == null) {
-        return value === type;
-    } else {
-        throw new TypeError("The type should be either a string, function, null or undefined, but found: " + type);
-    }
+    return createTypeChecker(type)(value);
 }
-
 module.exports = isTypeOf;

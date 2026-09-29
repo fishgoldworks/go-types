@@ -1,26 +1,22 @@
-var isInteger = require("./isInteger");
+// Share Date identity and ignore overridden instance methods.
+var isDate = require("./isDate");
+var getTime = Date.prototype.getTime;
 
 /**
- * Determines whether the value is a valid <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a valid <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Valid Date objects</caption>
- * // returns true
- * isValidDate(new Date());
- * isValidDate(new Date("2001-01-01T00:00:00.000Z"));
- * isValidDate(new Date(-1));
- * @example <caption>Invalid Date & non-date values</caption>
- * // returns false
- * isValidDate(new Date(""));
- * isValidDate("2001-01-01T00:00:00.000Z");
- * isValidDate(978307200000);
- * @see Date
- * @since 1.3.0
- * @memberof Object
- * @static
+ * Checks Date identity and finite timestamp validity.
+ * Foreign dates are supported; overridden instance getTime methods are ignored. Non-Dates return false.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isValidDate(new Date(0));   // => true
+ * @example isValidDate(new Date(NaN)); // => false
+ * @example isValidDate(0);             // => false
  */
 function isValidDate(value) {
-    return value instanceof Date && isInteger(value.getTime());
+    if (!isDate(value)) {
+        return false;
+    }
+    var time = getTime.call(value);
+    return time === time;
 }
 
 module.exports = isValidDate;

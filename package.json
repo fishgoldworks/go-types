@@ -1,40 +1,3529 @@
 {
-    "name": "go-types",
-    "description": "Type-checking utilities for JavaScript",
-    "author": "Michael Ko",
-    "email": "koyote130708@gmail.com",
-    "version": "1.3.1",
-    "license": "MIT",
-    "keywords": [
-        "type checking",
-        "type-checking",
-        "types",
-        "primitives",
-        "objects"
-    ],
-    "homepage": "https://github.com/koyote130708/go-types",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/koyote130708/go-types.git"
+  "name": "go-types",
+  "description": "Type-checking and conversion utilities for JavaScript",
+  "author": "Michael Ko",
+  "email": "koyote130708@gmail.com",
+  "version": "2.0.0",
+  "license": "MIT",
+  "keywords": [
+    "type checking",
+    "type-checking",
+    "types",
+    "primitives",
+    "objects",
+    "conversion",
+    "validation",
+    "typescript"
+  ],
+  "homepage": "https://github.com/koyote130708/go-types",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koyote130708/go-types.git"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "entries": "node scripts/generate-entries.js",
+    "docs": "node scripts/docs.js",
+    "test": "node scripts/test.js",
+    "test:docs": "node scripts/docs.js --check && node --test scripts/test-docs.js",
+    "test:types": "node scripts/test-types.js",
+    "test:build": "node --test scripts/test-build.js",
+    "test:artifacts": "node scripts/test-artifacts.js",
+    "test:tree-shaking": "node scripts/test-tree-shaking.js",
+    "test:package": "node scripts/test-package.js",
+    "test:browser": "node scripts/test-browser.js",
+    "coverage": "npm test -- --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=100",
+    "verify": "npm run build && npm run test:docs && npm run coverage && npm run test:types && npm run test:build && npm run test:artifacts && npm run test:tree-shaking && npm run test:package",
+    "verify:all": "npm run verify && npm run test:browser",
+    "benchmark": "node scripts/benchmark.js",
+    "benchmark:compare": "node scripts/benchmark-compare.js",
+    "benchmark:hot-paths": "node scripts/benchmark-hot-paths.js",
+    "benchmark:matcher-scaling": "node scripts/benchmark-matcher-scaling.js",
+    "benchmark:native-exceptions": "node scripts/benchmark-native-exceptions.js",
+    "benchmark:numeric-paths": "node scripts/benchmark-numeric-paths.js",
+    "prepack": "npm run verify",
+    "prepublishOnly": "npm run verify:all"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1",
+    "playwright": "1.57.0",
+    "typescript": "5.8.3",
+    "terser": "5.51.2"
+  },
+  "type": "commonjs",
+  "module": "./index.mjs",
+  "types": "./index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "unpkg": "./dist/go-types.min.js",
+  "jsdelivr": "./dist/go-types.min.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./index.d.mts",
+        "default": "./index.mjs"
+      },
+      "require": {
+        "types": "./index.d.ts",
+        "default": "./index.js"
+      },
+      "default": "./index.js"
     },
-    "main": "index.js",
-    "scripts": {
-        "build": "npm run bundle & npm run minify",
-        "bundle": "webpack build --mode=none --progress --entry ./index.js -o ./dist --output-filename go-types.js --output-library-name=Types --output-library-type=umd --output-global-object=this",
-        "minify": "uglifyjs ./dist/go-types.js -c -m --source-map -o ./dist/go-types.min.js",
-        "test": "mocha -u tdd test/*.js",
-        "coverage": "c8 --clean npm run test",
-        "docs": "documentation readme index.js --section=Documentation",
-        "docs:html": "documentation build index.js -f html -o docs"
+    "./isUndefined": {
+      "import": {
+        "types": "./types/isUndefined.d.mts",
+        "default": "./esm/isUndefined.mjs"
+      },
+      "require": {
+        "types": "./types/isUndefined.d.ts",
+        "default": "./src/isUndefined.js"
+      },
+      "default": "./src/isUndefined.js"
     },
-    "devDependencies": {
-        "c8": "^7.12.0",
-        "chai": "^4.3.6",
-        "documentation": "^14.0.0",
-        "mocha": "^10.0.0",
-        "uglify-js": "^3.17.3",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
+    "./src/isUndefined": {
+      "import": {
+        "types": "./types/isUndefined.d.mts",
+        "default": "./esm/isUndefined.mjs"
+      },
+      "require": {
+        "types": "./types/isUndefined.d.ts",
+        "default": "./src/isUndefined.js"
+      },
+      "default": "./src/isUndefined.js"
     },
-    "engine": "node >= 0.10"
+    "./src/isUndefined.js": {
+      "import": {
+        "types": "./types/isUndefined.d.mts",
+        "default": "./esm/isUndefined.mjs"
+      },
+      "require": {
+        "types": "./types/isUndefined.d.ts",
+        "default": "./src/isUndefined.js"
+      },
+      "default": "./src/isUndefined.js"
+    },
+    "./isNull": {
+      "import": {
+        "types": "./types/isNull.d.mts",
+        "default": "./esm/isNull.mjs"
+      },
+      "require": {
+        "types": "./types/isNull.d.ts",
+        "default": "./src/isNull.js"
+      },
+      "default": "./src/isNull.js"
+    },
+    "./src/isNull": {
+      "import": {
+        "types": "./types/isNull.d.mts",
+        "default": "./esm/isNull.mjs"
+      },
+      "require": {
+        "types": "./types/isNull.d.ts",
+        "default": "./src/isNull.js"
+      },
+      "default": "./src/isNull.js"
+    },
+    "./src/isNull.js": {
+      "import": {
+        "types": "./types/isNull.d.mts",
+        "default": "./esm/isNull.mjs"
+      },
+      "require": {
+        "types": "./types/isNull.d.ts",
+        "default": "./src/isNull.js"
+      },
+      "default": "./src/isNull.js"
+    },
+    "./isBoolean": {
+      "import": {
+        "types": "./types/isBoolean.d.mts",
+        "default": "./esm/isBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/isBoolean.d.ts",
+        "default": "./src/isBoolean.js"
+      },
+      "default": "./src/isBoolean.js"
+    },
+    "./src/isBoolean": {
+      "import": {
+        "types": "./types/isBoolean.d.mts",
+        "default": "./esm/isBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/isBoolean.d.ts",
+        "default": "./src/isBoolean.js"
+      },
+      "default": "./src/isBoolean.js"
+    },
+    "./src/isBoolean.js": {
+      "import": {
+        "types": "./types/isBoolean.d.mts",
+        "default": "./esm/isBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/isBoolean.d.ts",
+        "default": "./src/isBoolean.js"
+      },
+      "default": "./src/isBoolean.js"
+    },
+    "./isNumber": {
+      "import": {
+        "types": "./types/isNumber.d.mts",
+        "default": "./esm/isNumber.mjs"
+      },
+      "require": {
+        "types": "./types/isNumber.d.ts",
+        "default": "./src/isNumber.js"
+      },
+      "default": "./src/isNumber.js"
+    },
+    "./src/isNumber": {
+      "import": {
+        "types": "./types/isNumber.d.mts",
+        "default": "./esm/isNumber.mjs"
+      },
+      "require": {
+        "types": "./types/isNumber.d.ts",
+        "default": "./src/isNumber.js"
+      },
+      "default": "./src/isNumber.js"
+    },
+    "./src/isNumber.js": {
+      "import": {
+        "types": "./types/isNumber.d.mts",
+        "default": "./esm/isNumber.mjs"
+      },
+      "require": {
+        "types": "./types/isNumber.d.ts",
+        "default": "./src/isNumber.js"
+      },
+      "default": "./src/isNumber.js"
+    },
+    "./isString": {
+      "import": {
+        "types": "./types/isString.d.mts",
+        "default": "./esm/isString.mjs"
+      },
+      "require": {
+        "types": "./types/isString.d.ts",
+        "default": "./src/isString.js"
+      },
+      "default": "./src/isString.js"
+    },
+    "./src/isString": {
+      "import": {
+        "types": "./types/isString.d.mts",
+        "default": "./esm/isString.mjs"
+      },
+      "require": {
+        "types": "./types/isString.d.ts",
+        "default": "./src/isString.js"
+      },
+      "default": "./src/isString.js"
+    },
+    "./src/isString.js": {
+      "import": {
+        "types": "./types/isString.d.mts",
+        "default": "./esm/isString.mjs"
+      },
+      "require": {
+        "types": "./types/isString.d.ts",
+        "default": "./src/isString.js"
+      },
+      "default": "./src/isString.js"
+    },
+    "./isSymbol": {
+      "import": {
+        "types": "./types/isSymbol.d.mts",
+        "default": "./esm/isSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/isSymbol.d.ts",
+        "default": "./src/isSymbol.js"
+      },
+      "default": "./src/isSymbol.js"
+    },
+    "./src/isSymbol": {
+      "import": {
+        "types": "./types/isSymbol.d.mts",
+        "default": "./esm/isSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/isSymbol.d.ts",
+        "default": "./src/isSymbol.js"
+      },
+      "default": "./src/isSymbol.js"
+    },
+    "./src/isSymbol.js": {
+      "import": {
+        "types": "./types/isSymbol.d.mts",
+        "default": "./esm/isSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/isSymbol.d.ts",
+        "default": "./src/isSymbol.js"
+      },
+      "default": "./src/isSymbol.js"
+    },
+    "./isBigInt": {
+      "import": {
+        "types": "./types/isBigInt.d.mts",
+        "default": "./esm/isBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/isBigInt.d.ts",
+        "default": "./src/isBigInt.js"
+      },
+      "default": "./src/isBigInt.js"
+    },
+    "./src/isBigInt": {
+      "import": {
+        "types": "./types/isBigInt.d.mts",
+        "default": "./esm/isBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/isBigInt.d.ts",
+        "default": "./src/isBigInt.js"
+      },
+      "default": "./src/isBigInt.js"
+    },
+    "./src/isBigInt.js": {
+      "import": {
+        "types": "./types/isBigInt.d.mts",
+        "default": "./esm/isBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/isBigInt.d.ts",
+        "default": "./src/isBigInt.js"
+      },
+      "default": "./src/isBigInt.js"
+    },
+    "./isPrimitive": {
+      "import": {
+        "types": "./types/isPrimitive.d.mts",
+        "default": "./esm/isPrimitive.mjs"
+      },
+      "require": {
+        "types": "./types/isPrimitive.d.ts",
+        "default": "./src/isPrimitive.js"
+      },
+      "default": "./src/isPrimitive.js"
+    },
+    "./src/isPrimitive": {
+      "import": {
+        "types": "./types/isPrimitive.d.mts",
+        "default": "./esm/isPrimitive.mjs"
+      },
+      "require": {
+        "types": "./types/isPrimitive.d.ts",
+        "default": "./src/isPrimitive.js"
+      },
+      "default": "./src/isPrimitive.js"
+    },
+    "./src/isPrimitive.js": {
+      "import": {
+        "types": "./types/isPrimitive.d.mts",
+        "default": "./esm/isPrimitive.mjs"
+      },
+      "require": {
+        "types": "./types/isPrimitive.d.ts",
+        "default": "./src/isPrimitive.js"
+      },
+      "default": "./src/isPrimitive.js"
+    },
+    "./isNullish": {
+      "import": {
+        "types": "./types/isNullish.d.mts",
+        "default": "./esm/isNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNullish.d.ts",
+        "default": "./src/isNullish.js"
+      },
+      "default": "./src/isNullish.js"
+    },
+    "./src/isNullish": {
+      "import": {
+        "types": "./types/isNullish.d.mts",
+        "default": "./esm/isNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNullish.d.ts",
+        "default": "./src/isNullish.js"
+      },
+      "default": "./src/isNullish.js"
+    },
+    "./src/isNullish.js": {
+      "import": {
+        "types": "./types/isNullish.d.mts",
+        "default": "./esm/isNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNullish.d.ts",
+        "default": "./src/isNullish.js"
+      },
+      "default": "./src/isNullish.js"
+    },
+    "./isEmpty": {
+      "import": {
+        "types": "./types/isEmpty.d.mts",
+        "default": "./esm/isEmpty.mjs"
+      },
+      "require": {
+        "types": "./types/isEmpty.d.ts",
+        "default": "./src/isEmpty.js"
+      },
+      "default": "./src/isEmpty.js"
+    },
+    "./src/isEmpty": {
+      "import": {
+        "types": "./types/isEmpty.d.mts",
+        "default": "./esm/isEmpty.mjs"
+      },
+      "require": {
+        "types": "./types/isEmpty.d.ts",
+        "default": "./src/isEmpty.js"
+      },
+      "default": "./src/isEmpty.js"
+    },
+    "./src/isEmpty.js": {
+      "import": {
+        "types": "./types/isEmpty.d.mts",
+        "default": "./esm/isEmpty.mjs"
+      },
+      "require": {
+        "types": "./types/isEmpty.d.ts",
+        "default": "./src/isEmpty.js"
+      },
+      "default": "./src/isEmpty.js"
+    },
+    "./isBlank": {
+      "import": {
+        "types": "./types/isBlank.d.mts",
+        "default": "./esm/isBlank.mjs"
+      },
+      "require": {
+        "types": "./types/isBlank.d.ts",
+        "default": "./src/isBlank.js"
+      },
+      "default": "./src/isBlank.js"
+    },
+    "./src/isBlank": {
+      "import": {
+        "types": "./types/isBlank.d.mts",
+        "default": "./esm/isBlank.mjs"
+      },
+      "require": {
+        "types": "./types/isBlank.d.ts",
+        "default": "./src/isBlank.js"
+      },
+      "default": "./src/isBlank.js"
+    },
+    "./src/isBlank.js": {
+      "import": {
+        "types": "./types/isBlank.d.mts",
+        "default": "./esm/isBlank.mjs"
+      },
+      "require": {
+        "types": "./types/isBlank.d.ts",
+        "default": "./src/isBlank.js"
+      },
+      "default": "./src/isBlank.js"
+    },
+    "./isTruthy": {
+      "import": {
+        "types": "./types/isTruthy.d.mts",
+        "default": "./esm/isTruthy.mjs"
+      },
+      "require": {
+        "types": "./types/isTruthy.d.ts",
+        "default": "./src/isTruthy.js"
+      },
+      "default": "./src/isTruthy.js"
+    },
+    "./src/isTruthy": {
+      "import": {
+        "types": "./types/isTruthy.d.mts",
+        "default": "./esm/isTruthy.mjs"
+      },
+      "require": {
+        "types": "./types/isTruthy.d.ts",
+        "default": "./src/isTruthy.js"
+      },
+      "default": "./src/isTruthy.js"
+    },
+    "./src/isTruthy.js": {
+      "import": {
+        "types": "./types/isTruthy.d.mts",
+        "default": "./esm/isTruthy.mjs"
+      },
+      "require": {
+        "types": "./types/isTruthy.d.ts",
+        "default": "./src/isTruthy.js"
+      },
+      "default": "./src/isTruthy.js"
+    },
+    "./isFalsy": {
+      "import": {
+        "types": "./types/isFalsy.d.mts",
+        "default": "./esm/isFalsy.mjs"
+      },
+      "require": {
+        "types": "./types/isFalsy.d.ts",
+        "default": "./src/isFalsy.js"
+      },
+      "default": "./src/isFalsy.js"
+    },
+    "./src/isFalsy": {
+      "import": {
+        "types": "./types/isFalsy.d.mts",
+        "default": "./esm/isFalsy.mjs"
+      },
+      "require": {
+        "types": "./types/isFalsy.d.ts",
+        "default": "./src/isFalsy.js"
+      },
+      "default": "./src/isFalsy.js"
+    },
+    "./src/isFalsy.js": {
+      "import": {
+        "types": "./types/isFalsy.d.mts",
+        "default": "./esm/isFalsy.mjs"
+      },
+      "require": {
+        "types": "./types/isFalsy.d.ts",
+        "default": "./src/isFalsy.js"
+      },
+      "default": "./src/isFalsy.js"
+    },
+    "./isInteger": {
+      "import": {
+        "types": "./types/isInteger.d.mts",
+        "default": "./esm/isInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isInteger.d.ts",
+        "default": "./src/isInteger.js"
+      },
+      "default": "./src/isInteger.js"
+    },
+    "./src/isInteger": {
+      "import": {
+        "types": "./types/isInteger.d.mts",
+        "default": "./esm/isInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isInteger.d.ts",
+        "default": "./src/isInteger.js"
+      },
+      "default": "./src/isInteger.js"
+    },
+    "./src/isInteger.js": {
+      "import": {
+        "types": "./types/isInteger.d.mts",
+        "default": "./esm/isInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isInteger.d.ts",
+        "default": "./src/isInteger.js"
+      },
+      "default": "./src/isInteger.js"
+    },
+    "./isSafeInteger": {
+      "import": {
+        "types": "./types/isSafeInteger.d.mts",
+        "default": "./esm/isSafeInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isSafeInteger.d.ts",
+        "default": "./src/isSafeInteger.js"
+      },
+      "default": "./src/isSafeInteger.js"
+    },
+    "./src/isSafeInteger": {
+      "import": {
+        "types": "./types/isSafeInteger.d.mts",
+        "default": "./esm/isSafeInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isSafeInteger.d.ts",
+        "default": "./src/isSafeInteger.js"
+      },
+      "default": "./src/isSafeInteger.js"
+    },
+    "./src/isSafeInteger.js": {
+      "import": {
+        "types": "./types/isSafeInteger.d.mts",
+        "default": "./esm/isSafeInteger.mjs"
+      },
+      "require": {
+        "types": "./types/isSafeInteger.d.ts",
+        "default": "./src/isSafeInteger.js"
+      },
+      "default": "./src/isSafeInteger.js"
+    },
+    "./isFloat": {
+      "import": {
+        "types": "./types/isFloat.d.mts",
+        "default": "./esm/isFloat.mjs"
+      },
+      "require": {
+        "types": "./types/isFloat.d.ts",
+        "default": "./src/isFloat.js"
+      },
+      "default": "./src/isFloat.js"
+    },
+    "./src/isFloat": {
+      "import": {
+        "types": "./types/isFloat.d.mts",
+        "default": "./esm/isFloat.mjs"
+      },
+      "require": {
+        "types": "./types/isFloat.d.ts",
+        "default": "./src/isFloat.js"
+      },
+      "default": "./src/isFloat.js"
+    },
+    "./src/isFloat.js": {
+      "import": {
+        "types": "./types/isFloat.d.mts",
+        "default": "./esm/isFloat.mjs"
+      },
+      "require": {
+        "types": "./types/isFloat.d.ts",
+        "default": "./src/isFloat.js"
+      },
+      "default": "./src/isFloat.js"
+    },
+    "./isFinite": {
+      "import": {
+        "types": "./types/isFinite.d.mts",
+        "default": "./esm/isFinite.mjs"
+      },
+      "require": {
+        "types": "./types/isFinite.d.ts",
+        "default": "./src/isFinite.js"
+      },
+      "default": "./src/isFinite.js"
+    },
+    "./src/isFinite": {
+      "import": {
+        "types": "./types/isFinite.d.mts",
+        "default": "./esm/isFinite.mjs"
+      },
+      "require": {
+        "types": "./types/isFinite.d.ts",
+        "default": "./src/isFinite.js"
+      },
+      "default": "./src/isFinite.js"
+    },
+    "./src/isFinite.js": {
+      "import": {
+        "types": "./types/isFinite.d.mts",
+        "default": "./esm/isFinite.mjs"
+      },
+      "require": {
+        "types": "./types/isFinite.d.ts",
+        "default": "./src/isFinite.js"
+      },
+      "default": "./src/isFinite.js"
+    },
+    "./isInfinite": {
+      "import": {
+        "types": "./types/isInfinite.d.mts",
+        "default": "./esm/isInfinite.mjs"
+      },
+      "require": {
+        "types": "./types/isInfinite.d.ts",
+        "default": "./src/isInfinite.js"
+      },
+      "default": "./src/isInfinite.js"
+    },
+    "./src/isInfinite": {
+      "import": {
+        "types": "./types/isInfinite.d.mts",
+        "default": "./esm/isInfinite.mjs"
+      },
+      "require": {
+        "types": "./types/isInfinite.d.ts",
+        "default": "./src/isInfinite.js"
+      },
+      "default": "./src/isInfinite.js"
+    },
+    "./src/isInfinite.js": {
+      "import": {
+        "types": "./types/isInfinite.d.mts",
+        "default": "./esm/isInfinite.mjs"
+      },
+      "require": {
+        "types": "./types/isInfinite.d.ts",
+        "default": "./src/isInfinite.js"
+      },
+      "default": "./src/isInfinite.js"
+    },
+    "./isNaN": {
+      "import": {
+        "types": "./types/isNaN.d.mts",
+        "default": "./esm/isNaN.mjs"
+      },
+      "require": {
+        "types": "./types/isNaN.d.ts",
+        "default": "./src/isNaN.js"
+      },
+      "default": "./src/isNaN.js"
+    },
+    "./src/isNaN": {
+      "import": {
+        "types": "./types/isNaN.d.mts",
+        "default": "./esm/isNaN.mjs"
+      },
+      "require": {
+        "types": "./types/isNaN.d.ts",
+        "default": "./src/isNaN.js"
+      },
+      "default": "./src/isNaN.js"
+    },
+    "./src/isNaN.js": {
+      "import": {
+        "types": "./types/isNaN.d.mts",
+        "default": "./esm/isNaN.mjs"
+      },
+      "require": {
+        "types": "./types/isNaN.d.ts",
+        "default": "./src/isNaN.js"
+      },
+      "default": "./src/isNaN.js"
+    },
+    "./isNumeric": {
+      "import": {
+        "types": "./types/isNumeric.d.mts",
+        "default": "./esm/isNumeric.mjs"
+      },
+      "require": {
+        "types": "./types/isNumeric.d.ts",
+        "default": "./src/isNumeric.js"
+      },
+      "default": "./src/isNumeric.js"
+    },
+    "./src/isNumeric": {
+      "import": {
+        "types": "./types/isNumeric.d.mts",
+        "default": "./esm/isNumeric.mjs"
+      },
+      "require": {
+        "types": "./types/isNumeric.d.ts",
+        "default": "./src/isNumeric.js"
+      },
+      "default": "./src/isNumeric.js"
+    },
+    "./src/isNumeric.js": {
+      "import": {
+        "types": "./types/isNumeric.d.mts",
+        "default": "./esm/isNumeric.mjs"
+      },
+      "require": {
+        "types": "./types/isNumeric.d.ts",
+        "default": "./src/isNumeric.js"
+      },
+      "default": "./src/isNumeric.js"
+    },
+    "./isTypeOf": {
+      "import": {
+        "types": "./types/isTypeOf.d.mts",
+        "default": "./esm/isTypeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isTypeOf.d.ts",
+        "default": "./src/isTypeOf.js"
+      },
+      "default": "./src/isTypeOf.js"
+    },
+    "./src/isTypeOf": {
+      "import": {
+        "types": "./types/isTypeOf.d.mts",
+        "default": "./esm/isTypeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isTypeOf.d.ts",
+        "default": "./src/isTypeOf.js"
+      },
+      "default": "./src/isTypeOf.js"
+    },
+    "./src/isTypeOf.js": {
+      "import": {
+        "types": "./types/isTypeOf.d.mts",
+        "default": "./esm/isTypeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isTypeOf.d.ts",
+        "default": "./src/isTypeOf.js"
+      },
+      "default": "./src/isTypeOf.js"
+    },
+    "./isObject": {
+      "import": {
+        "types": "./types/isObject.d.mts",
+        "default": "./esm/isObject.mjs"
+      },
+      "require": {
+        "types": "./types/isObject.d.ts",
+        "default": "./src/isObject.js"
+      },
+      "default": "./src/isObject.js"
+    },
+    "./src/isObject": {
+      "import": {
+        "types": "./types/isObject.d.mts",
+        "default": "./esm/isObject.mjs"
+      },
+      "require": {
+        "types": "./types/isObject.d.ts",
+        "default": "./src/isObject.js"
+      },
+      "default": "./src/isObject.js"
+    },
+    "./src/isObject.js": {
+      "import": {
+        "types": "./types/isObject.d.mts",
+        "default": "./esm/isObject.mjs"
+      },
+      "require": {
+        "types": "./types/isObject.d.ts",
+        "default": "./src/isObject.js"
+      },
+      "default": "./src/isObject.js"
+    },
+    "./isPlainObject": {
+      "import": {
+        "types": "./types/isPlainObject.d.mts",
+        "default": "./esm/isPlainObject.mjs"
+      },
+      "require": {
+        "types": "./types/isPlainObject.d.ts",
+        "default": "./src/isPlainObject.js"
+      },
+      "default": "./src/isPlainObject.js"
+    },
+    "./src/isPlainObject": {
+      "import": {
+        "types": "./types/isPlainObject.d.mts",
+        "default": "./esm/isPlainObject.mjs"
+      },
+      "require": {
+        "types": "./types/isPlainObject.d.ts",
+        "default": "./src/isPlainObject.js"
+      },
+      "default": "./src/isPlainObject.js"
+    },
+    "./src/isPlainObject.js": {
+      "import": {
+        "types": "./types/isPlainObject.d.mts",
+        "default": "./esm/isPlainObject.mjs"
+      },
+      "require": {
+        "types": "./types/isPlainObject.d.ts",
+        "default": "./src/isPlainObject.js"
+      },
+      "default": "./src/isPlainObject.js"
+    },
+    "./isCyclic": {
+      "import": {
+        "types": "./types/isCyclic.d.mts",
+        "default": "./esm/isCyclic.mjs"
+      },
+      "require": {
+        "types": "./types/isCyclic.d.ts",
+        "default": "./src/isCyclic.js"
+      },
+      "default": "./src/isCyclic.js"
+    },
+    "./src/isCyclic": {
+      "import": {
+        "types": "./types/isCyclic.d.mts",
+        "default": "./esm/isCyclic.mjs"
+      },
+      "require": {
+        "types": "./types/isCyclic.d.ts",
+        "default": "./src/isCyclic.js"
+      },
+      "default": "./src/isCyclic.js"
+    },
+    "./src/isCyclic.js": {
+      "import": {
+        "types": "./types/isCyclic.d.mts",
+        "default": "./esm/isCyclic.mjs"
+      },
+      "require": {
+        "types": "./types/isCyclic.d.ts",
+        "default": "./src/isCyclic.js"
+      },
+      "default": "./src/isCyclic.js"
+    },
+    "./isIterable": {
+      "import": {
+        "types": "./types/isIterable.d.mts",
+        "default": "./esm/isIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isIterable.d.ts",
+        "default": "./src/isIterable.js"
+      },
+      "default": "./src/isIterable.js"
+    },
+    "./src/isIterable": {
+      "import": {
+        "types": "./types/isIterable.d.mts",
+        "default": "./esm/isIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isIterable.d.ts",
+        "default": "./src/isIterable.js"
+      },
+      "default": "./src/isIterable.js"
+    },
+    "./src/isIterable.js": {
+      "import": {
+        "types": "./types/isIterable.d.mts",
+        "default": "./esm/isIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isIterable.d.ts",
+        "default": "./src/isIterable.js"
+      },
+      "default": "./src/isIterable.js"
+    },
+    "./isArray": {
+      "import": {
+        "types": "./types/isArray.d.mts",
+        "default": "./esm/isArray.mjs"
+      },
+      "require": {
+        "types": "./types/isArray.d.ts",
+        "default": "./src/isArray.js"
+      },
+      "default": "./src/isArray.js"
+    },
+    "./src/isArray": {
+      "import": {
+        "types": "./types/isArray.d.mts",
+        "default": "./esm/isArray.mjs"
+      },
+      "require": {
+        "types": "./types/isArray.d.ts",
+        "default": "./src/isArray.js"
+      },
+      "default": "./src/isArray.js"
+    },
+    "./src/isArray.js": {
+      "import": {
+        "types": "./types/isArray.d.mts",
+        "default": "./esm/isArray.mjs"
+      },
+      "require": {
+        "types": "./types/isArray.d.ts",
+        "default": "./src/isArray.js"
+      },
+      "default": "./src/isArray.js"
+    },
+    "./isArrayOf": {
+      "import": {
+        "types": "./types/isArrayOf.d.mts",
+        "default": "./esm/isArrayOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayOf.d.ts",
+        "default": "./src/isArrayOf.js"
+      },
+      "default": "./src/isArrayOf.js"
+    },
+    "./src/isArrayOf": {
+      "import": {
+        "types": "./types/isArrayOf.d.mts",
+        "default": "./esm/isArrayOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayOf.d.ts",
+        "default": "./src/isArrayOf.js"
+      },
+      "default": "./src/isArrayOf.js"
+    },
+    "./src/isArrayOf.js": {
+      "import": {
+        "types": "./types/isArrayOf.d.mts",
+        "default": "./esm/isArrayOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayOf.d.ts",
+        "default": "./src/isArrayOf.js"
+      },
+      "default": "./src/isArrayOf.js"
+    },
+    "./isArrayLike": {
+      "import": {
+        "types": "./types/isArrayLike.d.mts",
+        "default": "./esm/isArrayLike.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLike.d.ts",
+        "default": "./src/isArrayLike.js"
+      },
+      "default": "./src/isArrayLike.js"
+    },
+    "./src/isArrayLike": {
+      "import": {
+        "types": "./types/isArrayLike.d.mts",
+        "default": "./esm/isArrayLike.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLike.d.ts",
+        "default": "./src/isArrayLike.js"
+      },
+      "default": "./src/isArrayLike.js"
+    },
+    "./src/isArrayLike.js": {
+      "import": {
+        "types": "./types/isArrayLike.d.mts",
+        "default": "./esm/isArrayLike.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLike.d.ts",
+        "default": "./src/isArrayLike.js"
+      },
+      "default": "./src/isArrayLike.js"
+    },
+    "./isArrayLikeOf": {
+      "import": {
+        "types": "./types/isArrayLikeOf.d.mts",
+        "default": "./esm/isArrayLikeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLikeOf.d.ts",
+        "default": "./src/isArrayLikeOf.js"
+      },
+      "default": "./src/isArrayLikeOf.js"
+    },
+    "./src/isArrayLikeOf": {
+      "import": {
+        "types": "./types/isArrayLikeOf.d.mts",
+        "default": "./esm/isArrayLikeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLikeOf.d.ts",
+        "default": "./src/isArrayLikeOf.js"
+      },
+      "default": "./src/isArrayLikeOf.js"
+    },
+    "./src/isArrayLikeOf.js": {
+      "import": {
+        "types": "./types/isArrayLikeOf.d.mts",
+        "default": "./esm/isArrayLikeOf.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayLikeOf.d.ts",
+        "default": "./src/isArrayLikeOf.js"
+      },
+      "default": "./src/isArrayLikeOf.js"
+    },
+    "./isPair": {
+      "import": {
+        "types": "./types/isPair.d.mts",
+        "default": "./esm/isPair.mjs"
+      },
+      "require": {
+        "types": "./types/isPair.d.ts",
+        "default": "./src/isPair.js"
+      },
+      "default": "./src/isPair.js"
+    },
+    "./src/isPair": {
+      "import": {
+        "types": "./types/isPair.d.mts",
+        "default": "./esm/isPair.mjs"
+      },
+      "require": {
+        "types": "./types/isPair.d.ts",
+        "default": "./src/isPair.js"
+      },
+      "default": "./src/isPair.js"
+    },
+    "./src/isPair.js": {
+      "import": {
+        "types": "./types/isPair.d.mts",
+        "default": "./esm/isPair.mjs"
+      },
+      "require": {
+        "types": "./types/isPair.d.ts",
+        "default": "./src/isPair.js"
+      },
+      "default": "./src/isPair.js"
+    },
+    "./isMap": {
+      "import": {
+        "types": "./types/isMap.d.mts",
+        "default": "./esm/isMap.mjs"
+      },
+      "require": {
+        "types": "./types/isMap.d.ts",
+        "default": "./src/isMap.js"
+      },
+      "default": "./src/isMap.js"
+    },
+    "./src/isMap": {
+      "import": {
+        "types": "./types/isMap.d.mts",
+        "default": "./esm/isMap.mjs"
+      },
+      "require": {
+        "types": "./types/isMap.d.ts",
+        "default": "./src/isMap.js"
+      },
+      "default": "./src/isMap.js"
+    },
+    "./src/isMap.js": {
+      "import": {
+        "types": "./types/isMap.d.mts",
+        "default": "./esm/isMap.mjs"
+      },
+      "require": {
+        "types": "./types/isMap.d.ts",
+        "default": "./src/isMap.js"
+      },
+      "default": "./src/isMap.js"
+    },
+    "./isSet": {
+      "import": {
+        "types": "./types/isSet.d.mts",
+        "default": "./esm/isSet.mjs"
+      },
+      "require": {
+        "types": "./types/isSet.d.ts",
+        "default": "./src/isSet.js"
+      },
+      "default": "./src/isSet.js"
+    },
+    "./src/isSet": {
+      "import": {
+        "types": "./types/isSet.d.mts",
+        "default": "./esm/isSet.mjs"
+      },
+      "require": {
+        "types": "./types/isSet.d.ts",
+        "default": "./src/isSet.js"
+      },
+      "default": "./src/isSet.js"
+    },
+    "./src/isSet.js": {
+      "import": {
+        "types": "./types/isSet.d.mts",
+        "default": "./esm/isSet.mjs"
+      },
+      "require": {
+        "types": "./types/isSet.d.ts",
+        "default": "./src/isSet.js"
+      },
+      "default": "./src/isSet.js"
+    },
+    "./isWeakMap": {
+      "import": {
+        "types": "./types/isWeakMap.d.mts",
+        "default": "./esm/isWeakMap.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakMap.d.ts",
+        "default": "./src/isWeakMap.js"
+      },
+      "default": "./src/isWeakMap.js"
+    },
+    "./src/isWeakMap": {
+      "import": {
+        "types": "./types/isWeakMap.d.mts",
+        "default": "./esm/isWeakMap.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakMap.d.ts",
+        "default": "./src/isWeakMap.js"
+      },
+      "default": "./src/isWeakMap.js"
+    },
+    "./src/isWeakMap.js": {
+      "import": {
+        "types": "./types/isWeakMap.d.mts",
+        "default": "./esm/isWeakMap.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakMap.d.ts",
+        "default": "./src/isWeakMap.js"
+      },
+      "default": "./src/isWeakMap.js"
+    },
+    "./isWeakSet": {
+      "import": {
+        "types": "./types/isWeakSet.d.mts",
+        "default": "./esm/isWeakSet.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakSet.d.ts",
+        "default": "./src/isWeakSet.js"
+      },
+      "default": "./src/isWeakSet.js"
+    },
+    "./src/isWeakSet": {
+      "import": {
+        "types": "./types/isWeakSet.d.mts",
+        "default": "./esm/isWeakSet.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakSet.d.ts",
+        "default": "./src/isWeakSet.js"
+      },
+      "default": "./src/isWeakSet.js"
+    },
+    "./src/isWeakSet.js": {
+      "import": {
+        "types": "./types/isWeakSet.d.mts",
+        "default": "./esm/isWeakSet.mjs"
+      },
+      "require": {
+        "types": "./types/isWeakSet.d.ts",
+        "default": "./src/isWeakSet.js"
+      },
+      "default": "./src/isWeakSet.js"
+    },
+    "./isFunction": {
+      "import": {
+        "types": "./types/isFunction.d.mts",
+        "default": "./esm/isFunction.mjs"
+      },
+      "require": {
+        "types": "./types/isFunction.d.ts",
+        "default": "./src/isFunction.js"
+      },
+      "default": "./src/isFunction.js"
+    },
+    "./src/isFunction": {
+      "import": {
+        "types": "./types/isFunction.d.mts",
+        "default": "./esm/isFunction.mjs"
+      },
+      "require": {
+        "types": "./types/isFunction.d.ts",
+        "default": "./src/isFunction.js"
+      },
+      "default": "./src/isFunction.js"
+    },
+    "./src/isFunction.js": {
+      "import": {
+        "types": "./types/isFunction.d.mts",
+        "default": "./esm/isFunction.mjs"
+      },
+      "require": {
+        "types": "./types/isFunction.d.ts",
+        "default": "./src/isFunction.js"
+      },
+      "default": "./src/isFunction.js"
+    },
+    "./isDate": {
+      "import": {
+        "types": "./types/isDate.d.mts",
+        "default": "./esm/isDate.mjs"
+      },
+      "require": {
+        "types": "./types/isDate.d.ts",
+        "default": "./src/isDate.js"
+      },
+      "default": "./src/isDate.js"
+    },
+    "./src/isDate": {
+      "import": {
+        "types": "./types/isDate.d.mts",
+        "default": "./esm/isDate.mjs"
+      },
+      "require": {
+        "types": "./types/isDate.d.ts",
+        "default": "./src/isDate.js"
+      },
+      "default": "./src/isDate.js"
+    },
+    "./src/isDate.js": {
+      "import": {
+        "types": "./types/isDate.d.mts",
+        "default": "./esm/isDate.mjs"
+      },
+      "require": {
+        "types": "./types/isDate.d.ts",
+        "default": "./src/isDate.js"
+      },
+      "default": "./src/isDate.js"
+    },
+    "./isValidDate": {
+      "import": {
+        "types": "./types/isValidDate.d.mts",
+        "default": "./esm/isValidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isValidDate.d.ts",
+        "default": "./src/isValidDate.js"
+      },
+      "default": "./src/isValidDate.js"
+    },
+    "./src/isValidDate": {
+      "import": {
+        "types": "./types/isValidDate.d.mts",
+        "default": "./esm/isValidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isValidDate.d.ts",
+        "default": "./src/isValidDate.js"
+      },
+      "default": "./src/isValidDate.js"
+    },
+    "./src/isValidDate.js": {
+      "import": {
+        "types": "./types/isValidDate.d.mts",
+        "default": "./esm/isValidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isValidDate.d.ts",
+        "default": "./src/isValidDate.js"
+      },
+      "default": "./src/isValidDate.js"
+    },
+    "./isInvalidDate": {
+      "import": {
+        "types": "./types/isInvalidDate.d.mts",
+        "default": "./esm/isInvalidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isInvalidDate.d.ts",
+        "default": "./src/isInvalidDate.js"
+      },
+      "default": "./src/isInvalidDate.js"
+    },
+    "./src/isInvalidDate": {
+      "import": {
+        "types": "./types/isInvalidDate.d.mts",
+        "default": "./esm/isInvalidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isInvalidDate.d.ts",
+        "default": "./src/isInvalidDate.js"
+      },
+      "default": "./src/isInvalidDate.js"
+    },
+    "./src/isInvalidDate.js": {
+      "import": {
+        "types": "./types/isInvalidDate.d.mts",
+        "default": "./esm/isInvalidDate.mjs"
+      },
+      "require": {
+        "types": "./types/isInvalidDate.d.ts",
+        "default": "./src/isInvalidDate.js"
+      },
+      "default": "./src/isInvalidDate.js"
+    },
+    "./isRegExp": {
+      "import": {
+        "types": "./types/isRegExp.d.mts",
+        "default": "./esm/isRegExp.mjs"
+      },
+      "require": {
+        "types": "./types/isRegExp.d.ts",
+        "default": "./src/isRegExp.js"
+      },
+      "default": "./src/isRegExp.js"
+    },
+    "./src/isRegExp": {
+      "import": {
+        "types": "./types/isRegExp.d.mts",
+        "default": "./esm/isRegExp.mjs"
+      },
+      "require": {
+        "types": "./types/isRegExp.d.ts",
+        "default": "./src/isRegExp.js"
+      },
+      "default": "./src/isRegExp.js"
+    },
+    "./src/isRegExp.js": {
+      "import": {
+        "types": "./types/isRegExp.d.mts",
+        "default": "./esm/isRegExp.mjs"
+      },
+      "require": {
+        "types": "./types/isRegExp.d.ts",
+        "default": "./src/isRegExp.js"
+      },
+      "default": "./src/isRegExp.js"
+    },
+    "./isPromise": {
+      "import": {
+        "types": "./types/isPromise.d.mts",
+        "default": "./esm/isPromise.mjs"
+      },
+      "require": {
+        "types": "./types/isPromise.d.ts",
+        "default": "./src/isPromise.js"
+      },
+      "default": "./src/isPromise.js"
+    },
+    "./src/isPromise": {
+      "import": {
+        "types": "./types/isPromise.d.mts",
+        "default": "./esm/isPromise.mjs"
+      },
+      "require": {
+        "types": "./types/isPromise.d.ts",
+        "default": "./src/isPromise.js"
+      },
+      "default": "./src/isPromise.js"
+    },
+    "./src/isPromise.js": {
+      "import": {
+        "types": "./types/isPromise.d.mts",
+        "default": "./esm/isPromise.mjs"
+      },
+      "require": {
+        "types": "./types/isPromise.d.ts",
+        "default": "./src/isPromise.js"
+      },
+      "default": "./src/isPromise.js"
+    },
+    "./isPromiseLike": {
+      "import": {
+        "types": "./types/isPromiseLike.d.mts",
+        "default": "./esm/isPromiseLike.mjs"
+      },
+      "require": {
+        "types": "./types/isPromiseLike.d.ts",
+        "default": "./src/isPromiseLike.js"
+      },
+      "default": "./src/isPromiseLike.js"
+    },
+    "./src/isPromiseLike": {
+      "import": {
+        "types": "./types/isPromiseLike.d.mts",
+        "default": "./esm/isPromiseLike.mjs"
+      },
+      "require": {
+        "types": "./types/isPromiseLike.d.ts",
+        "default": "./src/isPromiseLike.js"
+      },
+      "default": "./src/isPromiseLike.js"
+    },
+    "./src/isPromiseLike.js": {
+      "import": {
+        "types": "./types/isPromiseLike.d.mts",
+        "default": "./esm/isPromiseLike.mjs"
+      },
+      "require": {
+        "types": "./types/isPromiseLike.d.ts",
+        "default": "./src/isPromiseLike.js"
+      },
+      "default": "./src/isPromiseLike.js"
+    },
+    "./isThenable": {
+      "import": {
+        "types": "./types/isThenable.d.mts",
+        "default": "./esm/isThenable.mjs"
+      },
+      "require": {
+        "types": "./types/isThenable.d.ts",
+        "default": "./src/isThenable.js"
+      },
+      "default": "./src/isThenable.js"
+    },
+    "./src/isThenable": {
+      "import": {
+        "types": "./types/isThenable.d.mts",
+        "default": "./esm/isThenable.mjs"
+      },
+      "require": {
+        "types": "./types/isThenable.d.ts",
+        "default": "./src/isThenable.js"
+      },
+      "default": "./src/isThenable.js"
+    },
+    "./src/isThenable.js": {
+      "import": {
+        "types": "./types/isThenable.d.mts",
+        "default": "./esm/isThenable.mjs"
+      },
+      "require": {
+        "types": "./types/isThenable.d.ts",
+        "default": "./src/isThenable.js"
+      },
+      "default": "./src/isThenable.js"
+    },
+    "./isError": {
+      "import": {
+        "types": "./types/isError.d.mts",
+        "default": "./esm/isError.mjs"
+      },
+      "require": {
+        "types": "./types/isError.d.ts",
+        "default": "./src/isError.js"
+      },
+      "default": "./src/isError.js"
+    },
+    "./src/isError": {
+      "import": {
+        "types": "./types/isError.d.mts",
+        "default": "./esm/isError.mjs"
+      },
+      "require": {
+        "types": "./types/isError.d.ts",
+        "default": "./src/isError.js"
+      },
+      "default": "./src/isError.js"
+    },
+    "./src/isError.js": {
+      "import": {
+        "types": "./types/isError.d.mts",
+        "default": "./esm/isError.mjs"
+      },
+      "require": {
+        "types": "./types/isError.d.ts",
+        "default": "./src/isError.js"
+      },
+      "default": "./src/isError.js"
+    },
+    "./isNode": {
+      "import": {
+        "types": "./types/isNode.d.mts",
+        "default": "./esm/isNode.mjs"
+      },
+      "require": {
+        "types": "./types/isNode.d.ts",
+        "default": "./src/isNode.js"
+      },
+      "default": "./src/isNode.js"
+    },
+    "./src/isNode": {
+      "import": {
+        "types": "./types/isNode.d.mts",
+        "default": "./esm/isNode.mjs"
+      },
+      "require": {
+        "types": "./types/isNode.d.ts",
+        "default": "./src/isNode.js"
+      },
+      "default": "./src/isNode.js"
+    },
+    "./src/isNode.js": {
+      "import": {
+        "types": "./types/isNode.d.mts",
+        "default": "./esm/isNode.mjs"
+      },
+      "require": {
+        "types": "./types/isNode.d.ts",
+        "default": "./src/isNode.js"
+      },
+      "default": "./src/isNode.js"
+    },
+    "./isElement": {
+      "import": {
+        "types": "./types/isElement.d.mts",
+        "default": "./esm/isElement.mjs"
+      },
+      "require": {
+        "types": "./types/isElement.d.ts",
+        "default": "./src/isElement.js"
+      },
+      "default": "./src/isElement.js"
+    },
+    "./src/isElement": {
+      "import": {
+        "types": "./types/isElement.d.mts",
+        "default": "./esm/isElement.mjs"
+      },
+      "require": {
+        "types": "./types/isElement.d.ts",
+        "default": "./src/isElement.js"
+      },
+      "default": "./src/isElement.js"
+    },
+    "./src/isElement.js": {
+      "import": {
+        "types": "./types/isElement.d.mts",
+        "default": "./esm/isElement.mjs"
+      },
+      "require": {
+        "types": "./types/isElement.d.ts",
+        "default": "./src/isElement.js"
+      },
+      "default": "./src/isElement.js"
+    },
+    "./isFragment": {
+      "import": {
+        "types": "./types/isFragment.d.mts",
+        "default": "./esm/isFragment.mjs"
+      },
+      "require": {
+        "types": "./types/isFragment.d.ts",
+        "default": "./src/isFragment.js"
+      },
+      "default": "./src/isFragment.js"
+    },
+    "./src/isFragment": {
+      "import": {
+        "types": "./types/isFragment.d.mts",
+        "default": "./esm/isFragment.mjs"
+      },
+      "require": {
+        "types": "./types/isFragment.d.ts",
+        "default": "./src/isFragment.js"
+      },
+      "default": "./src/isFragment.js"
+    },
+    "./src/isFragment.js": {
+      "import": {
+        "types": "./types/isFragment.d.mts",
+        "default": "./esm/isFragment.mjs"
+      },
+      "require": {
+        "types": "./types/isFragment.d.ts",
+        "default": "./src/isFragment.js"
+      },
+      "default": "./src/isFragment.js"
+    },
+    "./isArrayBuffer": {
+      "import": {
+        "types": "./types/isArrayBuffer.d.mts",
+        "default": "./esm/isArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBuffer.d.ts",
+        "default": "./src/isArrayBuffer.js"
+      },
+      "default": "./src/isArrayBuffer.js"
+    },
+    "./src/isArrayBuffer": {
+      "import": {
+        "types": "./types/isArrayBuffer.d.mts",
+        "default": "./esm/isArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBuffer.d.ts",
+        "default": "./src/isArrayBuffer.js"
+      },
+      "default": "./src/isArrayBuffer.js"
+    },
+    "./src/isArrayBuffer.js": {
+      "import": {
+        "types": "./types/isArrayBuffer.d.mts",
+        "default": "./esm/isArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBuffer.d.ts",
+        "default": "./src/isArrayBuffer.js"
+      },
+      "default": "./src/isArrayBuffer.js"
+    },
+    "./isSharedArrayBuffer": {
+      "import": {
+        "types": "./types/isSharedArrayBuffer.d.mts",
+        "default": "./esm/isSharedArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isSharedArrayBuffer.d.ts",
+        "default": "./src/isSharedArrayBuffer.js"
+      },
+      "default": "./src/isSharedArrayBuffer.js"
+    },
+    "./src/isSharedArrayBuffer": {
+      "import": {
+        "types": "./types/isSharedArrayBuffer.d.mts",
+        "default": "./esm/isSharedArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isSharedArrayBuffer.d.ts",
+        "default": "./src/isSharedArrayBuffer.js"
+      },
+      "default": "./src/isSharedArrayBuffer.js"
+    },
+    "./src/isSharedArrayBuffer.js": {
+      "import": {
+        "types": "./types/isSharedArrayBuffer.d.mts",
+        "default": "./esm/isSharedArrayBuffer.mjs"
+      },
+      "require": {
+        "types": "./types/isSharedArrayBuffer.d.ts",
+        "default": "./src/isSharedArrayBuffer.js"
+      },
+      "default": "./src/isSharedArrayBuffer.js"
+    },
+    "./isArrayBufferView": {
+      "import": {
+        "types": "./types/isArrayBufferView.d.mts",
+        "default": "./esm/isArrayBufferView.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBufferView.d.ts",
+        "default": "./src/isArrayBufferView.js"
+      },
+      "default": "./src/isArrayBufferView.js"
+    },
+    "./src/isArrayBufferView": {
+      "import": {
+        "types": "./types/isArrayBufferView.d.mts",
+        "default": "./esm/isArrayBufferView.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBufferView.d.ts",
+        "default": "./src/isArrayBufferView.js"
+      },
+      "default": "./src/isArrayBufferView.js"
+    },
+    "./src/isArrayBufferView.js": {
+      "import": {
+        "types": "./types/isArrayBufferView.d.mts",
+        "default": "./esm/isArrayBufferView.mjs"
+      },
+      "require": {
+        "types": "./types/isArrayBufferView.d.ts",
+        "default": "./src/isArrayBufferView.js"
+      },
+      "default": "./src/isArrayBufferView.js"
+    },
+    "./isTypedArray": {
+      "import": {
+        "types": "./types/isTypedArray.d.mts",
+        "default": "./esm/isTypedArray.mjs"
+      },
+      "require": {
+        "types": "./types/isTypedArray.d.ts",
+        "default": "./src/isTypedArray.js"
+      },
+      "default": "./src/isTypedArray.js"
+    },
+    "./src/isTypedArray": {
+      "import": {
+        "types": "./types/isTypedArray.d.mts",
+        "default": "./esm/isTypedArray.mjs"
+      },
+      "require": {
+        "types": "./types/isTypedArray.d.ts",
+        "default": "./src/isTypedArray.js"
+      },
+      "default": "./src/isTypedArray.js"
+    },
+    "./src/isTypedArray.js": {
+      "import": {
+        "types": "./types/isTypedArray.d.mts",
+        "default": "./esm/isTypedArray.mjs"
+      },
+      "require": {
+        "types": "./types/isTypedArray.d.ts",
+        "default": "./src/isTypedArray.js"
+      },
+      "default": "./src/isTypedArray.js"
+    },
+    "./isDataView": {
+      "import": {
+        "types": "./types/isDataView.d.mts",
+        "default": "./esm/isDataView.mjs"
+      },
+      "require": {
+        "types": "./types/isDataView.d.ts",
+        "default": "./src/isDataView.js"
+      },
+      "default": "./src/isDataView.js"
+    },
+    "./src/isDataView": {
+      "import": {
+        "types": "./types/isDataView.d.mts",
+        "default": "./esm/isDataView.mjs"
+      },
+      "require": {
+        "types": "./types/isDataView.d.ts",
+        "default": "./src/isDataView.js"
+      },
+      "default": "./src/isDataView.js"
+    },
+    "./src/isDataView.js": {
+      "import": {
+        "types": "./types/isDataView.d.mts",
+        "default": "./esm/isDataView.mjs"
+      },
+      "require": {
+        "types": "./types/isDataView.d.ts",
+        "default": "./src/isDataView.js"
+      },
+      "default": "./src/isDataView.js"
+    },
+    "./isAsyncIterable": {
+      "import": {
+        "types": "./types/isAsyncIterable.d.mts",
+        "default": "./esm/isAsyncIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isAsyncIterable.d.ts",
+        "default": "./src/isAsyncIterable.js"
+      },
+      "default": "./src/isAsyncIterable.js"
+    },
+    "./src/isAsyncIterable": {
+      "import": {
+        "types": "./types/isAsyncIterable.d.mts",
+        "default": "./esm/isAsyncIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isAsyncIterable.d.ts",
+        "default": "./src/isAsyncIterable.js"
+      },
+      "default": "./src/isAsyncIterable.js"
+    },
+    "./src/isAsyncIterable.js": {
+      "import": {
+        "types": "./types/isAsyncIterable.d.mts",
+        "default": "./esm/isAsyncIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isAsyncIterable.d.ts",
+        "default": "./src/isAsyncIterable.js"
+      },
+      "default": "./src/isAsyncIterable.js"
+    },
+    "./isIteratorLike": {
+      "import": {
+        "types": "./types/isIteratorLike.d.mts",
+        "default": "./esm/isIteratorLike.mjs"
+      },
+      "require": {
+        "types": "./types/isIteratorLike.d.ts",
+        "default": "./src/isIteratorLike.js"
+      },
+      "default": "./src/isIteratorLike.js"
+    },
+    "./src/isIteratorLike": {
+      "import": {
+        "types": "./types/isIteratorLike.d.mts",
+        "default": "./esm/isIteratorLike.mjs"
+      },
+      "require": {
+        "types": "./types/isIteratorLike.d.ts",
+        "default": "./src/isIteratorLike.js"
+      },
+      "default": "./src/isIteratorLike.js"
+    },
+    "./src/isIteratorLike.js": {
+      "import": {
+        "types": "./types/isIteratorLike.d.mts",
+        "default": "./esm/isIteratorLike.mjs"
+      },
+      "require": {
+        "types": "./types/isIteratorLike.d.ts",
+        "default": "./src/isIteratorLike.js"
+      },
+      "default": "./src/isIteratorLike.js"
+    },
+    "./isNonNullish": {
+      "import": {
+        "types": "./types/isNonNullish.d.mts",
+        "default": "./esm/isNonNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNonNullish.d.ts",
+        "default": "./src/isNonNullish.js"
+      },
+      "default": "./src/isNonNullish.js"
+    },
+    "./src/isNonNullish": {
+      "import": {
+        "types": "./types/isNonNullish.d.mts",
+        "default": "./esm/isNonNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNonNullish.d.ts",
+        "default": "./src/isNonNullish.js"
+      },
+      "default": "./src/isNonNullish.js"
+    },
+    "./src/isNonNullish.js": {
+      "import": {
+        "types": "./types/isNonNullish.d.mts",
+        "default": "./esm/isNonNullish.mjs"
+      },
+      "require": {
+        "types": "./types/isNonNullish.d.ts",
+        "default": "./src/isNonNullish.js"
+      },
+      "default": "./src/isNonNullish.js"
+    },
+    "./isObjectLike": {
+      "import": {
+        "types": "./types/isObjectLike.d.mts",
+        "default": "./esm/isObjectLike.mjs"
+      },
+      "require": {
+        "types": "./types/isObjectLike.d.ts",
+        "default": "./src/isObjectLike.js"
+      },
+      "default": "./src/isObjectLike.js"
+    },
+    "./src/isObjectLike": {
+      "import": {
+        "types": "./types/isObjectLike.d.mts",
+        "default": "./esm/isObjectLike.mjs"
+      },
+      "require": {
+        "types": "./types/isObjectLike.d.ts",
+        "default": "./src/isObjectLike.js"
+      },
+      "default": "./src/isObjectLike.js"
+    },
+    "./src/isObjectLike.js": {
+      "import": {
+        "types": "./types/isObjectLike.d.mts",
+        "default": "./esm/isObjectLike.mjs"
+      },
+      "require": {
+        "types": "./types/isObjectLike.d.ts",
+        "default": "./src/isObjectLike.js"
+      },
+      "default": "./src/isObjectLike.js"
+    },
+    "./isNonEmptyArray": {
+      "import": {
+        "types": "./types/isNonEmptyArray.d.mts",
+        "default": "./esm/isNonEmptyArray.mjs"
+      },
+      "require": {
+        "types": "./types/isNonEmptyArray.d.ts",
+        "default": "./src/isNonEmptyArray.js"
+      },
+      "default": "./src/isNonEmptyArray.js"
+    },
+    "./src/isNonEmptyArray": {
+      "import": {
+        "types": "./types/isNonEmptyArray.d.mts",
+        "default": "./esm/isNonEmptyArray.mjs"
+      },
+      "require": {
+        "types": "./types/isNonEmptyArray.d.ts",
+        "default": "./src/isNonEmptyArray.js"
+      },
+      "default": "./src/isNonEmptyArray.js"
+    },
+    "./src/isNonEmptyArray.js": {
+      "import": {
+        "types": "./types/isNonEmptyArray.d.mts",
+        "default": "./esm/isNonEmptyArray.mjs"
+      },
+      "require": {
+        "types": "./types/isNonEmptyArray.d.ts",
+        "default": "./src/isNonEmptyArray.js"
+      },
+      "default": "./src/isNonEmptyArray.js"
+    },
+    "./isJson": {
+      "import": {
+        "types": "./types/isJson.d.mts",
+        "default": "./esm/isJson.mjs"
+      },
+      "require": {
+        "types": "./types/isJson.d.ts",
+        "default": "./src/isJson.js"
+      },
+      "default": "./src/isJson.js"
+    },
+    "./src/isJson": {
+      "import": {
+        "types": "./types/isJson.d.mts",
+        "default": "./esm/isJson.mjs"
+      },
+      "require": {
+        "types": "./types/isJson.d.ts",
+        "default": "./src/isJson.js"
+      },
+      "default": "./src/isJson.js"
+    },
+    "./src/isJson.js": {
+      "import": {
+        "types": "./types/isJson.d.mts",
+        "default": "./esm/isJson.mjs"
+      },
+      "require": {
+        "types": "./types/isJson.d.ts",
+        "default": "./src/isJson.js"
+      },
+      "default": "./src/isJson.js"
+    },
+    "./createTypeChecker": {
+      "import": {
+        "types": "./types/createTypeChecker.d.mts",
+        "default": "./esm/createTypeChecker.mjs"
+      },
+      "require": {
+        "types": "./types/createTypeChecker.d.ts",
+        "default": "./src/createTypeChecker.js"
+      },
+      "default": "./src/createTypeChecker.js"
+    },
+    "./src/createTypeChecker": {
+      "import": {
+        "types": "./types/createTypeChecker.d.mts",
+        "default": "./esm/createTypeChecker.mjs"
+      },
+      "require": {
+        "types": "./types/createTypeChecker.d.ts",
+        "default": "./src/createTypeChecker.js"
+      },
+      "default": "./src/createTypeChecker.js"
+    },
+    "./src/createTypeChecker.js": {
+      "import": {
+        "types": "./types/createTypeChecker.d.mts",
+        "default": "./esm/createTypeChecker.mjs"
+      },
+      "require": {
+        "types": "./types/createTypeChecker.d.ts",
+        "default": "./src/createTypeChecker.js"
+      },
+      "default": "./src/createTypeChecker.js"
+    },
+    "./isSetOf": {
+      "import": {
+        "types": "./types/isSetOf.d.mts",
+        "default": "./esm/isSetOf.mjs"
+      },
+      "require": {
+        "types": "./types/isSetOf.d.ts",
+        "default": "./src/isSetOf.js"
+      },
+      "default": "./src/isSetOf.js"
+    },
+    "./src/isSetOf": {
+      "import": {
+        "types": "./types/isSetOf.d.mts",
+        "default": "./esm/isSetOf.mjs"
+      },
+      "require": {
+        "types": "./types/isSetOf.d.ts",
+        "default": "./src/isSetOf.js"
+      },
+      "default": "./src/isSetOf.js"
+    },
+    "./src/isSetOf.js": {
+      "import": {
+        "types": "./types/isSetOf.d.mts",
+        "default": "./esm/isSetOf.mjs"
+      },
+      "require": {
+        "types": "./types/isSetOf.d.ts",
+        "default": "./src/isSetOf.js"
+      },
+      "default": "./src/isSetOf.js"
+    },
+    "./isMapOf": {
+      "import": {
+        "types": "./types/isMapOf.d.mts",
+        "default": "./esm/isMapOf.mjs"
+      },
+      "require": {
+        "types": "./types/isMapOf.d.ts",
+        "default": "./src/isMapOf.js"
+      },
+      "default": "./src/isMapOf.js"
+    },
+    "./src/isMapOf": {
+      "import": {
+        "types": "./types/isMapOf.d.mts",
+        "default": "./esm/isMapOf.mjs"
+      },
+      "require": {
+        "types": "./types/isMapOf.d.ts",
+        "default": "./src/isMapOf.js"
+      },
+      "default": "./src/isMapOf.js"
+    },
+    "./src/isMapOf.js": {
+      "import": {
+        "types": "./types/isMapOf.d.mts",
+        "default": "./esm/isMapOf.mjs"
+      },
+      "require": {
+        "types": "./types/isMapOf.d.ts",
+        "default": "./src/isMapOf.js"
+      },
+      "default": "./src/isMapOf.js"
+    },
+    "./isEmptyIterable": {
+      "import": {
+        "types": "./types/isEmptyIterable.d.mts",
+        "default": "./esm/isEmptyIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isEmptyIterable.d.ts",
+        "default": "./src/isEmptyIterable.js"
+      },
+      "default": "./src/isEmptyIterable.js"
+    },
+    "./src/isEmptyIterable": {
+      "import": {
+        "types": "./types/isEmptyIterable.d.mts",
+        "default": "./esm/isEmptyIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isEmptyIterable.d.ts",
+        "default": "./src/isEmptyIterable.js"
+      },
+      "default": "./src/isEmptyIterable.js"
+    },
+    "./src/isEmptyIterable.js": {
+      "import": {
+        "types": "./types/isEmptyIterable.d.mts",
+        "default": "./esm/isEmptyIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isEmptyIterable.d.ts",
+        "default": "./src/isEmptyIterable.js"
+      },
+      "default": "./src/isEmptyIterable.js"
+    },
+    "./isBlankIterable": {
+      "import": {
+        "types": "./types/isBlankIterable.d.mts",
+        "default": "./esm/isBlankIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isBlankIterable.d.ts",
+        "default": "./src/isBlankIterable.js"
+      },
+      "default": "./src/isBlankIterable.js"
+    },
+    "./src/isBlankIterable": {
+      "import": {
+        "types": "./types/isBlankIterable.d.mts",
+        "default": "./esm/isBlankIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isBlankIterable.d.ts",
+        "default": "./src/isBlankIterable.js"
+      },
+      "default": "./src/isBlankIterable.js"
+    },
+    "./src/isBlankIterable.js": {
+      "import": {
+        "types": "./types/isBlankIterable.d.mts",
+        "default": "./esm/isBlankIterable.mjs"
+      },
+      "require": {
+        "types": "./types/isBlankIterable.d.ts",
+        "default": "./src/isBlankIterable.js"
+      },
+      "default": "./src/isBlankIterable.js"
+    },
+    "./toArray": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./src/toArray": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./src/toArray.js": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./conversion/toArray": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./conversion/toArray.js": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./src/conversion/toArray": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./src/conversion/toArray.js": {
+      "import": {
+        "types": "./types/toArray.d.mts",
+        "default": "./esm/toArray.mjs"
+      },
+      "require": {
+        "types": "./types/toArray.d.ts",
+        "default": "./src/conversion/toArray.js"
+      },
+      "default": "./src/conversion/toArray.js"
+    },
+    "./toArrayIf": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./src/toArrayIf": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./src/toArrayIf.js": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./conversion/toArrayIf": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./conversion/toArrayIf.js": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./src/conversion/toArrayIf": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./src/conversion/toArrayIf.js": {
+      "import": {
+        "types": "./types/toArrayIf.d.mts",
+        "default": "./esm/toArrayIf.mjs"
+      },
+      "require": {
+        "types": "./types/toArrayIf.d.ts",
+        "default": "./src/conversion/toArrayIf.js"
+      },
+      "default": "./src/conversion/toArrayIf.js"
+    },
+    "./toBigInt": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./src/toBigInt": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./src/toBigInt.js": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./conversion/toBigInt": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./conversion/toBigInt.js": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./src/conversion/toBigInt": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./src/conversion/toBigInt.js": {
+      "import": {
+        "types": "./types/toBigInt.d.mts",
+        "default": "./esm/toBigInt.mjs"
+      },
+      "require": {
+        "types": "./types/toBigInt.d.ts",
+        "default": "./src/conversion/toBigInt.js"
+      },
+      "default": "./src/conversion/toBigInt.js"
+    },
+    "./toBigIntIf": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./src/toBigIntIf": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./src/toBigIntIf.js": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./conversion/toBigIntIf": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./conversion/toBigIntIf.js": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./src/conversion/toBigIntIf": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./src/conversion/toBigIntIf.js": {
+      "import": {
+        "types": "./types/toBigIntIf.d.mts",
+        "default": "./esm/toBigIntIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBigIntIf.d.ts",
+        "default": "./src/conversion/toBigIntIf.js"
+      },
+      "default": "./src/conversion/toBigIntIf.js"
+    },
+    "./toBoolean": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./src/toBoolean": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./src/toBoolean.js": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./conversion/toBoolean": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./conversion/toBoolean.js": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./src/conversion/toBoolean": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./src/conversion/toBoolean.js": {
+      "import": {
+        "types": "./types/toBoolean.d.mts",
+        "default": "./esm/toBoolean.mjs"
+      },
+      "require": {
+        "types": "./types/toBoolean.d.ts",
+        "default": "./src/conversion/toBoolean.js"
+      },
+      "default": "./src/conversion/toBoolean.js"
+    },
+    "./toBooleanIf": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./src/toBooleanIf": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./src/toBooleanIf.js": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./conversion/toBooleanIf": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./conversion/toBooleanIf.js": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./src/conversion/toBooleanIf": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./src/conversion/toBooleanIf.js": {
+      "import": {
+        "types": "./types/toBooleanIf.d.mts",
+        "default": "./esm/toBooleanIf.mjs"
+      },
+      "require": {
+        "types": "./types/toBooleanIf.d.ts",
+        "default": "./src/conversion/toBooleanIf.js"
+      },
+      "default": "./src/conversion/toBooleanIf.js"
+    },
+    "./toDate": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./src/toDate": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./src/toDate.js": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./conversion/toDate": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./conversion/toDate.js": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./src/conversion/toDate": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./src/conversion/toDate.js": {
+      "import": {
+        "types": "./types/toDate.d.mts",
+        "default": "./esm/toDate.mjs"
+      },
+      "require": {
+        "types": "./types/toDate.d.ts",
+        "default": "./src/conversion/toDate.js"
+      },
+      "default": "./src/conversion/toDate.js"
+    },
+    "./toDateIf": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./src/toDateIf": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./src/toDateIf.js": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./conversion/toDateIf": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./conversion/toDateIf.js": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./src/conversion/toDateIf": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./src/conversion/toDateIf.js": {
+      "import": {
+        "types": "./types/toDateIf.d.mts",
+        "default": "./esm/toDateIf.mjs"
+      },
+      "require": {
+        "types": "./types/toDateIf.d.ts",
+        "default": "./src/conversion/toDateIf.js"
+      },
+      "default": "./src/conversion/toDateIf.js"
+    },
+    "./toInteger": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./src/toInteger": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./src/toInteger.js": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./conversion/toInteger": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./conversion/toInteger.js": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./src/conversion/toInteger": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./src/conversion/toInteger.js": {
+      "import": {
+        "types": "./types/toInteger.d.mts",
+        "default": "./esm/toInteger.mjs"
+      },
+      "require": {
+        "types": "./types/toInteger.d.ts",
+        "default": "./src/conversion/toInteger.js"
+      },
+      "default": "./src/conversion/toInteger.js"
+    },
+    "./toIntegerIf": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./src/toIntegerIf": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./src/toIntegerIf.js": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./conversion/toIntegerIf": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./conversion/toIntegerIf.js": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./src/conversion/toIntegerIf": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./src/conversion/toIntegerIf.js": {
+      "import": {
+        "types": "./types/toIntegerIf.d.mts",
+        "default": "./esm/toIntegerIf.mjs"
+      },
+      "require": {
+        "types": "./types/toIntegerIf.d.ts",
+        "default": "./src/conversion/toIntegerIf.js"
+      },
+      "default": "./src/conversion/toIntegerIf.js"
+    },
+    "./toNumber": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./src/toNumber": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./src/toNumber.js": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./conversion/toNumber": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./conversion/toNumber.js": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./src/conversion/toNumber": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./src/conversion/toNumber.js": {
+      "import": {
+        "types": "./types/toNumber.d.mts",
+        "default": "./esm/toNumber.mjs"
+      },
+      "require": {
+        "types": "./types/toNumber.d.ts",
+        "default": "./src/conversion/toNumber.js"
+      },
+      "default": "./src/conversion/toNumber.js"
+    },
+    "./toNumberIf": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./src/toNumberIf": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./src/toNumberIf.js": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./conversion/toNumberIf": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./conversion/toNumberIf.js": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./src/conversion/toNumberIf": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./src/conversion/toNumberIf.js": {
+      "import": {
+        "types": "./types/toNumberIf.d.mts",
+        "default": "./esm/toNumberIf.mjs"
+      },
+      "require": {
+        "types": "./types/toNumberIf.d.ts",
+        "default": "./src/conversion/toNumberIf.js"
+      },
+      "default": "./src/conversion/toNumberIf.js"
+    },
+    "./toObject": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./src/toObject": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./src/toObject.js": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./conversion/toObject": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./conversion/toObject.js": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./src/conversion/toObject": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./src/conversion/toObject.js": {
+      "import": {
+        "types": "./types/toObject.d.mts",
+        "default": "./esm/toObject.mjs"
+      },
+      "require": {
+        "types": "./types/toObject.d.ts",
+        "default": "./src/conversion/toObject.js"
+      },
+      "default": "./src/conversion/toObject.js"
+    },
+    "./toObjectIf": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./src/toObjectIf": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./src/toObjectIf.js": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./conversion/toObjectIf": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./conversion/toObjectIf.js": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./src/conversion/toObjectIf": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./src/conversion/toObjectIf.js": {
+      "import": {
+        "types": "./types/toObjectIf.d.mts",
+        "default": "./esm/toObjectIf.mjs"
+      },
+      "require": {
+        "types": "./types/toObjectIf.d.ts",
+        "default": "./src/conversion/toObjectIf.js"
+      },
+      "default": "./src/conversion/toObjectIf.js"
+    },
+    "./toString": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./src/toString": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./src/toString.js": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./conversion/toString": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./conversion/toString.js": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./src/conversion/toString": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./src/conversion/toString.js": {
+      "import": {
+        "types": "./types/toString.d.mts",
+        "default": "./esm/toString.mjs"
+      },
+      "require": {
+        "types": "./types/toString.d.ts",
+        "default": "./src/conversion/toString.js"
+      },
+      "default": "./src/conversion/toString.js"
+    },
+    "./toStringIf": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./src/toStringIf": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./src/toStringIf.js": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./conversion/toStringIf": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./conversion/toStringIf.js": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./src/conversion/toStringIf": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./src/conversion/toStringIf.js": {
+      "import": {
+        "types": "./types/toStringIf.d.mts",
+        "default": "./esm/toStringIf.mjs"
+      },
+      "require": {
+        "types": "./types/toStringIf.d.ts",
+        "default": "./src/conversion/toStringIf.js"
+      },
+      "default": "./src/conversion/toStringIf.js"
+    },
+    "./toSymbol": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./src/toSymbol": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./src/toSymbol.js": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./conversion/toSymbol": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./conversion/toSymbol.js": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./src/conversion/toSymbol": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./src/conversion/toSymbol.js": {
+      "import": {
+        "types": "./types/toSymbol.d.mts",
+        "default": "./esm/toSymbol.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbol.d.ts",
+        "default": "./src/conversion/toSymbol.js"
+      },
+      "default": "./src/conversion/toSymbol.js"
+    },
+    "./toSymbolIf": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./src/toSymbolIf": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./src/toSymbolIf.js": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./conversion/toSymbolIf": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./conversion/toSymbolIf.js": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./src/conversion/toSymbolIf": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./src/conversion/toSymbolIf.js": {
+      "import": {
+        "types": "./types/toSymbolIf.d.mts",
+        "default": "./esm/toSymbolIf.mjs"
+      },
+      "require": {
+        "types": "./types/toSymbolIf.d.ts",
+        "default": "./src/conversion/toSymbolIf.js"
+      },
+      "default": "./src/conversion/toSymbolIf.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/go-types.js": "./dist/go-types.js",
+    "./dist/go-types.min.js": "./dist/go-types.min.js",
+    "./dist/go-types.mjs": "./dist/go-types.mjs"
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts",
+    "index.d.mts",
+    "src/**/*.js",
+    "esm/*.mjs",
+    "types/*.d.ts",
+    "types/*.d.mts",
+    "dist/",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "docs/API.md",
+    "docs/conversions.md",
+    "docs/migration.md",
+    "docs/runtime.md"
+  ]
 }

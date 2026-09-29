@@ -1,18 +1,10 @@
 /**
- * Determines whether the value is a primitive <code>Symbol</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive <code>Symbol</code>; <code>false</code> otherwise.
- * @example <caption>Symbol values</caption>
- * // returns true
- * isSymbol(Symbol("abc"));
- * @example <caption>Non-Symbol values</caption>
- * // returns false
- * isSymbol("abc");
- * isSymbol(/[a-z]/);
- * @see Symbol
- * @since 1.0.0
- * @memberof Primitive
- * @static
+ * Checks for a primitive symbol.
+ * Symbol and BigInt checks reject boxed values.
+ * @param {*} value Value to inspect.
+ * @returns {boolean}
+ * @example isSymbol(Symbol("x")); // => true
+ * @example isSymbol("x");         // => false
  */
 function isSymbol(value) {
     return typeof value === "symbol";

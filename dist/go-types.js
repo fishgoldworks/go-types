@@ -1,1613 +1,1629 @@
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["Types"] = factory();
-	else
-		root["Types"] = factory();
-})(this, () => {
-return /******/ (() => { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ([
-/* 0 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/*! go-types v2.0.0
 
-/**
-* @namespace  Primitive 
+The MIT License
+
+Copyright 2015 Michael Ko
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 */
-
-/** 
-* @namespace Utility 
-*/
-
-/**
-* @namespace Number 
-*/
-
-/**
-* @namespace Object 
-*/
-
-/**
-* @namespace Array 
-*/
-
-/**
-* @namespace Collection 
-*/
-
-/**
-* @namespace Node 
-*/
-
-module.exports.isUndefined = __webpack_require__(1);
-module.exports.isNull = __webpack_require__(2);
-module.exports.isBoolean = __webpack_require__(3);
-module.exports.isNumber = __webpack_require__(4);
-module.exports.isString = __webpack_require__(5);
-module.exports.isSymbol = __webpack_require__(6);
-module.exports.isBigInt = __webpack_require__(7);
-module.exports.isPrimitive = __webpack_require__(8);
-
-module.exports.isNullish = __webpack_require__(9);
-module.exports.isEmpty = __webpack_require__(10);
-module.exports.isBlank = __webpack_require__(15);
-module.exports.isTruthy = __webpack_require__(16);
-module.exports.isFalsy = __webpack_require__(17);
-
-module.exports.isInteger = __webpack_require__(18);
-module.exports.isFloat = __webpack_require__(20);
-module.exports.isFinite = __webpack_require__(19);
-module.exports.isInfinite = __webpack_require__(21);
-module.exports.isNaN = __webpack_require__(22);
-module.exports.isNumeric = __webpack_require__(23);
-module.exports.isTypeOf = __webpack_require__(24);
-
-module.exports.isObject = __webpack_require__(25);
-module.exports.isPlainObject = __webpack_require__(12);
-module.exports.isCyclic = __webpack_require__(26);
-module.exports.isIterable = __webpack_require__(13);
-module.exports.isArray = __webpack_require__(14);
-module.exports.isArrayOf = __webpack_require__(28);
-module.exports.isArrayLike = __webpack_require__(11);
-module.exports.isArrayLikeOf = __webpack_require__(29);
-module.exports.isPair = __webpack_require__(30);
-module.exports.isMap = __webpack_require__(31);
-module.exports.isSet = __webpack_require__(32);
-module.exports.isWeakMap = __webpack_require__(33);
-module.exports.isWeakSet = __webpack_require__(34);
-module.exports.isFunction = __webpack_require__(35);
-
-module.exports.isDate = __webpack_require__(36);
-module.exports.isValidDate = __webpack_require__(37);
-module.exports.isInvalidDate = __webpack_require__(38);
-module.exports.isRegExp = __webpack_require__(39);
-module.exports.isPromise = __webpack_require__(40);
-module.exports.isPromiseLike = __webpack_require__(41);
-module.exports.isThenable = __webpack_require__(42);
-module.exports.isError = __webpack_require__(43);
-module.exports.isNode = __webpack_require__(44);
-module.exports.isElement = __webpack_require__(45);
-module.exports.isFragment = __webpack_require__(46);
-
-
-
-
-
-
-/***/ }),
-/* 1 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is <code>undefined</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is <code>undefined</code>; <code>false</code> otherwise.
- * @example <caption>Undefined values</caption>
- * // returns true
- * isUndefined(undefined);
- * isUndefined(void 0);
- * @example <caption>Non-undefined values</caption>
- * // returns false
- * isUndefined(null);
- * isUndefined(false);
- * isUndefined(0);
- * isUndefined("");
- * isUndefined(NaN);
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isUndefined(value) {
-    return value === undefined;
-}
-
-module.exports = isUndefined;
-
-/***/ }),
-/* 2 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is <code>null</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is <code>null</code>; <code>false</code> otherwise.
- * @example <caption>Null values</caption>
- * // returns true
- * isNull(null);
- * @example <caption>Non-null values</caption>
- * // returns false
- * isNull(undefined);
- * isNull(false);
- * isNull(0);
- * isNull("");
- * isNull(NaN);
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isNull(value) {
-    return value === null;
-}
-
-module.exports = isNull;
-
-
-/***/ }),
-/* 3 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive boolean or <code>Boolean</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive boolean or <code>Boolean</code> object; <code>false</code> otherwise.
- * @example <caption>Boolean values</caption>
- * // returns true
- * isBoolean(true);
- * isBoolean(new Boolean(true));
- * @example <caption>Non-boolean values</caption>
- * // returns false
- * isBoolean(1);
- * isBoolean("true");
- * @see Types.isPrimitive
- * @see Types.isObject
- * @see Types.isTypeOf
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isBoolean(value) {
-    return typeof value === "boolean" || value instanceof Boolean;
-}
-
-module.exports = isBoolean;
-
-/***/ }),
-/* 4 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive number or <code>Number</code> object 
- * which includes the "special" numbers `+Infinity`, `-Infinity` and `NaN`.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive number or <code>Number</code> object; <code>false</code> otherwise.
- * @example <caption>Number values</caption>
- * // returns true
- * isNumber(1);
- * isNumber(-12.34);
- * isNumber(new Number(1));
- * isNumber(Infinity);
- * isNumber(NaN);
- * @example <caption>Non-number values</caption>
- * // returns false
- * isNumber("1");
- * isNumber(true);
- * @see Types.isPrimitive
- * @see Types.isObject
- * @see Types.isTypeOf
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isNumber(value) {
-    return typeof value === "number" || value instanceof Number;
-}
-
-module.exports = isNumber;
-
-/***/ }),
-/* 5 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive string or <code>String</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive string or <code>String</code> object; <code>false</code> otherwise.
- * @example <caption>String values</caption>
- * // returns true
- * isString("1");
- * isString(new String("abc"));
- * @example <caption>Non-string values</caption>
- * // returns false
- * isString(1);
- * isString(["a", "b"]);
- * @see Types.isPrimitive
- * @see Types.isObject
- * @see Types.isTypeOf
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isString(value) {
-    return typeof value === "string" || value instanceof String;
-}
-
-module.exports = isString;
-
-/***/ }),
-/* 6 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive <code>Symbol</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive <code>Symbol</code>; <code>false</code> otherwise.
- * @example <caption>Symbol values</caption>
- * // returns true
- * isSymbol(Symbol("abc"));
- * @example <caption>Non-Symbol values</caption>
- * // returns false
- * isSymbol("abc");
- * isSymbol(/[a-z]/);
- * @see Symbol
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isSymbol(value) {
-    return typeof value === "symbol";
-}
-
-module.exports = isSymbol;
-
-/***/ }),
-/* 7 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive <code>BigInt</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive <code>BigInt</code>; <code>false</code> otherwise.
- * @example <caption>BigInt values</caption>
- * // returns true
- * isBigInt(BigInt(1));
- * isBigInt(BigInt(-1234567890));
- * @example <caption>Non-BigInt values</caption>
- * // returns false
- * isBigInt(Number.MAX_VALUE);
- * isBigInt(Infinity);
- * isBigInt(NaN);
- * isBigInt("1n");
- * @see BigInt
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isBigInt(value) {
-    return typeof value === "bigint";
-}
-
-module.exports = isBigInt;
-
-/***/ }),
-/* 8 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a primitive value.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a primitive value; <code>false</code> otherwise.
- * @example <caption>Primitive values</caption>
- * // returns true
- * isPrimitive(undefined);
- * isPrimitive(null);
- * isPrimitive(false);
- * isPrimitive(0);
- * isPrimitive("abc");
- * isPrimitive(Symbol("abc"));
- * isPrimitive(BigInt(1234567890));
- * @example <caption>Non-primitive values</caption>
- * // returns false
- * isPrimitive(new Number(1));
- * isPrimitive([1, 2, 3]);
- * isPrimitive(function () {});
- * @since 1.0.0
- * @memberof Primitive
- * @static
- */
-function isPrimitive(value) {
-    return !(value instanceof Object);
-}
-
-module.exports = isPrimitive;
-
-/***/ }),
-/* 9 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is <code>null</code> or <code>undefined</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is <code>null</code> or <code>undefined</code>; <code>false</code> otherwise.
- * @example <caption>Nullish values</caption>
- * // returns true
- * isNullish();
- * isNullish(undefined);
- * isNullish(void 0);
- * @example <caption>Non-nullish values</caption>
- * // returns false
- * isNullish(null);
- * isNullish(false);
- * isNullish(0);
- * isNullish("");
- * isNullish([]);
- * isNullish(NaN);
- * @see undefined
- * @see null
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isNullish(value) {
-    return value == null;
-}
-
-module.exports = isNullish;
-
-/***/ }),
-/* 10 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isString = __webpack_require__(5);
-var isArrayLike = __webpack_require__(11);
-var isPlainObject = __webpack_require__(12);
-var isIterable = __webpack_require__(13);
-
-/**
- * Determines whether the value is an empty value which can be one of the following: 
- * - <code>null</code>
- * - <code>undefined</code>
- * - A string whose length is zero
- * - An array with no elements
- * - A plain object with no enumerable keys
- * - An iterable with no iterable values
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an empty value; <code>false</code> otherwise.
- * @example <caption>Empty values</caption>
- * // returns true
- * isEmpty(null);
- * isEmpty(undefined);
- * isEmpty("");
- * isEmpty([]);
- * isEmpty({});
- * isEmpty(new Set());
- * @example <caption>Non-empty values</caption>
- * // returns false
- * isEmpty(" ");
- * isEmpty(0);
- * isEmpty(false);
- * isEmpty([null]);
- * isEmpty({a: ""});
- * isEmpty(NaN);
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isEmpty(value) {
-    if (value == null) {
-        return true;
-    } else if (isString(value)) {
-        return value.length === 0;
-    } else if (isArrayLike(value)) {
-        return value.length === 0;
-    } else if (isPlainObject(value)) {
-        return Object.keys(value).length === 0;
-    } else if (isIterable(value)) {
-        return value[Symbol.iterator]().next().done === true;
-    }
-    return false;
-}
-
-module.exports = isEmpty;
-
-/***/ }),
-/* 11 */
-/***/ ((module) => {
-
-var MAX_SAFE_INTEGER = 9007199254740991;
-
-/**
- * Determines whether the value is an array-like object with a "length" property 
- * whose value is an integer and is within 0 ~ Number.MAX_SAFE_INTEGER (both inclusive).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an array-like object; <code>false</code> otherwise.
- * @example <caption>Array-like objects</caption>
- * // returns true
- * isArrayLike([]);
- * isArrayLike("abc");
- * isArrayLike({length: 0});
- * isArrayLike(new Int8Array());
- * @example <caption>Non-array-like values</caption>
- * // returns false
- * isArrayLike({});
- * isArrayLike({length: -1})
- * isArrayLike(new Set());
- * isArrayLike(Array);
- * @since 1.0.0
- * @memberof Array
- * @static
- */
-function isArrayLike(value) {
-    return value != null && typeof value.length === "number" && value.length >= 0 && value.length <= MAX_SAFE_INTEGER && typeof value !== "function";
-}
-
-module.exports = isArrayLike;
-
-/***/ }),
-/* 12 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a plain object created using object literal or by the <code>Object</code> constructor.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a plain object; <code>false</code> otherwise.
- * @example <caption>Plain object values</caption>
- * // returns true
- * isPlainObject({a: 1, b: 2});
- * isPlainObject(new Object());
- * @example <caption>Non-plain-object values</caption>
- * // returns false
- * isPlainObject(null);
- * isPlainObject("abc");
- * isPlainObject([1, 2]);
- * isPlainObject(new Number(1));
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isPlainObject(value) {
-    return value instanceof Object && value.constructor === Object;
-}
-
-module.exports = isPlainObject;
-
-/***/ }),
-/* 13 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isArray = __webpack_require__(14);
-var isString = __webpack_require__(5);
-
-/**
- * Determines whether the value is iterable which can be used in a <code>for..of</code> operator.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is iterable; <code>false</code> otherwise.
- * @example <caption>Iterable values</caption>
- * // returns true
- * isIterable([1, 2, 3]);
- * isIterable("abc");
- * isIterable(new Map());
- * isIterable(new Set());
- * isIterable({[Symbol.iterator]: function() {}});
- * @example <caption>Non-iterable values</caption>
- * // returns false
- * isIterable({a: 1, b: 2});
- * isIterable(12345);
- * @see Iterable
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isIterable(value) {
-    return (value != null && typeof Symbol === "function" && Symbol.iterator && typeof value[Symbol.iterator] === "function") || isArray(value) || isString(value);
-}
-
-module.exports = isIterable;
-
-/***/ }),
-/* 14 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is an <code>Array</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Array</code> object; <code>false</code> otherwise.
- * @example <caption>Array values</caption>
- * // returns true
- * isArray(["a", "b"]);
- * isArray(new Array());
- * @example <caption>Non-array values</caption>
- * // returns false
- * isArray("abc");
- * isArray({length: 0});
- * isArray(new Int8Array());
- * @since 1.0.0
- * @memberof Array
- * @static
- */
-function isArray(value) {
-    return value instanceof Array;
-}
-
-module.exports = isArray;
-
-/***/ }),
-/* 15 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isEmpty = __webpack_require__(10);
-var isString = __webpack_require__(5);
-var isArrayLike = __webpack_require__(11);
-var isPlainObject = __webpack_require__(12);
-var isNullish = __webpack_require__(9);
-var isIterable = __webpack_require__(13);
-
-var NON_SPACE_REGEX = new RegExp("\\S");
-
-/**
- * Determines whether the value is a blank value which can be one of the following: 
- * - <code>null</code>
- * - <code>undefined</code>
- * - A string whose length is zero or has only space characters
- * - An array that has no elements or has only nullish values
- * - A plain object that has no enumerable keys or has only nullish values
- * - An iterable that has no iterable values or has only nullish values.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a blank value; <code>false</code> otherwise.
- * @example <caption>Blank values</caption>
- * // returns true
- * isBlank(null);
- * isBlank(undefined);
- * isBlank(" \t\n ");
- * isBlank([undefined, null]);
- * isBlank({a: null, b: undefined});
- * isBlank(new Set(null));
- * @example <caption>Non-blank values</caption>
- * // returns false
- * isBlank(0);
- * isBlank(false);
- * isBlank(" a ");
- * isBlank([""]);
- * isBlank({a: ""});
- * isBlank(NaN);
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isBlank(value) {
-    if (isEmpty(value)) {
-        return true;
-    } else if (isString(value)) {
-        return !NON_SPACE_REGEX.test(value);
-    } else if (isArrayLike(value)) {
-        return Array.prototype.every.call(value, isNullish);
-    } else if (isPlainObject(value)) {
-        return Array.prototype.every.call(Object.values(value), isNullish);
-    } else if (isIterable(value)) {
-        var iter = value[Symbol.iterator]();
-        var entry;
-
-        while ((entry = iter.next()).done !== true) {
-            if (entry.value != null) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-module.exports = isBlank;
-
-/***/ }),
-/* 16 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a truthy value. 
- * A truthy value is a value that is considered true when encountered in a Boolean context.
- * All values are truthy except <code>false</code>, <code>0</code>, <code>""</code>, <code>undefined</code>, <code>null</code> and <code>NaN</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a truthy value; <code>false</code> otherwise.
- * @example <caption>Truthy values</caption>
- * // returns true
- * isTruthy(true);
- * isTruthy(1);
- * isTruthy("false");
- * isTruthy(new Boolean(false));
- * isTruthy({});
- * @example <caption>Non-truthy values</caption>
- * // returns false
- * isTruthy(false);
- * isTruthy(0);
- * isTruthy("");
- * isTruthy(undefined);
- * isTruthy(null);
- * isTruthy(NaN);
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isTruthy(value) {
-    return value ? true : false;
-}
-
-module.exports = isTruthy;
-
-/***/ }),
-/* 17 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a falsy value which can be one of the following:
- * - <code>false</code>
- * - <code>0</code>
- * - <code>""</code>
- * - <code>undefined</code>
- * - <code>null</code>
- * - <code>NaN</code>
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a falsy value; <code>false</code> otherwise.
- * @example <caption>Falsy values</caption>
- * // returns true
- * isFalsy(false);
- * isFalsy(0);
- * isFalsy("");
- * isFalsy(undefined);
- * isFalsy(null);
- * isFalsy(NaN);
- * @example <caption>Non-falsy values</caption>
- * // returns false
- * isFalsy(true);
- * isFalsy(-1);
- * isFalsy("false");
- * isFalsy(new Boolean(false));
- * isFalsy({});
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isFalsy(value) {
-    return value ? false : true;
-}
-
-module.exports = isFalsy;
-
-/***/ }),
-/* 18 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isFinite = __webpack_require__(19);
-
-/**
- * Determines whether the value is an integer (a primitive number or <code>Number</code> object).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an integer; <code>false</code> otherwise.
- * @example <caption>Integer values</caption>
- * // returns true
- * isInteger(1);
- * isInteger(new Number(1));
- * @example <caption>Non-integer values</caption>
- * // returns false
- * isInteger(isInteger(0.1));
- * isInteger("1");
- * isInteger(Infinity);
- * isInteger(NaN);
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isInteger(value) {
-    return isFinite(value) && Math.floor(value) === value.valueOf();
-}
-
-module.exports = isInteger;
-
-/***/ }),
-/* 19 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isNumber = __webpack_require__(4);
-
-/**
- * Determines whether the value is a finite number (a primitive number or <code>Number</code> object).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a finite number; <code>false</code> otherwise.
- * @example <caption>Finite values</caption>
- * // returns true
- * isFinite(0);
- * isFinite(-0.1);
- * isFinite(Number.MAX_VALUE);
- * @example <caption>Non-finite values</caption>
- * // returns false
- * isFinite(Infinity);
- * isFinite("1");
- * isFinite(NaN);
- * @see isFinite
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isFinite(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return val !== Number.POSITIVE_INFINITY && val !== Number.NEGATIVE_INFINITY && val === val;
-    }
-    return false;
-}
-
-module.exports = isFinite;
-
-/***/ }),
-/* 20 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isFinite = __webpack_require__(19);
-
-/**
- * Determines whether the value is a finite number with a decimal point (a primitive number or <code>Number</code> object).
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a finite number with a decimal point; <code>false</code> otherwise.
- * @example <caption>Float values</caption>
- * // returns true
- * isFloat(0.1);
- * isFloat(-1234.56789);
- * isFloat(new Number(0.1));
- * @example <caption>Non-float values</caption>
- * // returns false
- * isFloat(1);
- * isFloat(1.0);
- * isFloat("1.2");
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isFloat(value) {
-    return isFinite(value) && Math.floor(value) !== value.valueOf();
-}
-
-module.exports = isFloat;
-
-/***/ }),
-/* 21 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isNumber = __webpack_require__(4);
-
-/**
- * Determines whether the value is a primitive number or <code>Number</code> object that represents positive or negative infinity.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a number that represents positive or negative infinity; <code>false</code> otherwise.
- * @example <caption>Infinite values</caption>
- * // returns true
- * isInfinite(Infinity);
- * isInfinite(Number.NEGATIVE_INFINITY);
- * @example <caption>Non-infinite values</caption>
- * // returns false
- * isInfinite(Number.MAX_VALUE);
- * isInfinite(NaN);
- * @see isFinite
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isInfinite(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return  val === Number.POSITIVE_INFINITY || val === Number.NEGATIVE_INFINITY;
-    }
-    return false;
-}
-
-module.exports = isInfinite;
-
-/***/ }),
-/* 22 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isNumber = __webpack_require__(4);
-
-/**
- * Determines whether the value is <code>NaN</code> (a primitive number or a <code>Number</code> object). 
- * NaN is the only value in javascript that is not equal to itself.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is <code>NaN</code>; <code>false</code> otherwise.
- * @example <caption>NaN values</caption>
- * // returns true
- * isNaN(NaN);
- * isNaN(new Number(NaN));
- * isNaN(0/0);
- * @example <caption>Non-NaN values</caption>
- * // returns false
- * isNaN(undefined);
- * isNaN(null);
- * isNaN("NaN");
- * isNaN(Infinity);
- * @see Number.isNaN
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isNaN(value) {
-    if (isNumber(value)) {
-        var val = value.valueOf();
-        return val !== val;
-    }
-    return false;
-}
-
-module.exports = isNaN;
-
-/***/ }),
-/* 23 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isFinite = __webpack_require__(19);
-var isString = __webpack_require__(5);
-var isBigInt = __webpack_require__(7);
-
-/**
- * Determines whether the value is a numeric value which can be one of the following:
- * - A primitive number or <code>Number</code> object that has a finite value
- * - A primitive string or <code>String</code> object that represents a finite number
- * - A BigInt
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a numeric value; <code>false</code> otherwise.
- * @example <caption>Numeric values</caption>
- * // returns true
- * isNumeric(1);
- * isNumeric(new Number(1));
- * isNumeric("1.0");
- * isNumeric(new String("-1.234e+8"))
- * isNumeric(BigInt(1234567890));
- * isNumeric(Infinity);
- * @example <caption>Non-numeric values</caption>
- * // returns false
- * isNumeric(NaN);
- * isNumeric(Infinity);
- * isNumeric("12000n");
- * isNumeric("1*2");
- * @since 1.0.0
- * @memberof Number
- * @static
- */
-function isNumeric(value) {
-    return isFinite(value) || (isString(value) && value.length > 0 && isFinite(value * 1)) || isBigInt(value);
-}
-
-module.exports = isNumeric;
-
-/***/ }),
-/* 24 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isString = __webpack_require__(5);
-
-/**
- * Determines whether the value has a specified type.
- * Based on the type of the type value, it will check the following:
- * - string - checks if the type matches (case-sensitive) using the <code>typeof</code> operator.
- * - function - checks if the value is an instance of the function/class using the <code>instanceof</code> operator; if the test returns <code>false</code>, it checks if the function returns a truthy value when invoked with the value.
- * - null/undefined - checks if the value is equal to the type using the strict equality (<code>===</code>) operator.
- * - array - checks if the value has any type defined in the array.
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The expected type
- * @returns {boolean} <code>true</code> if the value is of the type; <code>false</code> otherwise.
- * @example <caption>Matching type values</caption>
- * // returns true
- * isTypeOf(1, "number");
- * isTypeOf({a: 1}, Object);
- * isTypeOf("abc", ["string", undefined]);
- * @example <caption>Non-matching type values</caption>
- * // returns false
- * isTypeOf(1, "boolean");
- * isTypeOf("", String);
- * isTypeOf(null, ["string", String]);
- * @since 1.0.0
- * @memberof Utility
- * @static
- */
-function isTypeOf(value, type) {
-    if (isString(type)) {
-        return typeof value === type;
-    } else if (typeof type === "function") {
-        return value instanceof type || !!type(value);
-    } else if (type instanceof Array) {
-        for (var i = 0; i < type.length; i++) {
-            if (isTypeOf(value, type[i])) {
-                return true;
-            }
-        }
-        return false;
-    } else if (type == null) {
-        return value === type;
-    } else {
-        throw new TypeError("The type should be either a string, function, null or undefined, but found: " + type);
-    }
-}
-
-module.exports = isTypeOf;
-
-/***/ }),
-/* 25 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is an <code>Object</code>.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Object</code>; <code>false</code> otherwise.
- * @example <caption>Object values</caption>
- * // returns true
- * isObject({a: 1, b: 2});
- * isObject(["a", "b"]);
- * isObject(new Object());
- * isObject(new Number(1));
- * isObject(function() {});
- * @example <caption>Non-object values</caption>
- * // returns false
- * isObject(null);
- * isObject("abc");
- * isObject(Symbol("abc"));
- * isObject(1);
- * isObject(BigInt(1));
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isObject(value) {
-    return value instanceof Object;
-}
-
-module.exports = isObject;
-
-/***/ }),
-/* 26 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var hasCircularReference = __webpack_require__(27);
-
-/**
- * Determines whether the value is an cyclic object with a circular reference.
- * A cycle object has an enumerable property (or a sub-property) whose value points 
- * to the object itself or a property of the object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a cyclic object with a circular reference; <code>false</code> otherwise.
- * @example <caption>Cyclic object</caption>
- * // returns true
- * var obj = {};
- * obj.ref = obj;
- * 
- * isCyclic(obj);
- * @example <caption>Non-cyclic values</caption>
- * // returns false
- * isCyclic({a: 1, b: 2});
- * isCyclic([1, 2, 3]);
- * isCyclic("abc");
- * isCyclic(function() {});
- * @since 1.2.0
- * @memberof Object
- * @static
- */
-function isCyclic(value) {
-    return value instanceof Object && hasCircularReference(value, [], [value]);
-}
-
-module.exports = isCyclic;
-
-
-
-/***/ }),
-/* 27 */
-/***/ ((module) => {
-
-module.exports = function hasCircularReference(obj, path, seen) {
-    var objs = [];
-    for (var k in obj) {
-        var val = obj[k];
-        objs[objs.length] = val;
-        if (seen.indexOf(val) >= 0) {
-            return true;
-        } else if (val instanceof Object) {
-            if (hasCircularReference(val, path.concat(k), seen.concat(objs))) {
-                return true;
-            }
-        }
-    }
-    return false;
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory();
+    else if (typeof define === 'function' && define.amd) define([], factory);
+    else root.Types = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+    var module = {exports: {}};
+    var exports = module.exports;
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+var __commonJS = (cb, mod) => function __require() {
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 
-/***/ }),
-/* 28 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isTypeOf = __webpack_require__(24);
-
-/**
- * Determines whether the value is a non-empty array and all elements in the array have the specified type. 
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The type of elements
- * @returns {boolean} <code>true</code> if the value is a non-empty array and and all elements in the array have the specified type; <code>false</code> otherwise.
- * @example <caption>Matching values</caption>
- * // returns true
- * isArrayOf([1, 2, 3], "number");
- * isArrayOf(["a", "b", null], ["string", null]);
- * isArrayOf([{a: 1}, {b: 2}], Object);
- * @example <caption>Non-matching values</caption>
- * // returns false
- * isArrayOf([1, 2, "c"], "number");
- * isArrayOf([], undefined);
- * @since 1.1.0
- * @memberof Array
- * @static
- */
-function isArrayOf(value, type) {
-    if (value instanceof Array && value.length > 0) {
-        for (var i = 0; i < value.length; i++) {
-            if (!isTypeOf(value[i], type)) {
-                return false;
-            }
-        }
-        return true;
+// src/isUndefined.js
+var require_isUndefined = __commonJS({
+  "src/isUndefined.js"(exports2, module2) {
+    function isUndefined(value) {
+      return value === void 0;
     }
-    return false;
-}
-
-module.exports = isArrayOf;
-
-/***/ }),
-/* 29 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isArrayLike = __webpack_require__(11);
-var isTypeOf = __webpack_require__(24);
-
-/**
- * Determines whether the value is a non-empty array-like object and all elements in the object have the specified type.
- * @param {*} value The value to check.
- * @param {(string|Function|null|undefined|Array)} type The type of elements
- * @returns {boolean} <code>true</code> if the value is a non-empty array-like object and all elements in the object have the specified type; <code>false</code> otherwise.
- * @example <caption>Matching values</caption>
- * // returns true
- * isArrayLikeOf([1, 2, 3], "number");
- * isArrayLikeOf({0: "a", 1: "b", length: 2}, "string");
- * @example <caption>Non-matching values</caption>
- * // returns false
- * isArrayLikeOf([1, 2, "c"], "number");
- * isArrayLikeOf({a: 1, b: 2, length: 2}, "number");
- * @since 1.1.0
- * @memberof Array
- * @static
- */
-function isArrayLikeOf(value, type) {
-    if (isArrayLike(value) && value.length > 0) {
-        for (var i = 0; i < value.length; i++) {
-            if (!isTypeOf(value[i], type)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-module.exports = isArrayLikeOf;
-
-/***/ }),
-/* 30 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isArray = __webpack_require__(14);
-
-/**
- * Determines whether the value is an array with two elements.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an array with two elements; <code>false</code> otherwise.
- * @example <caption>Pair values</caption>
- * // returns true
- * isPair([1, 2]);
- * isPair([null, {}]);
- * @example <caption>Non-pair values</caption>
- * // returns false
- * isPair([]);
- * isPair({a: 1, b: 2});
- * isPair("ab");
- * @since 1.2.0
- * @memberof Array
- * @static
- */
-function isPair(value) {
-    return isArray(value) && value.length === 2;
-}
-
-module.exports = isPair;
-
-/***/ }),
-/* 31 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>Map</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Map</code> object; <code>false</code> otherwise.
- * @example <caption>Map values</caption>
- * // returns true
- * isMap(new Map());
- * @example <caption>Non-Map values</caption>
- * // returns false
- * isMap(new WeakMap());
- * isMap({a: 1, b: 2});
- * @see Map
- * @since 1.0.0
- * @memberof Collection
- * @static
- */
-function isMap(value) {
-    return typeof Map === "function" && value instanceof Map;
-}
-
-module.exports = isMap;
-
-/***/ }),
-/* 32 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>Set</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Set</code> object; <code>false</code> otherwise.
- * @example <caption>Set values</caption>
- * // returns true
- * isSet(new Set());
- * @example <caption>Non-Set values</caption>
- * // returns false
- * isSet(new WeakSet());
- * isSet([1, 2, 3]);
- * @see Set
- * @since 1.0.0
- * @memberof Collection
- * @static
- */
-function isSet(value) {
-    return typeof Set === "function" && value instanceof Set;
-}
-
-module.exports = isSet;
-
-
-
-/***/ }),
-/* 33 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>WeakMap</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>WeakMap</code> object; <code>false</code> otherwise.
- * @example <caption>WeakMap values</caption>
- * // returns true
- * isWeakMap(new WeakMap());
- * @example <caption>Non-WeakMap values</caption>
- * // returns false
- * isWeakMap(new Map());
- * isWeakMap({a: 1, b: 2});
- * @see WeakMap
- * @since 1.0.0
- * @memberof Collection
- * @static
- */
-function isWeakMap(value) {
-    return typeof WeakMap === "function" && value instanceof WeakMap;
-}
-
-module.exports = isWeakMap;
-
-/***/ }),
-/* 34 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>WeakSet</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>WeakSet</code> object; <code>false</code> otherwise.
- * @example <caption>WeakSet values</caption>
- * // returns true
- * isWeakSet(new WeakSet());
- * @example <caption>Non-WeakSet values</caption>
- * // returns false
- * isWeakSet(new Set());
- * isWeakSet([1, 2, 3]);
- * @see WeakSet
- * @since 1.0.0
- * @memberof Collection
- * @static
- */
-function isWeakSet(value) {
-    return typeof WeakSet === "function" && value instanceof WeakSet;
-}
-
-module.exports = isWeakSet;
-
-/***/ }),
-/* 35 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>Function</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Function</code> object; <code>false</code> otherwise.
- * @example <caption>Function values</caption>
- * // returns true
- * isFunction(function() {});
- * isFunction(Object);
- * @example <caption>Non-function values</caption>
- * // returns false
- * isFunction(null);
- * isFunction(new Object());
- * isFunction("function() {}");
- * @since 1.0.0
- * @memberof Object
- * @static
- */function isFunction(value) {
-    return typeof value === "function";
-}
-
-module.exports = isFunction;
-
-/***/ }),
-/* 36 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Date values</caption>
- * // returns true
- * isDate(new Date());
- * isDate(new Date(""));
- * @example <caption>Non-date values</caption>
- * // returns false
- * isDate("2001-01-01T00:00:00.000Z");
- * isDate(978307200000);
- * @see Date
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isDate(value) {
-    return value instanceof Date;
-}
-
-
-module.exports = isDate;
-
-/***/ }),
-/* 37 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isInteger = __webpack_require__(18);
-
-/**
- * Determines whether the value is a valid <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a valid <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Valid Date objects</caption>
- * // returns true
- * isValidDate(new Date());
- * isValidDate(new Date("2001-01-01T00:00:00.000Z"));
- * isValidDate(new Date(-1));
- * @example <caption>Invalid Date & non-date values</caption>
- * // returns false
- * isValidDate(new Date(""));
- * isValidDate("2001-01-01T00:00:00.000Z");
- * isValidDate(978307200000);
- * @see Date
- * @since 1.3.0
- * @memberof Object
- * @static
- */
-function isValidDate(value) {
-    return value instanceof Date && isInteger(value.getTime());
-}
-
-module.exports = isValidDate;
-
-/***/ }),
-/* 38 */
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var isNaN = __webpack_require__(22);
-
-/**
- * Determines whether the value is an invalid <code>Date</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an invalid <code>Date</code> object; <code>false</code> otherwise.
- * @example <caption>Invalid Date objects</caption>
- * // returns true
- * isInvalidDate(new Date(""));
- * isInvalidDate(new Date(NaN));
- * @example <caption>Valid Date & non-date values</caption>
- * // returns false
- * isInvalidDate(new Date());
- * isInvalidDate("2001-01-01T00:00:00.000Z");
- * isInvalidDate(978307200000);
- * @see Date
- * @since 1.3.0
- * @memberof Object
- * @static
- */
-function isInvalidDate(value) {
-    return value instanceof Date && isNaN(value.getTime());
-}
-
-module.exports = isInvalidDate;
-
-/***/ }),
-/* 39 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>RegExp</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>RegExp</code> object; <code>false</code> otherwise.
- * @example <caption>RegExp values</caption>
- * // returns true
- * isRegExp(/[a-z]/);
- * isRegExp(new RegExp("[a-z]"));
- * @example <caption>Non-RegExp values</caption>
- * // returns false
- * isRegExp("[a-z]");
- * isRegExp("/[a-z]/");
- * @see RegExp
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isRegExp(value) {
-    return value instanceof RegExp;
-}
-
-module.exports = isRegExp;
-
-/***/ }),
-/* 40 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>Promise</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>Promise</code> object; <code>false</code> otherwise.
- * @example <caption>Promise values</caption>
- * // returns true
- * isPromise(new Promise(resolve, reject));
- * isPromise(Promise.resolve());
- * isPromise(Promise.reject());
- * @example <caption>Non-promise values</caption>
- * // returns false
- * isPromise({then: function() {}, catch: function() {}});
- * @see Promise
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isPromise(value) {
-    return typeof Promise === "function" && value instanceof Promise;
-}
-
-module.exports = isPromise;
-
-
-
-/***/ }),
-/* 41 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is an object that defines <code>then</code> and <code>catch</code> methods.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a Promise-like object; <code>false</code> otherwise.
- * @example <caption>Promise-like objects</caption>
- * // returns true
- * isPromiseLike(new Promise(resolve, reject));
- * isPromiseLike({then: function() {}, catch: function() {}});
- * @example <caption>Non-promise-like values</caption>
- * // returns false
- * isPromiseLike({then: function() {}});
- * isPromiseLike({then: true, catch: true});
- * @see {@link https://www.promisejs.org/api|Promise API Reference}
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isPromiseLike(value) {
-    return value instanceof Object && typeof value.then === "function" && typeof value.catch === "function";
-}
-
-module.exports = isPromiseLike;
-
-/***/ }),
-/* 42 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is an object that defines a <code>then</code> method.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a thenable object; <code>false</code> otherwise.
- * @example <caption>Thenable objects</caption>
- * // returns true
- * isThenable(new Promise(resolve, reject));
- * isThenable({then: function() {}});
- * @example <caption>Non-thenable values</caption>
- * // returns false
- * isThenable(null);
- * isThenable({then: true});
- * @since 1.1.0
- * @memberof Object
- * @static
- */
-function isThenable(value) {
-    return value instanceof Object && typeof value.then === "function";
-}
-
-module.exports = isThenable;
-
-/***/ }),
-/* 43 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is an <code>Error</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is an <code>Error</code> object; <code>false</code> otherwise.
- * @example <caption>Error objects</caption>
- * // returns true
- * isError(new Error("Validation error"));
- * isError(new TypeError("Expected a number, but found: " + value));
- * @example <caption>Non-Error values</caption>
- * // returns false
- * isError(null);
- * isError(NaN);
- * isError(Promise.reject());
- * isError({name: "TypeError", message: "Expected a number"});
- * @see Error
- * @since 1.0.0
- * @memberof Object
- * @static
- */
-function isError(value) {
-    return value instanceof Error;
-}
-
-module.exports = isError;
-
-/***/ }),
-/* 44 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a DOM <code>Node</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a DOM <code>Node</code> object; <code>false</code> otherwise.
- * @example <caption>Node objects</caption>
- * // returns true
- * isNode(document);
- * isNode(document.createElement("div"));
- * isNode(new DocumentFragment());
- * @example <caption>Non-Node values</caption>
- * // returns false
- * isNode(Node);
- * isNode(window);
- * @see Node
- * @since 1.1.0
- * @memberof Node
- * @static
- */
-function isNode(value) {
-    return typeof Node === "function" && value instanceof Node;
-}
-
-module.exports = isNode;
-
-/***/ }),
-/* 45 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a DOM <code>Element</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a DOM <code>Element</code> object; <code>false</code> otherwise.
- * @example <caption>Element objects</caption>
- * // returns true
- * isElement(document.createElement("div"));
- * @example <caption>Non-Element values</caption>
- * // returns false
- * isElement(document);
- * isElement(window);
- * isElement(new DocumentFragment());
- * @see Element
- * @since 1.1.0
- * @memberof Node
- * @static
- */
-function isElement(value) {
-    return typeof Element === "function" && value instanceof Element;
-}
-
-module.exports = isElement;
-
-/***/ }),
-/* 46 */
-/***/ ((module) => {
-
-/**
- * Determines whether the value is a <code>DocumentFragment</code> object.
- * @param {*} value The value to check.
- * @returns {boolean} <code>true</code> if the value is a <code>DocumentFragment</code> object; <code>false</code> otherwise.
- * @example <caption>DocumentFragment objects</caption>
- * // returns true
- * isFragment(new DocumentFragment());
- * @example <caption>Non-DocumentFragment values</caption>
- * // returns false
- * isFragment(document);
- * isFragment(window);
- * isFragment(document.createElement("div"));
- * @see DocumentFragment
- * @since 1.1.0
- * @memberof Node
- * @static
- */
-function isFragment(value) {
-    return typeof DocumentFragment === "function" && value instanceof DocumentFragment;
-}
-
-module.exports = isFragment;
-
-/***/ })
-/******/ 	]);
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module used 'module' so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__(0);
-/******/ 	
-/******/ 	return __webpack_exports__;
-/******/ })()
-;
+    __name(isUndefined, "isUndefined");
+    module2.exports = isUndefined;
+  }
 });
+
+// src/isNull.js
+var require_isNull = __commonJS({
+  "src/isNull.js"(exports2, module2) {
+    function isNull(value) {
+      return value === null;
+    }
+    __name(isNull, "isNull");
+    module2.exports = isNull;
+  }
+});
+
+// src/isObject.js
+var require_isObject = __commonJS({
+  "src/isObject.js"(exports2, module2) {
+    function isObject(value) {
+      const type = typeof value;
+      return type === "object" ? value !== null : type === "function" || type === "undefined" && value !== void 0;
+    }
+    __name(isObject, "isObject");
+    module2.exports = isObject;
+  }
+});
+
+// src/util/hasNativeBrand.js
+var require_hasNativeBrand = __commonJS({
+  "src/util/hasNativeBrand.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function hasNativeBrand(value, method) {
+      if (!isObject(value) || typeof method !== "function") {
+        return false;
+      }
+      try {
+        method.call(value);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    __name(hasNativeBrand, "hasNativeBrand");
+    module2.exports = hasNativeBrand;
+  }
+});
+
+// src/util/nativeTypes.js
+var require_nativeTypes = __commonJS({
+  "src/util/nativeTypes.js"(exports2, module2) {
+    "use strict";
+    var nativeTypes;
+    try {
+      if (typeof process === "object" && process !== null) {
+        const getBuiltinModule = process.getBuiltinModule;
+        if (typeof getBuiltinModule === "function") {
+          const util = getBuiltinModule.call(process, "node:util");
+          nativeTypes = util && util.types;
+        }
+      }
+    } catch (error) {
+    }
+    module2.exports = nativeTypes;
+  }
+});
+
+// src/isBoolean.js
+var require_isBoolean = __commonJS({
+  "src/isBoolean.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var valueOf = Boolean.prototype.valueOf;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isBooleanObject === "function" ? nativeTypes.isBooleanObject : (value) => hasNativeBrand(value, valueOf);
+    function isBoolean(value) {
+      return typeof value === "boolean" || checkNativeBrand(value);
+    }
+    __name(isBoolean, "isBoolean");
+    module2.exports = isBoolean;
+  }
+});
+
+// src/isNumber.js
+var require_isNumber = __commonJS({
+  "src/isNumber.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var valueOf = Number.prototype.valueOf;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isNumberObject === "function" ? nativeTypes.isNumberObject : (value) => hasNativeBrand(value, valueOf);
+    function isNumber(value) {
+      return typeof value === "number" || checkNativeBrand(value);
+    }
+    __name(isNumber, "isNumber");
+    module2.exports = isNumber;
+  }
+});
+
+// src/isString.js
+var require_isString = __commonJS({
+  "src/isString.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var valueOf = String.prototype.valueOf;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isStringObject === "function" ? nativeTypes.isStringObject : (value) => hasNativeBrand(value, valueOf);
+    function isString(value) {
+      return typeof value === "string" || checkNativeBrand(value);
+    }
+    __name(isString, "isString");
+    module2.exports = isString;
+  }
+});
+
+// src/isSymbol.js
+var require_isSymbol = __commonJS({
+  "src/isSymbol.js"(exports2, module2) {
+    function isSymbol(value) {
+      return typeof value === "symbol";
+    }
+    __name(isSymbol, "isSymbol");
+    module2.exports = isSymbol;
+  }
+});
+
+// src/isBigInt.js
+var require_isBigInt = __commonJS({
+  "src/isBigInt.js"(exports2, module2) {
+    function isBigInt(value) {
+      return typeof value === "bigint";
+    }
+    __name(isBigInt, "isBigInt");
+    module2.exports = isBigInt;
+  }
+});
+
+// src/isPrimitive.js
+var require_isPrimitive = __commonJS({
+  "src/isPrimitive.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function isPrimitive(value) {
+      return !isObject(value);
+    }
+    __name(isPrimitive, "isPrimitive");
+    module2.exports = isPrimitive;
+  }
+});
+
+// src/isNullish.js
+var require_isNullish = __commonJS({
+  "src/isNullish.js"(exports2, module2) {
+    function isNullish(value) {
+      return value === null || value === void 0;
+    }
+    __name(isNullish, "isNullish");
+    module2.exports = isNullish;
+  }
+});
+
+// src/isArray.js
+var require_isArray = __commonJS({
+  "src/isArray.js"(exports2, module2) {
+    var nativeIsArray = Array.isArray;
+    function isArray(value) {
+      return nativeIsArray(value);
+    }
+    __name(isArray, "isArray");
+    module2.exports = isArray;
+  }
+});
+
+// src/isMap.js
+var require_isMap = __commonJS({
+  "src/isMap.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var has = typeof Map === "function" ? Map.prototype.has : void 0;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isMap === "function" ? nativeTypes.isMap : (value) => hasNativeBrand(value, has);
+    function isMap(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isMap, "isMap");
+    module2.exports = isMap;
+  }
+});
+
+// src/isSet.js
+var require_isSet = __commonJS({
+  "src/isSet.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var has = typeof Set === "function" ? Set.prototype.has : void 0;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isSet === "function" ? nativeTypes.isSet : (value) => hasNativeBrand(value, has);
+    function isSet(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isSet, "isSet");
+    module2.exports = isSet;
+  }
+});
+
+// src/util/getArrayLikeLength.js
+var require_getArrayLikeLength = __commonJS({
+  "src/util/getArrayLikeLength.js"(exports2, module2) {
+    var MAX_SAFE_INTEGER = 9007199254740991;
+    function getArrayLikeLength(value) {
+      if (value === null || value === void 0 || typeof value === "function") {
+        return void 0;
+      }
+      var length = value.length;
+      return typeof length === "number" && length >= 0 && length <= MAX_SAFE_INTEGER && Math.floor(length) === length ? length : void 0;
+    }
+    __name(getArrayLikeLength, "getArrayLikeLength");
+    module2.exports = getArrayLikeLength;
+  }
+});
+
+// src/isPlainObject.js
+var require_isPlainObject = __commonJS({
+  "src/isPlainObject.js"(exports2, module2) {
+    var getPrototypeOf = Object.getPrototypeOf;
+    var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+    var functionToString = Function.prototype.toString;
+    var objectConstructorSource = functionToString.call(Object);
+    function isPlainObject(value) {
+      if (value === null || typeof value !== "object") {
+        return false;
+      }
+      var prototype = getPrototypeOf(value);
+      if (prototype === null) {
+        return true;
+      }
+      if (getPrototypeOf(prototype) !== null) {
+        return false;
+      }
+      var descriptor = getOwnPropertyDescriptor(prototype, "constructor");
+      return !!descriptor && typeof descriptor.value === "function" && descriptor.value.prototype === prototype && functionToString.call(descriptor.value) === objectConstructorSource;
+    }
+    __name(isPlainObject, "isPlainObject");
+    module2.exports = isPlainObject;
+  }
+});
+
+// src/isIterable.js
+var require_isIterable = __commonJS({
+  "src/isIterable.js"(exports2, module2) {
+    function isIterable(value) {
+      return value !== null && value !== void 0 && typeof Symbol === "function" && Symbol.iterator !== void 0 && typeof value[Symbol.iterator] === "function";
+    }
+    __name(isIterable, "isIterable");
+    module2.exports = isIterable;
+  }
+});
+
+// src/isAsyncIterable.js
+var require_isAsyncIterable = __commonJS({
+  "src/isAsyncIterable.js"(exports2, module2) {
+    function isAsyncIterable(value) {
+      return value !== null && value !== void 0 && typeof value[Symbol.asyncIterator] === "function";
+    }
+    __name(isAsyncIterable, "isAsyncIterable");
+    module2.exports = isAsyncIterable;
+  }
+});
+
+// src/isIteratorLike.js
+var require_isIteratorLike = __commonJS({
+  "src/isIteratorLike.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function isIteratorLike(value) {
+      return isObject(value) && typeof value.next === "function";
+    }
+    __name(isIteratorLike, "isIteratorLike");
+    module2.exports = isIteratorLike;
+  }
+});
+
+// src/util/assertSizedInput.js
+var require_assertSizedInput = __commonJS({
+  "src/util/assertSizedInput.js"(exports2, module2) {
+    var isIterable = require_isIterable();
+    var isAsyncIterable = require_isAsyncIterable();
+    var isIteratorLike = require_isIteratorLike();
+    function assertSizedInput(value) {
+      if (isIterable(value) || isAsyncIterable(value) || isIteratorLike(value)) {
+        throw new TypeError("Cannot inspect unsized protocol input without consuming it. For a synchronous iterable, use isEmptyIterable or isBlankIterable. Next-only iterators need an iterable adapter; asynchronous iteration is not supported by these helpers.");
+      }
+    }
+    __name(assertSizedInput, "assertSizedInput");
+    module2.exports = assertSizedInput;
+  }
+});
+
+// src/isEmpty.js
+var require_isEmpty = __commonJS({
+  "src/isEmpty.js"(exports2, module2) {
+    var isArray = require_isArray();
+    var isString = require_isString();
+    var isMap = require_isMap();
+    var isSet = require_isSet();
+    var getArrayLikeLength = require_getArrayLikeLength();
+    var isPlainObject = require_isPlainObject();
+    var assertSizedInput = require_assertSizedInput();
+    var keys = Object.keys;
+    var stringValueOf = String.prototype.valueOf;
+    var mapSize = Object.getOwnPropertyDescriptor(Map.prototype, "size").get;
+    var setSize = Object.getOwnPropertyDescriptor(Set.prototype, "size").get;
+    function isEmpty(value) {
+      if (value === null || value === void 0) return true;
+      if (!isArray(value)) {
+        if (isString(value)) return stringValueOf.call(value).length === 0;
+        if (isMap(value)) return mapSize.call(value) === 0;
+        if (isSet(value)) return setSize.call(value) === 0;
+      }
+      const length = getArrayLikeLength(value);
+      if (length !== void 0) return length === 0;
+      assertSizedInput(value);
+      return isPlainObject(value) && keys(value).length === 0;
+    }
+    __name(isEmpty, "isEmpty");
+    module2.exports = isEmpty;
+  }
+});
+
+// src/isBlank.js
+var require_isBlank = __commonJS({
+  "src/isBlank.js"(exports2, module2) {
+    var isArray = require_isArray();
+    var isString = require_isString();
+    var isMap = require_isMap();
+    var isSet = require_isSet();
+    var getArrayLikeLength = require_getArrayLikeLength();
+    var isPlainObject = require_isPlainObject();
+    var assertSizedInput = require_assertSizedInput();
+    var keys = Object.keys;
+    var stringValueOf = String.prototype.valueOf;
+    var mapValues = Map.prototype.values;
+    var setValues = Set.prototype.values;
+    var nonSpace = /\S/;
+    function isBlank(value) {
+      if (value === null || value === void 0) return true;
+      if (!isArray(value)) {
+        if (isString(value)) return !nonSpace.test(stringValueOf.call(value));
+        const map = isMap(value);
+        if (map || isSet(value)) {
+          const values = map ? mapValues.call(value) : setValues.call(value);
+          for (const item of values) if (item !== null && item !== void 0) return false;
+          return true;
+        }
+      }
+      const length = getArrayLikeLength(value);
+      if (length !== void 0) {
+        for (let index = 0; index < length; index++) {
+          const item = value[index];
+          if (item !== null && item !== void 0) return false;
+        }
+        return true;
+      }
+      assertSizedInput(value);
+      if (!isPlainObject(value)) return false;
+      const names = keys(value);
+      for (let index = 0; index < names.length; index++) {
+        const item = value[names[index]];
+        if (item !== null && item !== void 0) return false;
+      }
+      return true;
+    }
+    __name(isBlank, "isBlank");
+    module2.exports = isBlank;
+  }
+});
+
+// src/isTruthy.js
+var require_isTruthy = __commonJS({
+  "src/isTruthy.js"(exports2, module2) {
+    function isTruthy(value) {
+      return value ? true : false;
+    }
+    __name(isTruthy, "isTruthy");
+    module2.exports = isTruthy;
+  }
+});
+
+// src/isFalsy.js
+var require_isFalsy = __commonJS({
+  "src/isFalsy.js"(exports2, module2) {
+    function isFalsy(value) {
+      return value ? false : true;
+    }
+    __name(isFalsy, "isFalsy");
+    module2.exports = isFalsy;
+  }
+});
+
+// src/util/getNumberValue.js
+var require_getNumberValue = __commonJS({
+  "src/util/getNumberValue.js"(exports2, module2) {
+    var isObject = require_isObject();
+    var numberValueOf = Number.prototype.valueOf;
+    var nativeTypes = require_nativeTypes();
+    var isNumberObject = nativeTypes && typeof nativeTypes.isNumberObject === "function" ? nativeTypes.isNumberObject : void 0;
+    function nativeNumberValue(value) {
+      if (typeof value === "number") return value;
+      return isNumberObject(value) ? numberValueOf.call(value) : void 0;
+    }
+    __name(nativeNumberValue, "nativeNumberValue");
+    function intrinsicNumberValue(value) {
+      if (typeof value === "number") return value;
+      if (!isObject(value)) return void 0;
+      try {
+        return numberValueOf.call(value);
+      } catch (error) {
+        return void 0;
+      }
+    }
+    __name(intrinsicNumberValue, "intrinsicNumberValue");
+    module2.exports = isNumberObject ? nativeNumberValue : intrinsicNumberValue;
+  }
+});
+
+// src/isInteger.js
+var require_isInteger = __commonJS({
+  "src/isInteger.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    var nativeCheck = Number.isInteger;
+    function isInteger(value) {
+      return nativeCheck(typeof value === "number" ? value : getNumberValue(value));
+    }
+    __name(isInteger, "isInteger");
+    module2.exports = isInteger;
+  }
+});
+
+// src/isSafeInteger.js
+var require_isSafeInteger = __commonJS({
+  "src/isSafeInteger.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    var nativeCheck = Number.isSafeInteger;
+    function isSafeInteger(value) {
+      return nativeCheck(typeof value === "number" ? value : getNumberValue(value));
+    }
+    __name(isSafeInteger, "isSafeInteger");
+    module2.exports = isSafeInteger;
+  }
+});
+
+// src/isFloat.js
+var require_isFloat = __commonJS({
+  "src/isFloat.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    var floor = Math.floor;
+    function isFloat(value) {
+      const number = typeof value === "number" ? value : getNumberValue(value);
+      return number !== void 0 && number === number && floor(number) !== number;
+    }
+    __name(isFloat, "isFloat");
+    module2.exports = isFloat;
+  }
+});
+
+// src/isFinite.js
+var require_isFinite = __commonJS({
+  "src/isFinite.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    var nativeCheck = Number.isFinite;
+    function isFinite(value) {
+      return nativeCheck(typeof value === "number" ? value : getNumberValue(value));
+    }
+    __name(isFinite, "isFinite");
+    module2.exports = isFinite;
+  }
+});
+
+// src/isInfinite.js
+var require_isInfinite = __commonJS({
+  "src/isInfinite.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    function isInfinite(value) {
+      const number = typeof value === "number" ? value : getNumberValue(value);
+      return number === Infinity || number === -Infinity;
+    }
+    __name(isInfinite, "isInfinite");
+    module2.exports = isInfinite;
+  }
+});
+
+// src/isNaN.js
+var require_isNaN = __commonJS({
+  "src/isNaN.js"(exports2, module2) {
+    var getNumberValue = require_getNumberValue();
+    function isNaN(value) {
+      const number = typeof value === "number" ? value : getNumberValue(value);
+      return number !== number;
+    }
+    __name(isNaN, "isNaN");
+    module2.exports = isNaN;
+  }
+});
+
+// src/isNumeric.js
+var require_isNumeric = __commonJS({
+  "src/isNumeric.js"(exports2, module2) {
+    var nonSpace = /\S/;
+    var stringValueOf = String.prototype.valueOf;
+    var isFinite = require_isFinite();
+    var isString = require_isString();
+    var isBigInt = require_isBigInt();
+    function isNumeric(value) {
+      if (isFinite(value) || isBigInt(value)) {
+        return true;
+      }
+      if (!isString(value)) {
+        return false;
+      }
+      var text = stringValueOf.call(value);
+      return nonSpace.test(text) && isFinite(text * 1);
+    }
+    __name(isNumeric, "isNumeric");
+    module2.exports = isNumeric;
+  }
+});
+
+// src/util/isValidArrayLength.js
+var require_isValidArrayLength = __commonJS({
+  "src/util/isValidArrayLength.js"(exports2, module2) {
+    function isValidArrayLength(value) {
+      return typeof value === "number" && value >= 0 && value <= 4294967295 && value % 1 === 0;
+    }
+    __name(isValidArrayLength, "isValidArrayLength");
+    module2.exports = isValidArrayLength;
+  }
+});
+
+// src/createTypeChecker.js
+var require_createTypeChecker = __commonJS({
+  "src/createTypeChecker.js"(exports2, module2) {
+    var isArray = require_isArray();
+    var isValidArrayLength = require_isValidArrayLength();
+    var isString = require_isString();
+    var getDescriptor = Object.getOwnPropertyDescriptor;
+    var hasOwn = Object.prototype.hasOwnProperty;
+    var stringValueOf = String.prototype.valueOf;
+    var pureNode = /* @__PURE__ */ __name((check) => ({ check, pure: [check] }), "pureNode");
+    var typeNodes = Object.freeze({
+      __proto__: null,
+      undefined: pureNode((value) => typeof value === "undefined"),
+      object: pureNode((value) => typeof value === "object"),
+      boolean: pureNode((value) => typeof value === "boolean"),
+      number: pureNode((value) => typeof value === "number"),
+      bigint: pureNode((value) => typeof value === "bigint"),
+      string: pureNode((value) => typeof value === "string"),
+      symbol: pureNode((value) => typeof value === "symbol"),
+      function: pureNode((value) => typeof value === "function")
+    });
+    var nullNode = pureNode((value) => value === null);
+    var undefinedNode = pureNode((value) => value === void 0);
+    var neverNode = { check: /* @__PURE__ */ __name(() => false, "check"), pure: [] };
+    function invalidMatcher() {
+      return new TypeError("Expected a valid typeof name, instance target, null, undefined, union array, or an own {predicate: fn}/{instanceOf: fn} descriptor.");
+    }
+    __name(invalidMatcher, "invalidMatcher");
+    function instanceNode(target) {
+      if (typeof target !== "function") throw invalidMatcher();
+      const method = target[Symbol.hasInstance];
+      if (method !== null && method !== void 0 && typeof method !== "function") throw invalidMatcher();
+      return { check: /* @__PURE__ */ __name((value) => value instanceof target, "check") };
+    }
+    __name(instanceNode, "instanceNode");
+    function leafNode(type) {
+      if (typeof type === "string") {
+        const node = typeNodes[type];
+        if (!node) throw invalidMatcher();
+        return node;
+      }
+      if (type === null) return nullNode;
+      if (type === void 0) return undefinedNode;
+      if (typeof type === "function") return instanceNode(type);
+      if (typeof type !== "object") throw invalidMatcher();
+      if (isString(type)) {
+        const node = typeNodes[stringValueOf.call(type)];
+        if (!node) throw invalidMatcher();
+        return node;
+      }
+      const predicate = getDescriptor(type, "predicate");
+      const instanceOf = getDescriptor(type, "instanceOf");
+      if (predicate && !instanceOf && typeof predicate.value === "function") {
+        const check = predicate.value;
+        return { check(value) {
+          const result = check(value);
+          if (typeof result !== "boolean") {
+            throw new TypeError("A type predicate must return a synchronous primitive boolean.");
+          }
+          return result;
+        } };
+      }
+      if (instanceOf && !predicate) return instanceNode(instanceOf.value);
+      throw invalidMatcher();
+    }
+    __name(leafNode, "leafNode");
+    function unionFrame(type) {
+      const length = type.length;
+      if (!isValidArrayLength(length)) throw invalidMatcher();
+      return { type, index: 0, length, children: [] };
+    }
+    __name(unionFrame, "unionFrame");
+    function combine(children) {
+      if (children.length === 0) return neverNode;
+      if (children.length === 1) return children[0];
+      if (children.every((child) => child.pure !== void 0)) {
+        const checks = [...new Set(children.flatMap((child) => child.pure))];
+        if (checks.length === 0) return neverNode;
+        if (checks.length === 1) return { check: checks[0], pure: checks };
+        return { pure: checks, check(value) {
+          for (let i = 0; i < checks.length; i++) if (checks[i](value)) return true;
+          return false;
+        } };
+      }
+      return { children };
+    }
+    __name(combine, "combine");
+    function evaluator(root) {
+      if (root.check) return root.check;
+      if (root.children.every((child) => child.check)) {
+        const checks = root.children.map((child) => child.check);
+        return /* @__PURE__ */ __name(function checkFlatUnion(value) {
+          for (let i = 0; i < checks.length; i++) if (checks[i](value)) return true;
+          return false;
+        }, "checkFlatUnion");
+      }
+      return /* @__PURE__ */ __name(function checkGraph(value) {
+        let children = root.children;
+        let index = 0;
+        let stack;
+        for (; ; ) {
+          if (index === children.length) {
+            if (!stack || stack.length === 0) return false;
+            index = stack.pop();
+            children = stack.pop();
+            continue;
+          }
+          const node = children[index++];
+          if (node.check) {
+            if (node.check(value)) return true;
+          } else {
+            if (!stack) stack = [];
+            stack.push(children, index);
+            children = node.children;
+            index = 0;
+          }
+        }
+      }, "checkGraph");
+    }
+    __name(evaluator, "evaluator");
+    function createTypeChecker(type) {
+      if (!isArray(type)) return leafNode(type).check;
+      let completed;
+      let active;
+      const stack = [unionFrame(type)];
+      let root;
+      while (stack.length > 0) {
+        const frame = stack[stack.length - 1];
+        if (frame.index === frame.length) {
+          if (!completed) {
+            const children = frame.children;
+            if (children.length === 0) return neverNode.check;
+            if (children.length === 1) return children[0].check;
+            return /* @__PURE__ */ __name(function checkFlatUnion(value) {
+              for (let i = 0; i < children.length; i++) if (children[i].check(value)) return true;
+              return false;
+            }, "checkFlatUnion");
+          }
+          const node = combine(frame.children);
+          completed.set(frame.type, node);
+          active.delete(frame.type);
+          stack.pop();
+          if (stack.length) {
+            if (node !== neverNode) stack[stack.length - 1].children.push(node);
+          } else root = node;
+          continue;
+        }
+        const descriptor = getDescriptor(frame.type, frame.index++);
+        if (descriptor && !hasOwn.call(descriptor, "value")) throw invalidMatcher();
+        const item = descriptor ? descriptor.value : void 0;
+        if (!isArray(item)) {
+          frame.children.push(leafNode(item));
+        } else {
+          if (!completed) {
+            completed = /* @__PURE__ */ new WeakMap();
+            active = new WeakSet([type]);
+          }
+          if (active.has(item)) throw new TypeError("Type matcher unions must not contain cycles.");
+          const node = completed.get(item);
+          if (node) {
+            if (node !== neverNode) frame.children.push(node);
+          } else {
+            active.add(item);
+            stack.push(unionFrame(item));
+          }
+        }
+      }
+      return evaluator(root);
+    }
+    __name(createTypeChecker, "createTypeChecker");
+    module2.exports = createTypeChecker;
+  }
+});
+
+// src/isTypeOf.js
+var require_isTypeOf = __commonJS({
+  "src/isTypeOf.js"(exports2, module2) {
+    var createTypeChecker = require_createTypeChecker();
+    function isTypeOf(value, type) {
+      return createTypeChecker(type)(value);
+    }
+    __name(isTypeOf, "isTypeOf");
+    module2.exports = isTypeOf;
+  }
+});
+
+// src/hasCircularReference.js
+var require_hasCircularReference = __commonJS({
+  "src/hasCircularReference.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function enumerableKeys(value) {
+      var keys = [];
+      for (var key in value) {
+        keys.push(key);
+      }
+      return keys;
+    }
+    __name(enumerableKeys, "enumerableKeys");
+    function hasCircularReference(value) {
+      if (!isObject(value)) {
+        return false;
+      }
+      var active = /* @__PURE__ */ new WeakSet();
+      var completed = /* @__PURE__ */ new WeakSet();
+      var stack = [{ value, keys: enumerableKeys(value), index: 0 }];
+      active.add(value);
+      while (stack.length > 0) {
+        var frame = stack[stack.length - 1];
+        if (frame.index === frame.keys.length) {
+          active.delete(frame.value);
+          completed.add(frame.value);
+          stack.pop();
+          continue;
+        }
+        var child = frame.value[frame.keys[frame.index++]];
+        if (!isObject(child)) {
+          continue;
+        }
+        if (active.has(child)) {
+          return true;
+        }
+        if (!completed.has(child)) {
+          active.add(child);
+          stack.push({ value: child, keys: enumerableKeys(child), index: 0 });
+        }
+      }
+      return false;
+    }
+    __name(hasCircularReference, "hasCircularReference");
+    module2.exports = hasCircularReference;
+  }
+});
+
+// src/isCyclic.js
+var require_isCyclic = __commonJS({
+  "src/isCyclic.js"(exports2, module2) {
+    var hasCircularReference = require_hasCircularReference();
+    function isCyclic(value) {
+      return hasCircularReference(value);
+    }
+    __name(isCyclic, "isCyclic");
+    module2.exports = isCyclic;
+  }
+});
+
+// src/isArrayOf.js
+var require_isArrayOf = __commonJS({
+  "src/isArrayOf.js"(exports2, module2) {
+    var isArray = require_isArray();
+    var isValidArrayLength = require_isValidArrayLength();
+    var createTypeChecker = require_createTypeChecker();
+    function isArrayOf(value, type) {
+      const check = createTypeChecker(type);
+      if (!isArray(value)) return false;
+      const length = value.length;
+      if (!isValidArrayLength(length)) return false;
+      for (let index = 0; index < length; index++) if (!check(value[index])) return false;
+      return true;
+    }
+    __name(isArrayOf, "isArrayOf");
+    module2.exports = isArrayOf;
+  }
+});
+
+// src/isArrayLike.js
+var require_isArrayLike = __commonJS({
+  "src/isArrayLike.js"(exports2, module2) {
+    var getArrayLikeLength = require_getArrayLikeLength();
+    function isArrayLike(value) {
+      return getArrayLikeLength(value) !== void 0;
+    }
+    __name(isArrayLike, "isArrayLike");
+    module2.exports = isArrayLike;
+  }
+});
+
+// src/isArrayLikeOf.js
+var require_isArrayLikeOf = __commonJS({
+  "src/isArrayLikeOf.js"(exports2, module2) {
+    var getArrayLikeLength = require_getArrayLikeLength();
+    var createTypeChecker = require_createTypeChecker();
+    function isArrayLikeOf(value, type) {
+      const check = createTypeChecker(type);
+      const length = getArrayLikeLength(value);
+      if (length === void 0) return false;
+      for (let index = 0; index < length; index++) if (!check(value[index])) return false;
+      return true;
+    }
+    __name(isArrayLikeOf, "isArrayLikeOf");
+    module2.exports = isArrayLikeOf;
+  }
+});
+
+// src/isPair.js
+var require_isPair = __commonJS({
+  "src/isPair.js"(exports2, module2) {
+    var isArray = require_isArray();
+    function isPair(value) {
+      return isArray(value) && value.length === 2;
+    }
+    __name(isPair, "isPair");
+    module2.exports = isPair;
+  }
+});
+
+// src/isWeakMap.js
+var require_isWeakMap = __commonJS({
+  "src/isWeakMap.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var has = typeof WeakMap === "function" ? WeakMap.prototype.has : void 0;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isWeakMap === "function" ? nativeTypes.isWeakMap : (value) => hasNativeBrand(value, has);
+    function isWeakMap(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isWeakMap, "isWeakMap");
+    module2.exports = isWeakMap;
+  }
+});
+
+// src/isWeakSet.js
+var require_isWeakSet = __commonJS({
+  "src/isWeakSet.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var has = typeof WeakSet === "function" ? WeakSet.prototype.has : void 0;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isWeakSet === "function" ? nativeTypes.isWeakSet : (value) => hasNativeBrand(value, has);
+    function isWeakSet(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isWeakSet, "isWeakSet");
+    module2.exports = isWeakSet;
+  }
+});
+
+// src/isFunction.js
+var require_isFunction = __commonJS({
+  "src/isFunction.js"(exports2, module2) {
+    function isFunction(value) {
+      return typeof value === "function";
+    }
+    __name(isFunction, "isFunction");
+    module2.exports = isFunction;
+  }
+});
+
+// src/isDate.js
+var require_isDate = __commonJS({
+  "src/isDate.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var getTime = Date.prototype.getTime;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isDate === "function" ? nativeTypes.isDate : (value) => hasNativeBrand(value, getTime);
+    function isDate(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isDate, "isDate");
+    module2.exports = isDate;
+  }
+});
+
+// src/isValidDate.js
+var require_isValidDate = __commonJS({
+  "src/isValidDate.js"(exports2, module2) {
+    var isDate = require_isDate();
+    var getTime = Date.prototype.getTime;
+    function isValidDate(value) {
+      if (!isDate(value)) {
+        return false;
+      }
+      var time = getTime.call(value);
+      return time === time;
+    }
+    __name(isValidDate, "isValidDate");
+    module2.exports = isValidDate;
+  }
+});
+
+// src/isInvalidDate.js
+var require_isInvalidDate = __commonJS({
+  "src/isInvalidDate.js"(exports2, module2) {
+    var isDate = require_isDate();
+    var getTime = Date.prototype.getTime;
+    function isInvalidDate(value) {
+      if (!isDate(value)) {
+        return false;
+      }
+      var time = getTime.call(value);
+      return time !== time;
+    }
+    __name(isInvalidDate, "isInvalidDate");
+    module2.exports = isInvalidDate;
+  }
+});
+
+// src/isRegExp.js
+var require_isRegExp = __commonJS({
+  "src/isRegExp.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var regExpPrototype = RegExp.prototype;
+    var getSource = Object.getOwnPropertyDescriptor(regExpPrototype, "source").get;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isRegExp === "function" ? nativeTypes.isRegExp : (value) => hasNativeBrand(value, getSource);
+    function isRegExp(value) {
+      return value !== regExpPrototype && checkNativeBrand(value);
+    }
+    __name(isRegExp, "isRegExp");
+    module2.exports = isRegExp;
+  }
+});
+
+// src/isPromise.js
+var require_isPromise = __commonJS({
+  "src/isPromise.js"(exports2, module2) {
+    function isPromise(value) {
+      return typeof Promise === "function" && value instanceof Promise;
+    }
+    __name(isPromise, "isPromise");
+    module2.exports = isPromise;
+  }
+});
+
+// src/isPromiseLike.js
+var require_isPromiseLike = __commonJS({
+  "src/isPromiseLike.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function isPromiseLike(value) {
+      return isObject(value) && typeof value.then === "function" && typeof value.catch === "function";
+    }
+    __name(isPromiseLike, "isPromiseLike");
+    module2.exports = isPromiseLike;
+  }
+});
+
+// src/isThenable.js
+var require_isThenable = __commonJS({
+  "src/isThenable.js"(exports2, module2) {
+    var isObject = require_isObject();
+    function isThenable(value) {
+      return isObject(value) && typeof value.then === "function";
+    }
+    __name(isThenable, "isThenable");
+    module2.exports = isThenable;
+  }
+});
+
+// src/isError.js
+var require_isError = __commonJS({
+  "src/isError.js"(exports2, module2) {
+    var nativeIsError = Error.isError;
+    var objectToString = Object.prototype.toString;
+    function isError(value) {
+      if (typeof nativeIsError === "function") {
+        return nativeIsError(value);
+      }
+      if (value === null || typeof value !== "object") {
+        return false;
+      }
+      if (typeof Symbol === "function" && Symbol.toStringTag && Symbol.toStringTag in value) {
+        return false;
+      }
+      return objectToString.call(value) === "[object Error]";
+    }
+    __name(isError, "isError");
+    module2.exports = isError;
+  }
+});
+
+// src/isNode.js
+var require_isNode = __commonJS({
+  "src/isNode.js"(exports2, module2) {
+    function isNode(value) {
+      return typeof Node === "function" && value instanceof Node;
+    }
+    __name(isNode, "isNode");
+    module2.exports = isNode;
+  }
+});
+
+// src/isElement.js
+var require_isElement = __commonJS({
+  "src/isElement.js"(exports2, module2) {
+    function isElement(value) {
+      return typeof Element === "function" && value instanceof Element;
+    }
+    __name(isElement, "isElement");
+    module2.exports = isElement;
+  }
+});
+
+// src/isFragment.js
+var require_isFragment = __commonJS({
+  "src/isFragment.js"(exports2, module2) {
+    function isFragment(value) {
+      return typeof DocumentFragment === "function" && value instanceof DocumentFragment;
+    }
+    __name(isFragment, "isFragment");
+    module2.exports = isFragment;
+  }
+});
+
+// src/isArrayBuffer.js
+var require_isArrayBuffer = __commonJS({
+  "src/isArrayBuffer.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var getter = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, "byteLength").get;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isArrayBuffer === "function" ? nativeTypes.isArrayBuffer : (value) => hasNativeBrand(value, getter);
+    function isArrayBuffer(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isArrayBuffer, "isArrayBuffer");
+    module2.exports = isArrayBuffer;
+  }
+});
+
+// src/isSharedArrayBuffer.js
+var require_isSharedArrayBuffer = __commonJS({
+  "src/isSharedArrayBuffer.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var getter = typeof SharedArrayBuffer === "function" ? Object.getOwnPropertyDescriptor(SharedArrayBuffer.prototype, "byteLength").get : void 0;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = getter && nativeTypes && typeof nativeTypes.isSharedArrayBuffer === "function" ? nativeTypes.isSharedArrayBuffer : (value) => hasNativeBrand(value, getter);
+    function isSharedArrayBuffer(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isSharedArrayBuffer, "isSharedArrayBuffer");
+    module2.exports = isSharedArrayBuffer;
+  }
+});
+
+// src/isArrayBufferView.js
+var require_isArrayBufferView = __commonJS({
+  "src/isArrayBufferView.js"(exports2, module2) {
+    var nativeIsView = ArrayBuffer.isView;
+    function isArrayBufferView(value) {
+      return nativeIsView(value);
+    }
+    __name(isArrayBufferView, "isArrayBufferView");
+    module2.exports = isArrayBufferView;
+  }
+});
+
+// src/isTypedArray.js
+var require_isTypedArray = __commonJS({
+  "src/isTypedArray.js"(exports2, module2) {
+    var isView = ArrayBuffer.isView;
+    var typedArrayPrototype = Object.getPrototypeOf(Uint8Array.prototype);
+    var getTypedArrayTag = Object.getOwnPropertyDescriptor(typedArrayPrototype, Symbol.toStringTag).get;
+    var apply = Reflect.apply;
+    var noArguments = [];
+    function isTypedArray(value) {
+      return isView(value) && typeof apply(getTypedArrayTag, value, noArguments) === "string";
+    }
+    __name(isTypedArray, "isTypedArray");
+    module2.exports = isTypedArray;
+  }
+});
+
+// src/isDataView.js
+var require_isDataView = __commonJS({
+  "src/isDataView.js"(exports2, module2) {
+    var hasNativeBrand = require_hasNativeBrand();
+    var getter = Object.getOwnPropertyDescriptor(DataView.prototype, "buffer").get;
+    var nativeTypes = require_nativeTypes();
+    var checkNativeBrand = nativeTypes && typeof nativeTypes.isDataView === "function" ? nativeTypes.isDataView : (value) => hasNativeBrand(value, getter);
+    function isDataView(value) {
+      return checkNativeBrand(value);
+    }
+    __name(isDataView, "isDataView");
+    module2.exports = isDataView;
+  }
+});
+
+// src/isNonNullish.js
+var require_isNonNullish = __commonJS({
+  "src/isNonNullish.js"(exports2, module2) {
+    function isNonNullish(value) {
+      return value !== null && value !== void 0;
+    }
+    __name(isNonNullish, "isNonNullish");
+    module2.exports = isNonNullish;
+  }
+});
+
+// src/isObjectLike.js
+var require_isObjectLike = __commonJS({
+  "src/isObjectLike.js"(exports2, module2) {
+    function isObjectLike(value) {
+      const type = typeof value;
+      return type === "object" ? value !== null : type === "undefined" && value !== void 0;
+    }
+    __name(isObjectLike, "isObjectLike");
+    module2.exports = isObjectLike;
+  }
+});
+
+// src/isNonEmptyArray.js
+var require_isNonEmptyArray = __commonJS({
+  "src/isNonEmptyArray.js"(exports2, module2) {
+    var isArray = require_isArray();
+    var isValidArrayLength = require_isValidArrayLength();
+    function isNonEmptyArray(value) {
+      if (!isArray(value)) return false;
+      const length = value.length;
+      return isValidArrayLength(length) && length > 0;
+    }
+    __name(isNonEmptyArray, "isNonEmptyArray");
+    module2.exports = isNonEmptyArray;
+  }
+});
+
+// src/isJson.js
+var require_isJson = __commonJS({
+  "src/isJson.js"(exports2, module2) {
+    var isString = require_isString();
+    var stringValueOf = String.prototype.valueOf;
+    var parse = JSON.parse;
+    function isJson(value) {
+      if (!isString(value)) {
+        return false;
+      }
+      try {
+        parse(stringValueOf.call(value));
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    __name(isJson, "isJson");
+    module2.exports = isJson;
+  }
+});
+
+// src/isSetOf.js
+var require_isSetOf = __commonJS({
+  "src/isSetOf.js"(exports2, module2) {
+    var isSet = require_isSet();
+    var createTypeChecker = require_createTypeChecker();
+    var values = Set.prototype.values;
+    function isSetOf(value, type) {
+      const check = createTypeChecker(type);
+      if (!isSet(value)) return false;
+      for (const item of values.call(value)) if (!check(item)) return false;
+      return true;
+    }
+    __name(isSetOf, "isSetOf");
+    module2.exports = isSetOf;
+  }
+});
+
+// src/isMapOf.js
+var require_isMapOf = __commonJS({
+  "src/isMapOf.js"(exports2, module2) {
+    var isMap = require_isMap();
+    var createTypeChecker = require_createTypeChecker();
+    var entries = Map.prototype.entries;
+    function isMapOf(value, keyType, valueType) {
+      const checkKey = createTypeChecker(keyType);
+      const checkValue = createTypeChecker(valueType);
+      if (!isMap(value)) return false;
+      for (const entry of entries.call(value)) {
+        if (!checkKey(entry[0]) || !checkValue(entry[1])) return false;
+      }
+      return true;
+    }
+    __name(isMapOf, "isMapOf");
+    module2.exports = isMapOf;
+  }
+});
+
+// src/isEmptyIterable.js
+var require_isEmptyIterable = __commonJS({
+  "src/isEmptyIterable.js"(exports2, module2) {
+    function isEmptyIterable(value) {
+      for (const item of value) return false;
+      return true;
+    }
+    __name(isEmptyIterable, "isEmptyIterable");
+    module2.exports = isEmptyIterable;
+  }
+});
+
+// src/isBlankIterable.js
+var require_isBlankIterable = __commonJS({
+  "src/isBlankIterable.js"(exports2, module2) {
+    function isBlankIterable(value) {
+      for (const item of value) if (item !== null && item !== void 0) return false;
+      return true;
+    }
+    __name(isBlankIterable, "isBlankIterable");
+    module2.exports = isBlankIterable;
+  }
+});
+
+// src/conversion/toArray.js
+var require_toArray = __commonJS({
+  "src/conversion/toArray.js"(exports2, module2) {
+    "use strict";
+    var arrayFrom = Array.from;
+    function toArray(value) {
+      return arrayFrom(value);
+    }
+    __name(toArray, "toArray");
+    module2.exports = toArray;
+  }
+});
+
+// src/util/shouldConvert.js
+var require_shouldConvert = __commonJS({
+  "src/util/shouldConvert.js"(exports2, module2) {
+    "use strict";
+    function shouldConvert(value, condition) {
+      if (condition === void 0) return false;
+      const result = typeof condition === "function" ? condition(value) : condition;
+      if (typeof result !== "boolean") {
+        throw new TypeError("Conversion condition must be a boolean or a synchronous boolean predicate.");
+      }
+      return result;
+    }
+    __name(shouldConvert, "shouldConvert");
+    module2.exports = shouldConvert;
+  }
+});
+
+// src/conversion/toArrayIf.js
+var require_toArrayIf = __commonJS({
+  "src/conversion/toArrayIf.js"(exports2, module2) {
+    "use strict";
+    var toArray = require_toArray();
+    var shouldConvert = require_shouldConvert();
+    function toArrayIf(value, condition) {
+      return shouldConvert(value, condition) ? toArray(value) : value;
+    }
+    __name(toArrayIf, "toArrayIf");
+    module2.exports = toArrayIf;
+  }
+});
+
+// src/conversion/toBigInt.js
+var require_toBigInt = __commonJS({
+  "src/conversion/toBigInt.js"(exports2, module2) {
+    "use strict";
+    var nativeBigInt = BigInt;
+    function toBigInt(value) {
+      return nativeBigInt(value);
+    }
+    __name(toBigInt, "toBigInt");
+    module2.exports = toBigInt;
+  }
+});
+
+// src/conversion/toBigIntIf.js
+var require_toBigIntIf = __commonJS({
+  "src/conversion/toBigIntIf.js"(exports2, module2) {
+    "use strict";
+    var toBigInt = require_toBigInt();
+    var shouldConvert = require_shouldConvert();
+    function toBigIntIf(value, condition) {
+      return shouldConvert(value, condition) ? toBigInt(value) : value;
+    }
+    __name(toBigIntIf, "toBigIntIf");
+    module2.exports = toBigIntIf;
+  }
+});
+
+// src/conversion/toBoolean.js
+var require_toBoolean = __commonJS({
+  "src/conversion/toBoolean.js"(exports2, module2) {
+    "use strict";
+    var nativeBoolean = Boolean;
+    function toBoolean(value) {
+      return nativeBoolean(value);
+    }
+    __name(toBoolean, "toBoolean");
+    module2.exports = toBoolean;
+  }
+});
+
+// src/conversion/toBooleanIf.js
+var require_toBooleanIf = __commonJS({
+  "src/conversion/toBooleanIf.js"(exports2, module2) {
+    "use strict";
+    var toBoolean = require_toBoolean();
+    var shouldConvert = require_shouldConvert();
+    function toBooleanIf(value, condition) {
+      return shouldConvert(value, condition) ? toBoolean(value) : value;
+    }
+    __name(toBooleanIf, "toBooleanIf");
+    module2.exports = toBooleanIf;
+  }
+});
+
+// src/conversion/toDate.js
+var require_toDate = __commonJS({
+  "src/conversion/toDate.js"(exports2, module2) {
+    "use strict";
+    var NativeDate = Date;
+    var isDate = require_isDate();
+    function toDate(value) {
+      return isDate(value) ? value : new NativeDate(value);
+    }
+    __name(toDate, "toDate");
+    module2.exports = toDate;
+  }
+});
+
+// src/conversion/toDateIf.js
+var require_toDateIf = __commonJS({
+  "src/conversion/toDateIf.js"(exports2, module2) {
+    "use strict";
+    var toDate = require_toDate();
+    var shouldConvert = require_shouldConvert();
+    function toDateIf(value, condition) {
+      return shouldConvert(value, condition) ? toDate(value) : value;
+    }
+    __name(toDateIf, "toDateIf");
+    module2.exports = toDateIf;
+  }
+});
+
+// src/conversion/toNumber.js
+var require_toNumber = __commonJS({
+  "src/conversion/toNumber.js"(exports2, module2) {
+    "use strict";
+    var nativeNumber = Number;
+    function toNumber(value) {
+      return nativeNumber(value);
+    }
+    __name(toNumber, "toNumber");
+    module2.exports = toNumber;
+  }
+});
+
+// src/conversion/toInteger.js
+var require_toInteger = __commonJS({
+  "src/conversion/toInteger.js"(exports2, module2) {
+    "use strict";
+    var toNumber = require_toNumber();
+    var trunc = Math.trunc;
+    function toInteger(value) {
+      return trunc(toNumber(value));
+    }
+    __name(toInteger, "toInteger");
+    module2.exports = toInteger;
+  }
+});
+
+// src/conversion/toIntegerIf.js
+var require_toIntegerIf = __commonJS({
+  "src/conversion/toIntegerIf.js"(exports2, module2) {
+    "use strict";
+    var toInteger = require_toInteger();
+    var shouldConvert = require_shouldConvert();
+    function toIntegerIf(value, condition) {
+      return shouldConvert(value, condition) ? toInteger(value) : value;
+    }
+    __name(toIntegerIf, "toIntegerIf");
+    module2.exports = toIntegerIf;
+  }
+});
+
+// src/conversion/toNumberIf.js
+var require_toNumberIf = __commonJS({
+  "src/conversion/toNumberIf.js"(exports2, module2) {
+    "use strict";
+    var toNumber = require_toNumber();
+    var shouldConvert = require_shouldConvert();
+    function toNumberIf(value, condition) {
+      return shouldConvert(value, condition) ? toNumber(value) : value;
+    }
+    __name(toNumberIf, "toNumberIf");
+    module2.exports = toNumberIf;
+  }
+});
+
+// src/conversion/toObject.js
+var require_toObject = __commonJS({
+  "src/conversion/toObject.js"(exports2, module2) {
+    "use strict";
+    var nativeObject = Object;
+    function toObject(value) {
+      return nativeObject(value);
+    }
+    __name(toObject, "toObject");
+    module2.exports = toObject;
+  }
+});
+
+// src/conversion/toObjectIf.js
+var require_toObjectIf = __commonJS({
+  "src/conversion/toObjectIf.js"(exports2, module2) {
+    "use strict";
+    var toObject = require_toObject();
+    var shouldConvert = require_shouldConvert();
+    function toObjectIf(value, condition) {
+      return shouldConvert(value, condition) ? toObject(value) : value;
+    }
+    __name(toObjectIf, "toObjectIf");
+    module2.exports = toObjectIf;
+  }
+});
+
+// src/conversion/toString.js
+var require_toString = __commonJS({
+  "src/conversion/toString.js"(exports2, module2) {
+    "use strict";
+    var nativeString = String;
+    function toString(value) {
+      return nativeString(value);
+    }
+    __name(toString, "toString");
+    module2.exports = toString;
+  }
+});
+
+// src/conversion/toStringIf.js
+var require_toStringIf = __commonJS({
+  "src/conversion/toStringIf.js"(exports2, module2) {
+    "use strict";
+    var toString = require_toString();
+    var shouldConvert = require_shouldConvert();
+    function toStringIf(value, condition) {
+      return shouldConvert(value, condition) ? toString(value) : value;
+    }
+    __name(toStringIf, "toStringIf");
+    module2.exports = toStringIf;
+  }
+});
+
+// src/conversion/toSymbol.js
+var require_toSymbol = __commonJS({
+  "src/conversion/toSymbol.js"(exports2, module2) {
+    "use strict";
+    var nativeSymbol = Symbol;
+    var symbolValueOf = Symbol.prototype.valueOf;
+    function toSymbol(value) {
+      if (typeof value === "symbol") return value;
+      if (value !== null && typeof value === "object") {
+        try {
+          return symbolValueOf.call(value);
+        } catch (_) {
+        }
+      }
+      return nativeSymbol(value);
+    }
+    __name(toSymbol, "toSymbol");
+    module2.exports = toSymbol;
+  }
+});
+
+// src/conversion/toSymbolIf.js
+var require_toSymbolIf = __commonJS({
+  "src/conversion/toSymbolIf.js"(exports2, module2) {
+    "use strict";
+    var toSymbol = require_toSymbol();
+    var shouldConvert = require_shouldConvert();
+    function toSymbolIf(value, condition) {
+      return shouldConvert(value, condition) ? toSymbol(value) : value;
+    }
+    __name(toSymbolIf, "toSymbolIf");
+    module2.exports = toSymbolIf;
+  }
+});
+
+// index.js
+exports.isUndefined = require_isUndefined();
+exports.isNull = require_isNull();
+exports.isBoolean = require_isBoolean();
+exports.isNumber = require_isNumber();
+exports.isString = require_isString();
+exports.isSymbol = require_isSymbol();
+exports.isBigInt = require_isBigInt();
+exports.isPrimitive = require_isPrimitive();
+exports.isNullish = require_isNullish();
+exports.isEmpty = require_isEmpty();
+exports.isBlank = require_isBlank();
+exports.isTruthy = require_isTruthy();
+exports.isFalsy = require_isFalsy();
+exports.isInteger = require_isInteger();
+exports.isSafeInteger = require_isSafeInteger();
+exports.isFloat = require_isFloat();
+exports.isFinite = require_isFinite();
+exports.isInfinite = require_isInfinite();
+exports.isNaN = require_isNaN();
+exports.isNumeric = require_isNumeric();
+exports.isTypeOf = require_isTypeOf();
+exports.isObject = require_isObject();
+exports.isPlainObject = require_isPlainObject();
+exports.isCyclic = require_isCyclic();
+exports.isIterable = require_isIterable();
+exports.isArray = require_isArray();
+exports.isArrayOf = require_isArrayOf();
+exports.isArrayLike = require_isArrayLike();
+exports.isArrayLikeOf = require_isArrayLikeOf();
+exports.isPair = require_isPair();
+exports.isMap = require_isMap();
+exports.isSet = require_isSet();
+exports.isWeakMap = require_isWeakMap();
+exports.isWeakSet = require_isWeakSet();
+exports.isFunction = require_isFunction();
+exports.isDate = require_isDate();
+exports.isValidDate = require_isValidDate();
+exports.isInvalidDate = require_isInvalidDate();
+exports.isRegExp = require_isRegExp();
+exports.isPromise = require_isPromise();
+exports.isPromiseLike = require_isPromiseLike();
+exports.isThenable = require_isThenable();
+exports.isError = require_isError();
+exports.isNode = require_isNode();
+exports.isElement = require_isElement();
+exports.isFragment = require_isFragment();
+exports.isArrayBuffer = require_isArrayBuffer();
+exports.isSharedArrayBuffer = require_isSharedArrayBuffer();
+exports.isArrayBufferView = require_isArrayBufferView();
+exports.isTypedArray = require_isTypedArray();
+exports.isDataView = require_isDataView();
+exports.isAsyncIterable = require_isAsyncIterable();
+exports.isIteratorLike = require_isIteratorLike();
+exports.isNonNullish = require_isNonNullish();
+exports.isObjectLike = require_isObjectLike();
+exports.isNonEmptyArray = require_isNonEmptyArray();
+exports.isJson = require_isJson();
+exports.createTypeChecker = require_createTypeChecker();
+exports.isSetOf = require_isSetOf();
+exports.isMapOf = require_isMapOf();
+exports.isEmptyIterable = require_isEmptyIterable();
+exports.isBlankIterable = require_isBlankIterable();
+exports.toArray = require_toArray();
+exports.toArrayIf = require_toArrayIf();
+exports.toBigInt = require_toBigInt();
+exports.toBigIntIf = require_toBigIntIf();
+exports.toBoolean = require_toBoolean();
+exports.toBooleanIf = require_toBooleanIf();
+exports.toDate = require_toDate();
+exports.toDateIf = require_toDateIf();
+exports.toInteger = require_toInteger();
+exports.toIntegerIf = require_toIntegerIf();
+exports.toNumber = require_toNumber();
+exports.toNumberIf = require_toNumberIf();
+exports.toObject = require_toObject();
+exports.toObjectIf = require_toObjectIf();
+exports.toString = require_toString();
+exports.toStringIf = require_toStringIf();
+exports.toSymbol = require_toSymbol();
+exports.toSymbolIf = require_toSymbolIf();
+return module.exports;
+});
+//# sourceMappingURL=go-types.js.map
