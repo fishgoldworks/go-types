@@ -1,32 +1,30 @@
-"use strict";
+'use strict';
 
-const assert = require("node:assert/strict");
-const { describe: suite, test } = require("node:test");
-const { isArrayLikeOf } = require("../../");
+const assert = require('node:assert/strict');
+const { describe: suite, test } = require('node:test');
+const { isArrayLikeOf } = require('../../');
 
+suite('#isArrayLikeOf', function () {
+  test('true', function () {
+    assert.equal(isArrayLikeOf('abc', 'string'), true);
+    assert.equal(isArrayLikeOf({ 0: 'a', 1: 'b', length: 2 }, 'string'), true);
 
-suite("#isArrayLikeOf", function () {
+    assert.equal(isArrayLikeOf([undefined], undefined), true);
+    assert.equal(isArrayLikeOf([null], null), true);
+    assert.equal(isArrayLikeOf([true], 'boolean'), true);
+    assert.equal(isArrayLikeOf([1, 2], 'number'), true);
+    assert.equal(isArrayLikeOf(['a', 'b'], 'string'), true);
+    assert.equal(isArrayLikeOf([{ a: 1 }, { b: 2 }], Object), true);
+    assert.equal(isArrayLikeOf([1, new Number(2)], ['number', Number]), true);
+  });
 
-    test("true", function () {
-        assert.equal(isArrayLikeOf("abc", "string"), true);
-        assert.equal(isArrayLikeOf({0: "a", 1: "b", length: 2}, "string"), true);
+  test('false', function () {
+    assert.equal(isArrayLikeOf('123', 'number'), false);
+    assert.equal(isArrayLikeOf({ 0: 'a', 1: 'b', length: 2 }, 'number'), false);
 
-        assert.equal(isArrayLikeOf([undefined], undefined), true);
-        assert.equal(isArrayLikeOf([null], null), true);
-        assert.equal(isArrayLikeOf([true], "boolean"), true);
-        assert.equal(isArrayLikeOf([1, 2], "number"), true);
-        assert.equal(isArrayLikeOf(["a", "b"], "string"), true);
-        assert.equal(isArrayLikeOf([{a: 1}, {b: 2}], Object), true);
-        assert.equal(isArrayLikeOf([1, new Number(2)], ["number", Number]), true);
-    });
-
-    test("false", function () {
-        assert.equal(isArrayLikeOf("123", "number"), false);
-        assert.equal(isArrayLikeOf({0: "a", 1: "b", length: 2}, "number"), false);
-
-        assert.equal(isArrayLikeOf(), false);
-        assert.equal(isArrayLikeOf([], "number"), true);
-        assert.equal(isArrayLikeOf([1, "2"], "number"), false);
-        assert.equal(isArrayLikeOf([1, new Number(2)], "number"), false);
-    });
+    assert.equal(isArrayLikeOf(), false);
+    assert.equal(isArrayLikeOf([], 'number'), true);
+    assert.equal(isArrayLikeOf([1, '2'], 'number'), false);
+    assert.equal(isArrayLikeOf([1, new Number(2)], 'number'), false);
+  });
 });

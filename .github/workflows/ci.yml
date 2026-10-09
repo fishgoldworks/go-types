@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: [22, 24]
+        node: ['22.16.0', '24']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -26,8 +26,50 @@ jobs:
       - run: npm run docs
       - run: npm run verify
       - name: Check generated source and entry points
-        run: git diff --exit-code -- README.md src docs/API.md package.json index.js index.mjs index.d.mts esm types dist
-  chromium:
+        shell: bash
+        run: |
+          git diff --exit-code
+          if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            git ls-files --others --exclude-standard
+            exit 1
+          fi
+      - name: Share the verified release tarball
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-types-tarball
+          path: artifacts/*.tgz
+          if-no-files-found: error
+  runtime-consumers:
+    needs: source-and-package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['8.0.0', '13.0.0', '8.17.0', '12.17.0', '14.0.0']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - name: Keep the consumer runtime executable
+        run: node -e "require('fs').appendFileSync(process.env.GITHUB_ENV, 'GO_TYPES_RUNTIME_NODE=' + process.execPath + '\n')"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: go-types-tarball
+          path: artifacts
+      - run: npm run test:package
+  browsers:
+    needs: source-and-package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -38,6 +80,9 @@ jobs:
           node-version: 22
           package-manager-cache: false
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npm run test:browser
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - uses: actions/download-artifact@v4
+        with:
+          name: go-types-tarball
+          path: artifacts
+      - run: npm run test:package -- --browser

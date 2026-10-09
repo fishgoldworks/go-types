@@ -1,13 +1,16 @@
 /**
- * Checks for a primitive symbol.
- * Symbol and BigInt checks reject boxed values.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isSymbol(Symbol("x")); // => true
- * @example isSymbol("x");         // => false
+ * Determines whether a value is a primitive symbol.
+ *
+ * Boxed symbols return `false`.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value is a primitive symbol; otherwise `false`.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issymbolvalue
+ * @example isSymbol(Symbol("x"));         // => true
+ * @example isSymbol("x");                 // => false
  */
 function isSymbol(value) {
-    return typeof value === "symbol";
+  return typeof value === 'symbol';
 }
 
 module.exports = isSymbol;

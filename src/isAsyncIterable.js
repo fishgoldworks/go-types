@@ -1,12 +1,26 @@
+const isCallable = require('./util/isCallable');
 /**
- * Checks for a callable Symbol.asyncIterator method.
- * Does not invoke the method. Checks only the explicit async protocol, not synchronous iterables that for-await-of can adapt. Method presence does not prove valid iteration.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isAsyncIterable((async function*(){})()); // => true
- * @example isAsyncIterable([]);                      // => false
+ * Determines whether a value exposes an asynchronous iterator method.
+ *
+ * Does not invoke the method. Returns `false` without inspecting the value when
+ * `Symbol.asyncIterator` is unavailable. Returns `false` without inspecting the input when
+ * `Symbol` itself or `Symbol.asyncIterator` is unavailable.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the async-iterator symbol is available and the value has a callable
+ * `Symbol.asyncIterator` method; otherwise `false`.
+ * @throws {*} Property getters or proxy traps may throw; their errors propagate.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isasynciterablevalue
+ * @example isAsyncIterable((async function*(){})());  // => true
+ * @example isAsyncIterable([]);                       // => false
  */
 function isAsyncIterable(value) {
-    return value !== null && value !== undefined && typeof value[Symbol.asyncIterator] === 'function';
+  return (
+    typeof Symbol === 'function' &&
+    typeof Symbol.asyncIterator === 'symbol' &&
+    value !== null &&
+    value !== undefined &&
+    isCallable(value[Symbol.asyncIterator])
+  );
 }
 module.exports = isAsyncIterable;

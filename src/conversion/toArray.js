@@ -1,21 +1,29 @@
 'use strict';
 
-const arrayFrom = Array.from;
+const arrayFrom = typeof Array.from === 'function' ? Array.from : undefined;
 
 /**
- * Creates a new shallow array from iterable or array-like input using Array.from.
- * Iterable input takes precedence over length. Strings are read as Unicode code points; sparse arrays become dense. Null and undefined throw TypeError. Values with neither an iterator nor a usable length produce an empty array. Native length coercion applies, unlike the stricter isArrayLike validator.
+ * Converts iterable or array-like input to a new shallow array.
  *
- * Conversion reads properties and consumes finite iterables; infinite iterables do not finish and large inputs can exhaust memory. No clone of nested values, object-entry conversion or scalar wrapping is performed.
- * @param {*} value Value to convert.
- * @returns {Array}
- * @example toArray(new Set([1, 2]));     // => [1,2]
- * @example toArray('A😀B');              // => ["A","😀","B"]
- * @example toArray({0: 'x', length: 1}); // => ["x"]
- * @example toArray(42);                  // => []
+ * Consumes iterable input and may invoke getters or iterator methods. Infinite iterables do not
+ * finish; nullish input throws. Requires native `Array.from`; missing support does not prevent
+ * loading. Requested conversion throws `TypeError` before inspecting the input when it is
+ * unavailable.
+ *
+ * @param {*} value The value to convert.
+ * @returns {Array} A new shallow array containing the input items.
+ * @throws {*} `TypeError` for `null`, `undefined`, malformed iterators or incompatible length
+ * conversion. Oversized lengths can throw `RangeError`. Property-access and iteration errors
+ * propagate. Unavailable native `Array.from` support throws `TypeError` before conversion.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayvalue
+ * @example toArray(new Set([1, 2]));      // => [1,2]
+ * @example toArray('A😀B');               // => ["A","😀","B"]
+ * @example toArray({0: 'x', length: 1});  // => ["x"]
+ * @example toArray(42);                   // => []
  */
 function toArray(value) {
-    return arrayFrom(value);
+  if (!arrayFrom) throw new TypeError('Native array conversion is unavailable in this runtime.');
+  return arrayFrom(value);
 }
 
 module.exports = toArray;

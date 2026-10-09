@@ -19,7 +19,7 @@ def main() -> int:
         raise RuntimeError('Node.js is required to load the source modules.')
     source = subprocess.run(
         [node, str(root / 'scripts/source-test-loader.js')],
-        check=True, capture_output=True, text=True, timeout=30,
+        check=True, capture_output=True, text=True, encoding='utf-8', timeout=30,
     ).stdout
     executable = os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
     options = {'executable_path': executable} if executable else {}
@@ -31,11 +31,11 @@ def main() -> int:
             # SharedArrayBuffer may be unavailable without cross-origin isolation.
             page.set_content('<!doctype html><html><body></body></html>')
             page.add_script_tag(content=source)
-            page.add_script_tag(content=(root / 'test/browser/contract.js').read_text())
+            page.add_script_tag(content=(root / 'test/browser/contract.js').read_text(encoding='utf-8'))
             result = page.evaluate(
                 '({metadata,names})=>runGoTypesBrowserTests(Types,metadata,names)',
-                {'metadata': json.loads((root / 'scripts/api.json').read_text()),
-                 'names': json.loads((root / 'scripts/exports.json').read_text())},
+                {'metadata': json.loads((root / 'scripts/api.json').read_text(encoding='utf-8')),
+                 'names': json.loads((root / 'scripts/exports.json').read_text(encoding='utf-8'))},
             )
             report = {
                 'browser': browser.version,

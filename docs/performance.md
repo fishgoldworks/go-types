@@ -34,9 +34,9 @@ const acceptsValue = createTypeChecker(['number', null]);
 const values = [1, 'text', null];
 
 for (const value of values) {
-    if (acceptsValue(value)) {
-        // Handle the accepted value.
-    }
+  if (acceptsValue(value)) {
+    // Handle the accepted value.
+  }
 }
 ```
 
@@ -56,6 +56,8 @@ node scripts/benchmark-numeric-paths.js /path/to/previous-library /path/to/updat
 ```
 
 The comparison uses identical input sequences, consumes results, warms each case and repeats each library in independent processes with alternating order. It reports the median of process medians and keeps every raw sample. The scripts define the batch and process counts. The scaling probe uses fresh subprocesses with deadlines so an exponential case cannot hang the test session.
+
+The scripts accept source checkout directories, generated `package/` directories or explicit CommonJS entry files. Directory inputs use the package's declared `main` or Node's directory index fallback, even when a neighbouring `package.json` exists. Matcher-scaling timeouts remain reported results; unexpected worker failures retain their diagnostics and make the command exit unsuccessfully.
 
 The comparison and matcher-scaling scripts print JSON when supplied with two source revisions. Keep results, source revisions and environment details in a task-owned temporary directory outside the checkout.
 

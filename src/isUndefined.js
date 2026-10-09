@@ -1,12 +1,14 @@
 /**
- * Checks for undefined.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isUndefined(undefined); // => true
- * @example isUndefined("x");       // => false
+ * Determines whether a value is exactly `undefined`.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value is `undefined`; otherwise `false`.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isundefinedvalue
+ * @example isUndefined(undefined);        // => true
+ * @example isUndefined("x");              // => false
  */
 function isUndefined(value) {
-    return value === undefined;
+  return value === undefined;
 }
 
 module.exports = isUndefined;

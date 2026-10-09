@@ -2,7 +2,7 @@
 
 Run `npm run benchmark` (or `node scripts/benchmark.js` for JSON-only output). `BENCH_ITERATIONS` and `BENCH_ROUNDS` configure sample length and repeated rounds. The runner defines the default sample, round and warm-up counts.
 
-The harness reports all samples and their median nanoseconds per call. It consumes results to keep the workload observable. Cases cover native/captured array identity with the same input mix, primitive-plus-boxed number checks, ordinary-object collection negatives, repeated matcher validation versus a reused compiled checker, array validation and non-nullish filtering.
+The harness reports all samples and their median nanoseconds per call. For an even number of rounds, the median is the average of the two middle sorted samples. It consumes results to keep the workload observable. Cases cover native/captured array identity with the same input mix, primitive-plus-boxed number checks, ordinary-object collection negatives, repeated matcher validation versus a reused compiled checker, array validation and non-nullish filtering.
 
 These measurements include the cost of dispatching the benchmark and consuming results. Just-in-time compilation, garbage collection, process scheduling, input distributions and runtime versions affect results. Measurements do not establish a statistically reliable speedup, a cross-engine ranking, worst-case complexity or production throughput.
 

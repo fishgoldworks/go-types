@@ -1,22 +1,24 @@
 // Share Date identity and ignore overridden instance methods.
-var isDate = require("./isDate");
+var isDate = require('./isDate');
 var getTime = Date.prototype.getTime;
 
 /**
- * Checks Date identity and NaN timestamp invalidity.
- * Foreign dates are supported; overridden instance getTime methods are ignored. Non-Dates return false.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isInvalidDate(new Date(NaN)); // => true
- * @example isInvalidDate(new Date(0));   // => false
- * @example isInvalidDate(0);             // => false
+ * Determines whether a genuine `Date` contains a `NaN` timestamp.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise
+ * `false`.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinvaliddatevalue
+ * @example isInvalidDate(new Date(NaN));  // => true
+ * @example isInvalidDate(new Date(0));    // => false
+ * @example isInvalidDate(0);              // => false
  */
 function isInvalidDate(value) {
-    if (!isDate(value)) {
-        return false;
-    }
-    var time = getTime.call(value);
-    return time !== time;
+  if (!isDate(value)) {
+    return false;
+  }
+  var time = getTime.call(value);
+  return time !== time;
 }
 
 module.exports = isInvalidDate;

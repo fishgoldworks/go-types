@@ -2,19 +2,31 @@
 // Test-only CommonJS loader for browser source tests. This is not a production bundler.
 const fs = require('node:fs');
 const path = require('node:path');
-const root = path.resolve(__dirname,'..');
+const root = path.resolve(__dirname, '..');
 function sourceTestLoader() {
-    const files = ['index.js'];
-    function collect(directory) {
-        for (const entry of fs.readdirSync(path.join(root,directory), {withFileTypes:true})) {
-            const name = directory + '/' + entry.name;
-            if (entry.isDirectory()) collect(name);
-            else if (name.endsWith('.js')) files.push(name);
-        }
+  const files = [];
+  const index = require('./exports.json')
+    .map((name) => 'exports.' + name + " = require('./" + require('./source-path')(name) + "');")
+    .join('\n');
+  function collect(directory) {
+    for (const entry of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
+      const name = directory + '/' + entry.name;
+      if (entry.isDirectory()) collect(name);
+      else if (name.endsWith('.js')) files.push(name);
     }
-    collect('src');
-    const modules = files.map(name => `${JSON.stringify('/'+name)}: function(module,exports,require) {\n${fs.readFileSync(path.join(root,name),'utf8')}\n}`).join(',\n');
-    return `(function(){
+  }
+  collect('src');
+  const modules =
+    '"/index.js": function(module,exports,require) {\n' +
+    index +
+    '\n},\n' +
+    files
+      .map(
+        (name) =>
+          `${JSON.stringify('/' + name)}: function(module,exports,require) {\n${fs.readFileSync(path.join(root, name), 'utf8')}\n}`
+      )
+      .join(',\n');
+  return `(function(){
         const modules = {${modules}};
         const cache = Object.create(null);
         function load(name) {

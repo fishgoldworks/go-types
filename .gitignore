@@ -1,6 +1,24 @@
+# Dependencies and package-manager state
 node_modules/
-coverage/
-*.tgz
-.go-types-build-*/
+
+# Generated distributions and documentation
+/artifacts/
+/package/
+
+# Build staging and temporary files
 .tmp/
-.go-types-typecheck-*/
+/.go-types-build-*/
+
+# Coverage and local test results
+/coverage/
+
+# Package archives
+*.tgz
+
+# Editor and operating-system files
+.DS_Store
+/nbproject/
+
+# Local playgrounds
+/test.js
+/test2.js

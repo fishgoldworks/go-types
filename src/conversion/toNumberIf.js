@@ -4,16 +4,29 @@ const toNumber = require('./toNumber');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Applies toNumber only when a boolean condition or synchronous predicate returns true.
- * Returns the original input unchanged when condition is false, undefined or omitted. Predicates receive the original value once, without an explicit receiver, and must return a primitive boolean. Other conditions/results, including Promise results, throw TypeError. Predicate and conversion errors propagate. A skipped conversion never inspects or coerces the input. The true branch follows the full toNumber contract.
- * @param {*} value Value to convert.
- * @param {*} condition Boolean or synchronous boolean predicate.
- * @returns {number|*}
- * @example toNumberIf('12', value => typeof value === 'string'); // => 12
- * @example toNumberIf('12', false);                              // => "12"
+ * Converts a value to a primitive number when the condition evaluates to `true`. Otherwise,
+ * returns the original value unchanged.
+ *
+ * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+ * conditions or non-boolean predicate results throw `TypeError`.
+ *
+ * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or
+ * invoke object conversion hooks. Symbols throw.
+ *
+ * @param {*} value The value to convert.
+ * @param {*} [condition] A boolean or synchronous predicate called once with the original value.
+ * Omitted or `undefined` skips conversion; a predicate must return a primitive boolean.
+ * @returns {number|*} The converted primitive number, possibly `NaN` or infinite, when conversion
+ * is requested; otherwise the original input, unchanged.
+ * @throws {*} Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate
+ * errors propagate. A requested conversion also follows `toNumber` error behaviour; a skipped
+ * conversion does not inspect or coerce the value.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tonumberifvalue-condition
+ * @example toNumberIf('12', value => typeof value === 'string');  // => 12
+ * @example toNumberIf('12', false);                               // => "12"
  */
 function toNumberIf(value, condition) {
-    return shouldConvert(value, condition) ? toNumber(value) : value;
+  return shouldConvert(value, condition) ? toNumber(value) : value;
 }
 
 module.exports = toNumberIf;

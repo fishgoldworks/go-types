@@ -1,28 +1,38 @@
 'use strict';
 
-const nativeSymbol = Symbol;
-const symbolValueOf = Symbol.prototype.valueOf;
+const nativeSymbol = typeof Symbol === 'function' ? Symbol : undefined;
+const symbolValueOf = nativeSymbol && nativeSymbol.prototype.valueOf;
 
 /**
- * Preserves primitive symbols, unboxes genuine Symbol wrappers, or creates a new symbol from a description.
- * Genuine boxed symbols are unboxed intrinsically, including across realms; their overridden conversion hooks are not called. Other values follow native Symbol(description) conversion and may throw. Identical descriptions create distinct symbols; Symbol.for is not used. Omitted/undefined input creates a symbol without a description.
- * @param {*} value Value to convert.
- * @returns {symbol}
- * @example toSymbol('key').description;                                                             // => "key"
- * @example toSymbol('key') !== toSymbol('key');                                                     // => true
- * @example (() => { const symbol = Symbol('key'); return toSymbol(Object(symbol)) === symbol; })(); // => true
+ * Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol
+ * wrappers.
+ *
+ * Preserves primitive symbol identity and unboxes genuine wrappers. Other inputs create a new
+ * symbol and may invoke description-conversion hooks. Requires native `Symbol`; missing support
+ * does not prevent loading. Requested conversion throws `TypeError` before inspecting the input
+ * when it is unavailable.
+ *
+ * @param {*} [value] The value to convert.
+ * @returns {symbol} The original or unboxed symbol, or a new symbol created from the description.
+ * @throws {*} Native description-conversion errors propagate. Unavailable native `Symbol` support
+ * throws `TypeError` before conversion.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosymbolvalue
+ * @example toSymbol('key').toString();                                                                // => "Symbol(key)"
+ * @example toSymbol('key') !== toSymbol('key');                                                       // => true
+ * @example (() => { const symbol = Symbol('key'); return toSymbol(Object(symbol)) === symbol; })();   // => true
  */
 function toSymbol(value) {
-    if (typeof value === 'symbol') return value;
-    if (value !== null && typeof value === 'object') {
-        try {
-            // Unbox genuine Symbol wrappers without running overridden coercion hooks.
-            return symbolValueOf.call(value);
-        } catch (_) {
-            // Not a Symbol wrapper; the native constructor performs description conversion.
-        }
+  if (!nativeSymbol) throw new TypeError('Native Symbol conversion is unavailable in this runtime.');
+  if (typeof value === 'symbol') return value;
+  if (value !== null && typeof value === 'object') {
+    try {
+      // Unbox genuine Symbol wrappers without running overridden coercion hooks.
+      return symbolValueOf.call(value);
+    } catch (_) {
+      // Not a Symbol wrapper; the native constructor performs description conversion.
     }
-    return nativeSymbol(value);
+  }
+  return nativeSymbol(value);
 }
 
 module.exports = toSymbol;

@@ -1,14 +1,17 @@
 /**
- * Checks typeof value === "function".
- * Includes classes, generators and callable proxies. It does not guarantee that calling the value will succeed; a class cannot be invoked without new.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isFunction(() => {});   // => true
- * @example isFunction(class A {}); // => true
- * @example isFunction({call(){}}); // => false
+ * Determines whether JavaScript reports a value as a function.
+ *
+ * Includes classes and callable proxies; does not guarantee a successful call.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if `typeof value` is `"function"`; otherwise `false`.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfunctionvalue
+ * @example isFunction(() => {});          // => true
+ * @example isFunction(class A {});        // => true
+ * @example isFunction({call(){}});        // => false
  */
 function isFunction(value) {
-    return typeof value === "function";
+  return typeof value === 'function';
 }
 
 module.exports = isFunction;

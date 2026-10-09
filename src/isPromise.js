@@ -1,14 +1,20 @@
 /**
- * Performs a local-realm native Promise instanceof check.
- * This is not an unforgeable native-brand check. Foreign promises can return false and objects inheriting Promise.prototype can return true. Does not subscribe, call then, or create a derived promise. Returns boolean in declarations.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isPromise(Promise.resolve(1));   // => true
- * @example isPromise({then(){},catch(){}}); // => false
+ * Determines whether a value passes the local native `Promise` instance check.
+ *
+ * Uses local `instanceof` semantics; it is not proof of native Promise identity. Does not call
+ * `then`.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value passes the local native `Promise` instance check;
+ * otherwise `false`.
+ * @throws {*} Native `instanceof` errors propagate, including errors from proxy prototype access
+ * or a custom `Symbol.hasInstance` method.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ispromisevalue
+ * @example isPromise(Promise.resolve(1));     // => true
+ * @example isPromise({then(){},catch(){}});   // => false
  */
 function isPromise(value) {
-    return typeof Promise === "function" && value instanceof Promise;
+  return typeof Promise === 'function' && value instanceof Promise;
 }
 
 module.exports = isPromise;
-

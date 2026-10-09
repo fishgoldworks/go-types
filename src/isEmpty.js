@@ -7,33 +7,47 @@ const isPlainObject = require('./isPlainObject');
 const assertSizedInput = require('./util/assertSizedInput');
 const keys = Object.keys;
 const stringValueOf = String.prototype.valueOf;
-const mapSize = Object.getOwnPropertyDescriptor(Map.prototype, 'size').get;
-const setSize = Object.getOwnPropertyDescriptor(Set.prototype, 'size').get;
+const getNativeGetter = require('./util/getNativeGetter');
+const mapSize = getNativeGetter(typeof Map === 'function' ? Map : undefined, 'size');
+const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'size');
 /**
- * Non-consuming check for nullish values or empty strings, arrays/array-likes, Maps, Sets and plain dictionaries.
- * Checks strings, genuine Maps/Sets and validated array-like lengths before inspecting protocols. Unsized iterator/iterable capabilities take precedence over dictionary keys and throw TypeError without calling next or an iterator method. This also applies to plain objects that expose these capabilities. The consuming variants accept synchronous iterables only; next-only iterators need an adapter, and asynchronous iteration must be handled by the caller.
+ * Determines whether a value is nullish or a supported string or container has no items.
  *
- * Remaining plain dictionaries use own enumerable string keys. Other unsupported values, such as numbers or Dates, return false. Length/property getters can run; this is non-consuming, not universally side-effect-free.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isEmpty(null);                // => true
- * @example isEmpty([]);                  // => true
- * @example isEmpty(new Map());           // => true
- * @example isEmpty(Object.create(null)); // => true
- * @example isEmpty([null]);              // => false
+ * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
+ * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
+ * loading or checks of other supported values. If a detected collection lacks the required native
+ * size or iteration operation, the check throws `TypeError`.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value is nullish or a supported string or container with no
+ * items; otherwise `false`.
+ * @throws {*} `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
+ * throw. See Empty and blank values.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isemptyvalue
+ * @example isEmpty(null);                 // => true
+ * @example isEmpty([]);                   // => true
+ * @example isEmpty(new Map());            // => true
+ * @example isEmpty(Object.create(null));  // => true
+ * @example isEmpty([null]);               // => false
  */
 function isEmpty(value) {
-    if (value === null || value === undefined) return true;
-    // A real array cannot carry boxed-String or Map/Set internal slots.
-    if (!isArray(value)) {
-        if (isString(value)) return stringValueOf.call(value).length === 0;
-        if (isMap(value)) return mapSize.call(value) === 0;
-        if (isSet(value)) return setSize.call(value) === 0;
+  if (value === null || value === undefined) return true;
+  // A real array cannot carry boxed-String or Map/Set internal slots.
+  if (!isArray(value)) {
+    if (isString(value)) return stringValueOf.call(value).length === 0;
+    if (isMap(value)) {
+      if (!mapSize) throw new TypeError('Native Map size is unavailable in this runtime.');
+      return mapSize.call(value) === 0;
     }
-    const length = getArrayLikeLength(value);
-    if (length !== undefined) return length === 0;
-    // A boolean must not disguise unknown iterator contents as known non-emptiness.
-    assertSizedInput(value);
-    return isPlainObject(value) && keys(value).length === 0;
+    if (isSet(value)) {
+      if (!setSize) throw new TypeError('Native Set size is unavailable in this runtime.');
+      return setSize.call(value) === 0;
+    }
+  }
+  const length = getArrayLikeLength(value);
+  if (length !== undefined) return length === 0;
+  // A boolean must not disguise unknown iterator contents as known non-emptiness.
+  assertSizedInput(value);
+  return isPlainObject(value) && keys(value).length === 0;
 }
 module.exports = isEmpty;

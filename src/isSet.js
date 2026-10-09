@@ -1,24 +1,29 @@
-var hasNativeBrand = require("./util/hasNativeBrand");
-var has = typeof Set === "function" ? Set.prototype.has : undefined;
+var hasNativeBrand = require('./util/hasNativeBrand');
+var has = typeof Set === 'function' ? Set.prototype.has : undefined;
 
 const nativeTypes = require('./util/nativeTypes');
 // Resolve the platform implementation once; never inspect user prototypes or tags.
-const checkNativeBrand = nativeTypes && typeof nativeTypes.isSet === 'function'
+const checkNativeBrand =
+  has && nativeTypes && typeof nativeTypes.isSet === 'function'
     ? nativeTypes.isSet
-    : value => hasNativeBrand(value, has);
+    : (value) => hasNativeBrand(value, has);
 
 /**
- * Checks genuine Set identity using captured, non-mutating native checks.
- * Supports foreign instances, ignores custom tags and rejects proxies/prototype imitations. Does not enumerate or modify the collection.
- * @param {*} value Value to inspect.
- * @returns {boolean}
- * @example isSet(new Set());                    // => true
- * @example isSet(Object.create(Set.prototype)); // => false
+ * Determines whether a value is a genuine `Set`.
+ *
+ * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
+ * imitations. Returns `false` when the local native detection capability is unavailable.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} `true` if the value is a genuine `Set`; otherwise `false`.
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetvalue
+ * @example isSet(new Set());                      // => true
+ * @example isSet(Object.create(Set.prototype));   // => false
  */
 function isSet(value) {
-    // has checks the receiver's native brand without changing the collection.
-    // It accepts foreign instances and rejects objects that merely inherit the prototype.
-    return checkNativeBrand(value);
+  // has checks the receiver's native brand without changing the collection.
+  // It accepts foreign instances and rejects objects that merely inherit the prototype.
+  return checkNativeBrand(value);
 }
 
 module.exports = isSet;

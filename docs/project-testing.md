@@ -1,21 +1,31 @@
 # Test strategy
 
-Runtime tests use Node's built-in `node:test` and `node:assert/strict` without requiring development dependencies. They check public root and subpath behaviour, documented exceptions, termination, iterator closing and application-visible side effects. Assertions target the public contract rather than private helper calls, intermediate implementation values or mocked native results.
+Runtime behaviour is tested with Node's built-in `node:test` and `node:assert/strict`. The main `npm test` command also runs documentation examples and compiles their TypeScript snippets, so install the locked development dependencies with `npm ci` before running the complete suite or coverage. A globally resolvable TypeScript installation is not a substitute for the locked toolchain. Individual behavioural tests that import only the built-in test/assert modules can still run without external dependencies.
+
+Tests check public root and subpath behaviour, documented exceptions, termination, iterator closing and application-visible side effects. Assertions target the public contract rather than private helper calls, intermediate implementation values or mocked native results.
 
 ## Contract coverage
 
-| Group | Covered cases |
-|---|---|
-| Primitive/numeric | All primitive categories, boxed payloads, falsy values, signed zero, NaN/infinities, integer/fraction/safe bounds, whitespace/numeric syntax, overridden coercion. |
-| Native identity | Foreign realms, subclasses, prototype/tag imitations, overridden getters/methods, proxies/revocation, real native receivers. |
-| Binary | All typed-array constructors in the Node 22 test baseline, DataView, ArrayBuffer/SharedArrayBuffer, detached buffers, resizable out-of-bounds views, foreign values; Chromium additionally covers Float16Array when present. |
-| Matchers | Eight typeof names, boxed names, null/undefined, constructors/bounds/arrows/custom hooks, predicates, async/non-boolean returns, invalid descriptors, unions, holes/accessors, shared/cyclic/deep configuration, order/snapshot behaviour, deterministic linear shared-graph inspection, deep iterative evaluation and bound targets with custom hooks/prototypes. |
-| Collections | Empty/non-empty/wrong container, sparse/inherited indexes, invalid/fractional/huge lengths, length snapshots, null-prototype dictionaries, symbols/property scope, Map/Set native iteration and exception propagation. |
-| Iterators | Method presence without invoking it, one-shot inputs, preserved first item, native truthy completion, malformed records, early close/finally, return errors, unsupported async inputs, non-consuming default checks. |
-| Graphs | Repeated primitives, shared acyclic nodes, self/mutual cycles, deep chains, inherited/enumerability/symbol scope, getters, and deterministic generated graphs checked against an independent small-graph reference implementation. |
-| Conversions | All 18 public functions; nullish/falsy values, native coercion, NaN/infinities, signed zero, precision boundaries, wrappers, foreign realms, array copy/density/iteration, Date/Symbol identity, condition results, errors and observable input hooks. |
-| Package/API | All public root and subpath names, CJS/ESM identity, private-path rejection, executable documentation examples, actual packed-source install, TypeScript true/false branches, dynamic matcher unions, typed sparse arrays and rejected unsafe method calls. |
-| Browser | Real DOM nodes, document.all complement/collection invariants, and iframe realms, native Error branch, detached/resizable views, optional APIs, constructor/protocol cases and all applicable documentation examples. |
+| Group             | Covered cases                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Primitive/numeric | All primitive categories, boxed payloads, falsy values, signed zero, NaN/infinities, integer/fraction/safe bounds, whitespace/numeric syntax, overridden coercion.                                                                                                                                                                                                 |
+| Native identity   | Foreign realms, subclasses, prototype/tag imitations, overridden getters/methods, proxies/revocation, real native receivers.                                                                                                                                                                                                                                       |
+| Binary            | All typed-array constructors in the Node 22 test baseline, DataView, ArrayBuffer/SharedArrayBuffer, detached buffers, resizable out-of-bounds views, foreign values; Browser engines additionally cover Float16Array when present.                                                                                                                                 |
+| Matchers          | Eight typeof names, boxed names, null/undefined, constructors/bounds/arrows/custom hooks, predicates, async/non-boolean returns, invalid descriptors, unions, holes/accessors, shared/cyclic/deep configuration, order/snapshot behaviour, deterministic linear shared-graph inspection, deep iterative evaluation and bound targets with custom hooks/prototypes. |
+| Collections       | Empty/non-empty/wrong container, sparse/inherited indexes, invalid/fractional/huge lengths, length snapshots, null-prototype dictionaries, symbols/property scope, Map/Set native iteration and exception propagation.                                                                                                                                             |
+| Iterators         | Method presence without invoking it, one-shot inputs, preserved first item, native truthy completion, malformed records, early close/finally, return errors, unsupported async inputs, non-consuming default checks.                                                                                                                                               |
+| Graphs            | Repeated primitives, shared acyclic nodes, self/mutual cycles, deep chains, inherited/enumerability/symbol scope, getters, and deterministic generated graphs checked against an independent small-graph reference implementation.                                                                                                                                 |
+| Conversions       | All 22 public functions; nullish/falsy values, native coercion, NaN/infinities, signed zero, precision boundaries, wrappers, foreign realms, array copy/density/iteration, Date/Symbol identity, condition results, errors and observable input hooks.                                                                                                             |
+| Package/API       | All public root and subpath names, CJS/ESM identity, private-path rejection, executable documentation examples, actual packed-source install, TypeScript true/false branches, dynamic matcher unions, typed sparse arrays and rejected unsafe method calls.                                                                                                        |
+| Browser           | Real DOM nodes, document.all complement/collection invariants, and iframe realms, native Error branch, detached/resizable views, optional APIs, constructor/protocol cases and all applicable documentation examples.                                                                                                                                              |
+
+Source tests and coverage load canonical implementations through the small development entry. Public-path tests live in `test/package/` and run against an isolated tarball installation, alongside the older-runtime fixtures in `test/runtime/`. Standalone type and tree-shaking checks use a temporary consumer of the built package; release gates use the exact tarball.
+
+`scripts/test.js` discovers `test/**/*.test.js` in a stable order and fails if no matching test files exist. Node options are forwarded before the discovered paths. A deliberate name filter that matches no test cases and explicit capability skips retain Node's normal behaviour; they are not evidence that the full suite passed.
+
+`test/verification-tooling.test.js` exercises the real runner in isolated fixtures, checking discovery, option forwarding, failure exits, skips and coverage thresholds. It also verifies consumer-process diagnostics, asynchronous staging cleanup and isolation, and relative-module identity in the source-only loader. These are infrastructure controls, not a substitute for regressions in each runtime review area.
+
+`test/benchmark-tooling.test.js` exercises benchmark loading with a neighbouring manifest, custom package entry points, explicit files and directory fallback. It checks worker-error exit codes and a real intentional timeout without asserting a performance threshold. Controlled-clock fixtures verify median-report arithmetic for odd and even sample counts; these fixtures do not measure runtime speed.
 
 Some compatibility and regression cases intentionally overlap. The test count does not represent independent root causes or prove every possible behaviour.
 
@@ -24,27 +34,36 @@ Some compatibility and regression cases intentionally overlap. The test count do
 ```sh
 npm test
 npm run coverage
+npm run build
 npm run test:types
+npm run pack:package
 npm run test:package -- --source-only
 npm run benchmark
 ```
 
-Type and package checks require the pinned TypeScript development tool or a compatible globally available compiler. For release verification, install the locked development dependencies and Chromium with `npx playwright install chromium`, then run `npm run verify:all`. Its build, artefact and browser checks can also be run individually:
+Installed-package checks require the pinned local TypeScript development tool. They compile strict ES2017 consumers with legacy node and Node16 resolution, checking every public CommonJS alias before executing the emitted JavaScript. The main declaration fixtures also check NodeNext resolution with ES2020 libraries. `scripts/test-tooltips.js` uses the TypeScript language service against the installed package to check purpose, result meaning and reference links in editor hovers and signature help, covering all public functions through root and focused CommonJS/ES module imports. For release verification, install the locked development dependencies and browser engines with `npx playwright install chromium firefox webkit`, then run `npm run verify:all`. Its build, artefact and browser checks can also be run individually:
 
 ```sh
 npm run build
 npm run test:build
 npm run test:artifacts
+npm run pack:package
 npm run test:package
 npm run test:tree-shaking
 npm run test:browser
 ```
 
-The normal browser script uses JavaScript Playwright. `npm run test:browser -- --source-only` uses a CommonJS source loader for diagnostics and does not verify esbuild output. `CHROMIUM_EXECUTABLE` optionally selects an existing Chromium installation. The optional `python scripts/test-browser-source.py` runner reproduces the inline source-only check when Python Playwright is installed; it does not replace release-bundle tests.
+The complete gates build and pack once, then verify the same tarball, reporting its SHA-256 digest. Build tests cover replacement/rollback failures, unchanged canonical inputs, repeatability, stale and removed entries, invalid generation destinations, failed-build packing and wrong-directory lifecycle guards. An explicit missing tarball must fail instead of silently repacking the checkout. Artefact checks compare embedded source-map content with packaged source after normalising line endings; the build suite deliberately corrupts each map format to verify rejection. The source-map boundary fixtures also reject maps or mapped sources outside the package, absolute source paths, escaping source symlinks, nonempty `sourceRoot` and empty source inventories. They use the existing generated package as their control; passing them does not prove a fresh build succeeded or that every encoded mapping position is correct.
+
+Packing-phase tests in `scripts/test-package-workflow.js` use a deliberately small build fixture and the real local npm pack operation. They check successful replacement, original-error preservation when cleanup also fails, failed-build short-circuiting, and rejection of stale documentation without dumping per-byte Buffer differences. They do not replace the real bundler and filesystem rollback tests. Build-failure assertions require evidence that the intended injected stage was actually reached; missing dependencies must not be described as tested minifier or replacement recovery.
+
+The normal browser script uses JavaScript Playwright to run Chromium, Firefox and WebKit, and reads `package/dist/`; the release gate runs the same checker against the installed tarball. `npm run test:browser -- --source-only` uses a CommonJS source loader for diagnostics and does not verify esbuild output. `CHROMIUM_EXECUTABLE` optionally selects an existing Chromium installation. The optional `python scripts/test-browser-source.py` runner reproduces the inline source-only check when Python Playwright is installed; it does not replace release-bundle tests.
+
+The optional Python runner reads source, browser contracts and API metadata as UTF-8 independently of the system locale. Run `python test/python-browser-runner.test.py` to check the text handed to Playwright under UTF-8 and CP1252 defaults; this standard-library regression needs Node and Python, but no Playwright installation. It checks transport fidelity, not browser behaviour. Run the optional browser command itself for that behaviour.
 
 ## Coverage interpretation
 
-Coverage is measured on `src/**`, excluding tests and generated wrappers. The coverage command enforces 100% source-line coverage. Node reports lines, branches and functions separately; a 100% line result does not imply 100% branch coverage. Browser results are not merged into that report. No coverage number is manually rounded up to 100%.
+Coverage is measured on loaded files matching `src/**`, excluding tests and generated wrappers. The include pattern filters measured files; it does not automatically load unimported source. The canonical aggregate and behavioural tests must reach the supported implementations. The coverage command enforces 100% source-line coverage. Node reports lines, branches and functions separately; a 100% line result does not imply 100% branch coverage. Browser results are not merged into that report. No coverage number is manually rounded up to 100%.
 
 A high coverage percentage does not establish contract correctness, completeness or security. The independent graph oracle, explicit regressions, negative type tests, real-browser checks and clean-consumer installation add different evidence.
 
@@ -66,9 +85,11 @@ The compile fixtures `native-safety.cts` and `native-safety.mts` check unsafe su
 
 ## Host capability checks
 
-`test/platform-capabilities.test.js` imports the real public modules in isolated child processes with selected host features present or absent. It checks Error branding, conservative tag rejection, captured intrinsics, optional collection constructors and local DOM-constructor semantics. These constructor checks complement the real DOM tests in Chromium; they do not replace browser execution.
+`test/platform-capabilities.test.js` imports the real public modules in isolated child processes with selected host features present or absent. It checks Error branding, conservative tag rejection, captured intrinsics, optional collection constructors and local DOM-constructor semantics. These constructor checks complement the real DOM tests across browser engines; they do not replace browser execution.
 
 The numeric public functions handle primitive numbers before calling the private payload helper. Its defensive primitive guards are therefore not reached through the public API and remain visible in the branch report.
+
+`test/native-identity-lifecycle.test.js` checks timestamp transitions, frozen collection and RegExp inspection, trapping proxies, resizable and growable buffer/view states, and error payload getters. The same explicit expectations run against the public source entry and portable source in a separate realm. The browser contract also checks DOM adoption against each engine's native local-instance semantics (adoption can change the prototype realm), and binary state transitions. These test additions protect existing behaviour; passing both backends does not prove equivalence for every input.
 
 ## Independent contract checks
 
@@ -77,3 +98,19 @@ The numeric public functions handle primitive numbers before calling the private
 `test/matcher-oracle.test.js` adds an independently seeded shared-graph corpus with stateful predicates and exception traces. `test/source-examples.test.js` executes the expected results in generated source JSDoc. The browser runner also executes the actual JSDoc examples, including DOM cases, against each distributed format and verifies recovery when optional-host discovery throws. These checks supplement the README, API-metadata, native/fallback, compiler and browser tests; no finite suite proves every possible JavaScript program.
 
 `test/native-backend-and-sizing.test.js` checks optional-host initialisation failure recovery, native/fallback numeric behaviour with foreign/modified/imitation/proxy values, and unsized-input diagnostics without consuming anything. Benchmarks and inspector exception counts remain separate from timing-independent behavioural assertions.
+
+`test/value-boundaries.test.js` checks optional classifier-property failures through real public imports and isolated hosts, once-only capability capture, preserved execution errors, primitive/boxed boundaries and current-prototype classification. The browser contract additionally checks `document.all` after prototype changes and restores its original prototype after each case. These host fixtures do not claim protection from a compromised runtime.
+
+`test/protocol-lifecycle.test.js` checks precise method reads without invocation, live capability changes, local Promise constructor selection, captured iterator `next` versus live `return`, receiver and error identity, non-awaited payloads, and yielding cleanup boundaries. The browser contract includes callable HTMLDDA method values and their sized-container neighbours. These are protocol-shape and native-iteration controls, not a guarantee that arbitrary user iterator code completes or releases its resources.
+
+`test/collection-conversion-lifecycle.test.js` checks native iterator acquisition and completion, overridden iteration, entry-slot read order, error precedence, shallow reference preservation and conditional re-entrancy. Its documentation controls check that each Map/Set conditional error link targets the corresponding base conversion, not merely an existing anchor. `test/types/conversion-inference.cts` protects callback-body inference, explicit receiver requirements, literal/dynamic condition results and collection element inference; `test/types/runtime-safe.cts` executes bound and receiver-independent controls. These are observable-contract checks, not private-helper assertions.
+
+`test/sized-container-lifecycle.test.js` protects sized-input dispatch, cardinality-only reads, captured matcher/length state with live indexed values, Map key/value ordering, dictionary key snapshots and non-consuming native-container handling. `test/types/collection-inference.cts` and its ESM companion check callback-body/receiver inference, bound controls, conservative result signatures and all collection-content predicate positions. These assertions protect the documented contracts rather than prescribing private helper calls.
+
+`test/numeric-text-contract.test.js` checks numeric partitions against an independent binary64 encoding model, including subnormal and safe-integer boundaries. It separates numeric-string grammar from JSON syntax and covers whitespace, escapes, overflow, underflow, precision, primitive/boxed bigints, poisoned hooks and captured built-ins. Explicit expectations run against canonical and portable source APIs; neither backend supplies the other's expected results. The browser contract includes foreign-wrapper and text-grammar controls. These checks do not promise lossless parsing or schema validation, and are not benchmarks.
+
+`test/scalar-conversion-contract.test.js` protects scalar coercion hints and fallback ordering, exact thrown values, wrapper conversion versus identity, Date clipping, Symbol description conversion, realm-local boxing and condition ordering. The scalar-inference fixtures check primitive-intersection boxing, preserved object types, literal/dynamic conditions and contextual callback types through CommonJS and ESM imports. Runtime-safe and ES2017 consumers execute the successful boxing and identity cases; negative type checks prevent boxed results from being used as primitives.
+
+`test/graph-lifecycle.test.js` checks stable reachable graphs against a topological-elimination oracle built from explicit adjacency lists, rather than copying the runtime's active-path traversal. It covers inherited edges and hidden shadows, getter receivers, repeated shared nodes, abrupt-exit recovery, re-entrant checks, distinct proxy vertices and frozen foreign objects. The browser contract adds isolated HTMLDDA graphs and foreign getter/shadow controls. These checks preserve enumerable string-property scope; they do not expand traversal to hidden properties, symbols or collection membership, and do not make timing or garbage-collection claims.
+
+`test/types/optional-iterator.cts` and its ESM companion check optional/nullable iterator precedence in array conversion declarations, callback-body inference, and requested versus skipped conversion results. Positive controls retain definite iterable and plain/definitely-nullish array-like inference. The strict ES2017 fixture and compiled runtime-safe cases exercise the same boundary. The declaration verifier also compiles and executes all focused ESM alias declarations, checking signature assignability and rejecting implicit `any`, rather than relying only on CommonJS routes.
