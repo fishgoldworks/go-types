@@ -19,6 +19,8 @@
     "native-safety.mts",
     "matcher-inference.cts",
     "conversion-inference.cts",
+    "collection-conversion-contract.cts",
+    "collection-conversion-contract.mts",
     "collection-inference.cts",
     "collection-inference.mts",
     "scalar-conversion-inference.cts",
@@ -26,6 +28,14 @@
     "optional-iterator.cts",
     "optional-iterator.mts",
     "helper-exports.cts",
-    "helper-exports.mts"
+    "helper-exports.mts",
+    "json-conversion.cts",
+    "json-conversion.mts",
+    "wrapper-conversion.cts",
+    "wrapper-conversion.mts",
+    "from-json-conversion.cts",
+    "from-json-conversion.mts",
+    "private-matcher.cts",
+    "private-matcher.mts"
   ]
 }

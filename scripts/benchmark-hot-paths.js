@@ -13,7 +13,6 @@ if (process.argv[2] === '--worker') {
   const numbers = [0, 1, 1.5, NaN, Infinity, -1];
   const boxed = [new Number(0), new Number(1), new Number(1.5), new Number(NaN)];
   const predicate = { predicate: (value) => typeof value === 'number' };
-  const compiled = T.createTypeChecker(predicate);
   const cases = [
     ['isEmpty / dictionaries', (i) => T.isEmpty(objects[i % 4])],
     ['isBlank / dictionaries', (i) => T.isBlank(objects[i % 4])],
@@ -24,7 +23,6 @@ if (process.argv[2] === '--worker') {
     ['isMap / ordinary negatives', (i) => T.isMap(objects[i % 4])],
     ['isMap / genuine Maps', (i) => T.isMap(maps[i % 2])],
     ['isTypeOf / predicate descriptor', (i) => T.isTypeOf(i, predicate)],
-    ['compiled / same predicate', (i) => compiled(i)],
     ['isTypeOf / primitive name', (i) => T.isTypeOf(i, 'number')],
     ['isNumber / primitives', (i) => T.isNumber(numbers[i % 6])],
     ['isNumber / boxed', (i) => T.isNumber(boxed[i % 4])],

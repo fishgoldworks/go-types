@@ -4,17 +4,16 @@ const toSet = require('./toSet');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Converts an iterable of values to a new shallow Set when the condition evaluates to `true`.
- * Otherwise, returns the original value unchanged.
+ * Converts supported iterable, record or array-like input to a new shallow Set when the condition
+ * evaluates to `true`. Otherwise, returns the original value unchanged.
  *
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toSet`. Consumes synchronous values and removes duplicates without
- * coercion. Strings yield Unicode code points. Nullish input creates an empty Set; non-iterable
- * scalars and array-like objects throw. Requires native `Set`; missing support does not prevent
- * loading. Requested conversion throws `TypeError` before inspecting the input when it is
- * unavailable.
+ * Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol
+ * record values, or supported array-like indices. Lengths must be numeric safe integers at least
+ * zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`,
+ * independently of `Array.from`; missing support throws before inspecting the input.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.

@@ -1,30 +1,34 @@
 'use strict';
+const collectionInput = require('../util/collectionInput');
 
 const NativeSet = typeof Set === 'function' ? Set : undefined;
 
 /**
- * Converts an iterable of values to a new shallow Set.
+ * Converts a synchronous iterable, plain record or supported array-like input to a new shallow
+ * Set.
  *
- * Consumes synchronous values and removes duplicates without coercion. Strings yield Unicode code
- * points. Nullish input creates an empty Set; non-iterable scalars and array-like objects throw.
- * Requires native `Set`; missing support does not prevent loading. Requested conversion throws
- * `TypeError` before inspecting the input when it is unavailable.
+ * Copies iterable values, own enumerable string and symbol record values, or supported array-like
+ * indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty
+ * Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing
+ * support throws before inspecting the input.
  *
  * @param {*} [value] The value to convert.
- * @returns {Set} A new Set of the input values in first-insertion order, or an empty Set for
- * omitted or nullish input.
- * @throws {*} TypeError for non-nullish non-iterable input or malformed iterators. Property-access
- * and iterator errors propagate according to native Set construction. Unavailable native `Set`
- * support throws `TypeError` before conversion.
+ * @returns {Set} A new Set of iterable items, own enumerable record values or indexed array-like
+ * values, or an empty Set for omitted or nullish input.
+ * @throws {*} TypeError for unsupported input, malformed iterators or invalid array-like lengths.
+ * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; record
+ * copying requires symbol-enumeration support.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
- * @example Array.from(toSet([3, 1, 3]));  // => [3,1]
- * @example Array.from(toSet('A😀A'));     // => ["A","😀"]
- * @example toSet().size;                  // => 0
- * @example toSet(null).size;              // => 0
+ * @example Array.from(toSet([3, 1, 3]));            // => [3,1]
+ * @example Array.from(toSet('A😀A'));               // => ["A","😀"]
+ * @example Array.from(toSet({a: 1, b: 2, c: 1}));   // => [1,2]
+ * @example Array.from(toSet({0: 'x', length: 1}));  // => ["x",1]
+ * @example toSet().size;                            // => 0
+ * @example toSet(null).size;                        // => 0
  */
 function toSet(value) {
   if (!NativeSet) throw new TypeError('Native Set conversion is unavailable in this runtime.');
-  return new NativeSet(value);
+  return new NativeSet(value === null || value === undefined ? value : collectionInput(value, false));
 }
 
 module.exports = toSet;

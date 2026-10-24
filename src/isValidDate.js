@@ -3,7 +3,7 @@ var isDate = require('./isDate');
 var getTime = Date.prototype.getTime;
 
 /**
- * Determines whether a genuine `Date` contains a finite timestamp.
+ * Checks whether a genuine `Date` contains a finite timestamp.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a genuine `Date` with a finite timestamp; otherwise

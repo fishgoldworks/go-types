@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const vm = require('node:vm');
 const T = require('../');
 const pred = (predicate) => ({ predicate });
@@ -21,7 +22,7 @@ for (const invalid of [
 ]) {
   for (const [name, run] of [
     ['direct', (m) => T.isTypeOf(1, m)],
-    ['factory', (m) => T.createTypeChecker(m)],
+    ['factory', (m) => compileTypeMatcher(m)],
     ['empty array', (m) => T.isArrayOf([], m)],
     ['non-array', (m) => T.isArrayOf(null, m)],
     ['empty arraylike', (m) => T.isArrayLikeOf('', m)],
@@ -51,17 +52,17 @@ test('unreachable invalid alternatives are still rejected before callbacks run',
 test('cyclic unions fail deterministically rather than overflowing', () => {
   const a = [];
   a.push(a);
-  assert.throws(() => T.createTypeChecker(a), TypeError);
+  assert.throws(() => compileTypeMatcher(a), TypeError);
   assert.throws(() => T.isTypeOf(1, ['number', a]), TypeError);
   const x = [],
     y = [x];
   x.push(y);
-  assert.throws(() => T.createTypeChecker(x), TypeError);
+  assert.throws(() => compileTypeMatcher(x), TypeError);
 });
 test('deep valid unions do not overflow', () => {
   let type = 'number';
   for (let i = 0; i < 20000; i++) type = [type];
-  const check = T.createTypeChecker(type);
+  const check = compileTypeMatcher(type);
   assert.equal(check(1), true);
   assert.equal(check('1'), false);
 });
@@ -75,7 +76,7 @@ test('checker snapshots union structure and descriptors but not callback closure
   const p = pred(() => answer),
     nested = ['number'],
     union = [nested, p];
-  const check = T.createTypeChecker(union);
+  const check = compileTypeMatcher(union);
   nested[0] = 'string';
   union.length = 0;
   p.predicate = () => false;
@@ -95,7 +96,7 @@ test('compilation does not call predicates, constructors, or custom instance hoo
       return v === 7;
     }
   });
-  const check = T.createTypeChecker([
+  const check = compileTypeMatcher([
     pred(() => {
       calls++;
       return false;
@@ -107,7 +108,7 @@ test('compilation does not call predicates, constructors, or custom instance hoo
   assert.equal(calls, 2);
 });
 test('empty unions match nothing while empty collection element constraints are vacuously true', () => {
-  assert.equal(T.createTypeChecker([])(undefined), false);
+  assert.equal(compileTypeMatcher([])(undefined), false);
   assert.equal(T.isArrayOf([], []), true);
   assert.equal(T.isArrayOf([1], []), false);
   assert.equal(T.isSetOf(new Set(), []), true);
@@ -115,7 +116,7 @@ test('empty unions match nothing while empty collection element constraints are 
 });
 test('union alternatives short-circuit during evaluation, not validation', () => {
   let calls = 0;
-  const check = T.createTypeChecker([
+  const check = compileTypeMatcher([
     'number',
     pred(() => {
       calls++;
@@ -135,9 +136,9 @@ test('matcher accessors and inherited selector properties are rejected without e
       return () => true;
     }
   };
-  assert.throws(() => T.createTypeChecker(x), TypeError);
+  assert.throws(() => compileTypeMatcher(x), TypeError);
   assert.equal(calls, 0);
-  assert.throws(() => T.createTypeChecker(Object.create({ predicate: () => true })), TypeError);
+  assert.throws(() => compileTypeMatcher(Object.create({ predicate: () => true })), TypeError);
   const a = [];
   Object.defineProperty(a, 0, {
     get() {
@@ -145,27 +146,27 @@ test('matcher accessors and inherited selector properties are rejected without e
       return 'number';
     }
   });
-  assert.throws(() => T.createTypeChecker(a), TypeError);
+  assert.throws(() => compileTypeMatcher(a), TypeError);
   assert.equal(calls, 0);
 });
 test('foreign nested arrays and boxed type names compile', () => {
   const type = vm.runInNewContext('[new String("number"), [null]]');
-  assert.equal(T.createTypeChecker(type)(1), true);
-  assert.equal(T.createTypeChecker(type)(null), true);
+  assert.equal(compileTypeMatcher(type)(1), true);
+  assert.equal(compileTypeMatcher(type)(null), true);
 });
 test('sparse matcher union slots mean undefined, never inherited configuration', () => {
   const union = new Array(1);
   const proto = [];
   proto[0] = 'number';
   Object.setPrototypeOf(union, proto);
-  const check = T.createTypeChecker(union);
+  const check = compileTypeMatcher(union);
   assert.equal(check(undefined), true);
   assert.equal(check(1), false);
 });
 test('instance prototype errors occur on evaluation, without a constructibility preflight', () => {
   function Wrong() {}
   Wrong.prototype = null;
-  const check = T.createTypeChecker(Wrong);
+  const check = compileTypeMatcher(Wrong);
   assert.equal(check(1), false);
   assert.throws(() => check({}), TypeError);
   assert.equal(T.isArrayOf([], Wrong), true);
@@ -210,7 +211,7 @@ test('predicates run without an accidental receiver and errors propagate unchang
   const error = Error('sentinel');
   assert.throws(
     () =>
-      T.createTypeChecker(
+      compileTypeMatcher(
         pred(() => {
           throw error;
         })

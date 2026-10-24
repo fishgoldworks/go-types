@@ -18,6 +18,8 @@ try {
           'isBooleanObject',
           'isNumberObject',
           'isStringObject',
+          'isSymbolObject',
+          'isBigIntObject',
           'isDate',
           'isRegExp',
           'isMap',

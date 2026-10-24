@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const T = require('..');
 
 test('matcher descriptor eligibility depends on own selectors, not plain-object identity', () => {
@@ -19,7 +20,7 @@ test('matcher descriptor eligibility depends on own selectors, not plain-object 
         throw new Error('Unrelated configuration must not be read');
       }
     });
-    const check = T.createTypeChecker(container);
+    const check = compileTypeMatcher(container);
     assert.equal(calls, 0);
     assert.equal(check(7), true);
     assert.equal(check(8), false);
@@ -41,7 +42,7 @@ test('snapshotted shared arrays and selectors can be revoked without invalidatin
   );
   const shared = Proxy.revocable([descriptor.proxy, 'number'], {});
   const root = Proxy.revocable([shared.proxy, shared.proxy, 'boolean'], {});
-  const check = T.createTypeChecker(root.proxy);
+  const check = compileTypeMatcher(root.proxy);
   descriptor.revoke();
   shared.revoke();
   root.revoke();
@@ -50,15 +51,15 @@ test('snapshotted shared arrays and selectors can be revoked without invalidatin
   answer = true;
   assert.equal(check('x'), true);
   assert.equal(calls, 3);
-  assert.throws(() => T.createTypeChecker(root.proxy), TypeError);
+  assert.throws(() => compileTypeMatcher(root.proxy), TypeError);
 });
 
 test('independent compilations snapshot current configuration without modifying previous checkers', () => {
   const descriptor = { predicate: (value) => value === 1 };
   const specification = [descriptor];
-  const first = T.createTypeChecker(specification);
+  const first = compileTypeMatcher(specification);
   descriptor.predicate = (value) => value === 2;
-  const second = T.createTypeChecker(specification);
+  const second = compileTypeMatcher(specification);
   assert.equal(first(1), true);
   assert.equal(first(2), false);
   assert.equal(second(1), false);
@@ -89,12 +90,12 @@ test('failed compilation does not poison later compilation of the same repaired 
   );
   const root = [shared, shared];
   assert.throws(
-    () => T.createTypeChecker(root),
+    () => compileTypeMatcher(root),
     (error) => error === failure
   );
   assert.equal(calls, 0);
   broken = false;
-  const check = T.createTypeChecker(root);
+  const check = compileTypeMatcher(root);
   assert.equal(calls, 0);
   assert.equal(check(1), true);
   assert.equal(calls, 1);
@@ -122,7 +123,7 @@ test('reentrant graph checks can recover from an inner exception without losing 
       return false;
     }
   };
-  check = T.createTypeChecker([reject, [nested, reject], 'string']);
+  check = compileTypeMatcher([reject, [nested, reject], 'string']);
   assert.equal(check('outer'), true);
   assert.deepEqual(visits, [
     ['reject', 'outer'],
@@ -152,7 +153,7 @@ test('live instance-hook access can fail after compilation and remain skipped by
       return (value) => value === 'accepted';
     }
   });
-  const check = T.createTypeChecker(['number', { instanceOf: Target }]);
+  const check = compileTypeMatcher(['number', { instanceOf: Target }]);
   const compilationReads = reads;
   broken = true;
   assert.equal(check(1), true);
@@ -171,8 +172,8 @@ test('native instance hooks retain truthiness while explicit predicates require 
   for (const result of values) {
     function Target() {}
     Object.defineProperty(Target, Symbol.hasInstance, { value: () => result });
-    assert.equal(T.createTypeChecker(Target)(7), Boolean(result));
-    const check = T.createTypeChecker({ predicate: () => result });
+    assert.equal(compileTypeMatcher(Target)(7), Boolean(result));
+    const check = compileTypeMatcher({ predicate: () => result });
     if (typeof result === 'boolean') assert.equal(check(7), result);
     else assert.throws(() => check(7), TypeError);
   }
@@ -186,7 +187,7 @@ test('compiler does not subscribe to a thenable returned by an invalid synchrono
       throw new Error('then read');
     }
   });
-  const check = T.createTypeChecker({ predicate: () => result });
+  const check = compileTypeMatcher({ predicate: () => result });
   assert.equal(reads, 0);
   assert.throws(() => check(1), TypeError);
   assert.equal(reads, 0);

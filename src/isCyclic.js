@@ -1,7 +1,7 @@
 var hasCircularReference = require('./hasCircularReference');
 
 /**
- * Determines whether following enumerable string-keyed properties leads back to an ancestor.
+ * Checks whether following enumerable string-keyed properties leads back to an ancestor.
  *
  * Includes inherited enumerable string keys, but ignores symbols, non-enumerable properties and
  * Map/Set entries. Getters and proxy traps may run. Internal reference tracking falls back to

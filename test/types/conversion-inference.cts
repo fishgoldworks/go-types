@@ -27,7 +27,7 @@ toSetIf(values, needsReceiver);
 const invalid: T.ConversionCondition<readonly number[]> = needsReceiver;
 
 // Scalar neighbours share the same condition contract, even though their own
-// conversion semantics have a later primary review area.
+// Runtime conversion semantics are exercised by the conversion contract suites.
 // @ts-expect-error scalar conditions are also called without a receiver.
 T.toNumberIf('12', needsReceiver);
 
@@ -100,4 +100,53 @@ expectType<string[]>(T.toArray(input));
 expectType<number[]>(T.toArray(input));
 expectType<Set<string>>(T.toSet(input));
 expectType<Set<unknown>>(T.toSet(null));
-expectType<Map<unknown, unknown>>(T.toMap({ key: 1 }));
+expectType<Map<string, number>>(T.toMap({ key: 1 }));
+const symbolKey = Symbol('record key');
+const record = { a: 1, b: 'two', 3: true, [symbolKey]: new Date() } as const;
+expectType<Map<string | typeof symbolKey, 1 | 'two' | true | Date>>(T.toMap(record));
+// @ts-expect-error object property keys, including numeric names, become strings.
+expectType<Map<3, unknown>>(T.toMap(record));
+// @ts-expect-error record values also include the string and numeric properties.
+expectType<Map<string, Date>>(T.toMap(record));
+const inferredRecordMap = T.toMap(record);
+expectFalse<IsAny<typeof inferredRecordMap>>();
+expectType<Map<string | typeof symbolKey, 1 | 'two' | true | Date>>(toMapIf(record, true));
+expectType<typeof record>(toMapIf(record, false));
+expectType<typeof record>(toMapIf(record));
+expectType<typeof record | Map<string | typeof symbolKey, 1 | 'two' | true | Date>>(
+  toMapIf(record, (value) => {
+    expectFalse<IsAny<typeof value>>();
+    expectType<1>(value.a);
+    return true;
+  })
+);
+interface RecordInput {
+  readonly a: number;
+  readonly b?: string;
+}
+declare const recordInput: RecordInput;
+expectType<Map<string, number | string | undefined>>(T.toMap(recordInput));
+expectType<Map<string, unknown>>(T.toMap({}));
+const iterableRecord = {
+  a: 1,
+  *[Symbol.iterator]() {
+    yield [7, 'entry'] as const;
+  }
+};
+expectType<Map<7, 'entry'>>(T.toMap(iterableRecord));
+interface OptionalRecordIterator {
+  a: number;
+  [Symbol.iterator]?: () => IterableIterator<readonly [number, string]>;
+}
+declare const optionalRecordIterator: OptionalRecordIterator;
+expectType<Map<unknown, unknown>>(T.toMap(optionalRecordIterator));
+// @ts-expect-error an optional iterator may replace record entries at runtime.
+expectType<Map<string, number>>(T.toMap(optionalRecordIterator));
+expectType<Map<string | typeof Symbol.iterator, number | null>>(T.toMap({ a: 1, [Symbol.iterator]: null }));
+expectType<Map<string | typeof Symbol.iterator, number | undefined>>(T.toMap({ a: 1, [Symbol.iterator]: undefined }));
+
+// A broad symbol index signature also includes a possible Symbol.iterator.
+declare const symbolicRecord: { a: number; [key: symbol]: unknown };
+expectType<Map<unknown, unknown>>(T.toMap(symbolicRecord));
+// @ts-expect-error a broad symbol index can hide a custom iterator.
+expectType<Map<string, number>>(T.toMap(symbolicRecord));

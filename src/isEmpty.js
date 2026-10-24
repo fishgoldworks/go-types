@@ -11,7 +11,7 @@ const getNativeGetter = require('./util/getNativeGetter');
 const mapSize = getNativeGetter(typeof Map === 'function' ? Map : undefined, 'size');
 const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'size');
 /**
- * Determines whether a value is nullish or a supported string or container has no items.
+ * Checks whether a value is nullish or a supported string or container has no items.
  *
  * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
  * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent

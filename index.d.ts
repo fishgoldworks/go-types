@@ -1,3 +1,9 @@
+/** Native JSON replacers receive arbitrary values and holder objects. */
+type JsonReplacer = ((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[] | null;
+
+/** Native reviver output and holder are arbitrary; source context depends on the host. */
+type JsonReviver = (this: unknown, key: string, value: unknown, context?: { source?: string }) => unknown;
+
 /** Use the consumer's native wrapper type when declared, without requiring ES2020 globals. */
 type BoxedBigInt = typeof globalThis extends { BigInt: { prototype: infer Boxed } }
   ? Boxed
@@ -7,6 +13,70 @@ type BoxedBigInt = typeof globalThis extends { BigInt: { prototype: infer Boxed 
       toLocaleString(): string;
       readonly [Symbol.toStringTag]: 'BigInt';
     };
+
+/** An omitted own key can reveal one of the ordinary object's inherited properties. */
+type PlainObjectPrototypeKey =
+  keyof Object | '__proto__' | '__defineGetter__' | '__defineSetter__' | '__lookupGetter__' | '__lookupSetter__';
+/** Explicit prototype members keep unknown values uncallable on older compilers. */
+interface UnknownPlainObject
+  extends Record<keyof Object, unknown>, Partial<Record<Exclude<PlainObjectPrototypeKey, keyof Object>, unknown>> {
+  [key: string]: unknown;
+  [key: symbol]: unknown;
+}
+type PlainObjectProperties<T> = string extends keyof T
+  ? UnknownPlainObject
+  : { -readonly [Key in keyof T]?: Key extends PlainObjectPrototypeKey ? unknown : T[Key] };
+
+/** Structural input checks cannot prove plainness or property enumerability. */
+type PlainObjectInput<T> = T extends string
+  ? T
+  : T extends ((...args: never[]) => unknown) | Date | RegExp | Number | Boolean | String | Symbol | BoxedBigInt
+    ? never
+    : T extends Iterable<unknown>
+      ? T extends Iterable<readonly [string | symbol, unknown]>
+        ? T
+        : never
+      : T extends object
+        ? T
+        : never;
+
+/** Structural checks reject known unsupported inputs; runtime validates source protocols and plainness. */
+type CollectionSourceInput<T> = unknown extends T
+  ? T
+  : T extends string
+    ? T
+    : T extends ((...args: never[]) => unknown) | Date | RegExp | Number | Boolean | String | Symbol | BoxedBigInt
+      ? never
+      : T extends object
+        ? T
+        : never;
+type SetInput<T> = T extends null | undefined ? T : CollectionSourceInput<T>;
+/** Fixed tuples must have two items. Runtime validates dynamic arrays, unknown entries, and own indices. */
+type MapEntryInput<T> = unknown extends T
+  ? T
+  : T extends readonly unknown[]
+    ? number extends T['length']
+      ? T
+      : T extends readonly [unknown, unknown]
+        ? T
+        : never
+    : never;
+type MapInput<T> = unknown extends T
+  ? T
+  : T extends null | undefined | string
+    ? T
+    : T extends CollectionSourceInput<T>
+      ? T extends Iterable<infer Entry>
+        ? [Entry] extends [MapEntryInput<Entry>]
+          ? T
+          : never
+        : T
+      : never;
+type RecordValues<T> = keyof T extends never ? unknown : T[keyof T];
+/** A numeric length may describe a non-plain array-like with missing indexed properties. */
+type CollectionRecordValues<T> =
+  | RecordValues<T>
+  | (T extends { readonly length: infer Length } ? (Extract<Length, number> extends never ? never : undefined) : never);
 
 /** Runtime contracts and migration details: docs/API.md and docs/migration.md. */
 declare namespace Types {
@@ -61,7 +131,7 @@ declare namespace Types {
     [index: number]: number | bigint;
   }
   /**
-   * Determines whether a value is exactly `undefined`.
+   * Checks whether a value is exactly `undefined`.
    *
    * @param value The value to check.
    * @returns `true` if the value is `undefined`; otherwise `false`.
@@ -69,7 +139,7 @@ declare namespace Types {
    */
   function isUndefined(value: unknown): value is undefined;
   /**
-   * Determines whether a value is exactly `null`.
+   * Checks whether a value is exactly `null`.
    *
    * @param value The value to check.
    * @returns `true` if the value is `null`; otherwise `false`.
@@ -77,7 +147,7 @@ declare namespace Types {
    */
   function isNull(value: unknown): value is null;
   /**
-   * Determines whether a value is a primitive boolean or a genuine boxed `Boolean`.
+   * Checks whether a value is a primitive boolean or a genuine boxed `Boolean`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods.
@@ -89,7 +159,7 @@ declare namespace Types {
    */
   function isBoolean(value: unknown): boolean;
   /**
-   * Determines whether a value is a primitive number or a genuine boxed `Number`.
+   * Checks whether a value is a primitive number or a genuine boxed `Number`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods. Includes `NaN` and infinities.
@@ -101,7 +171,7 @@ declare namespace Types {
    */
   function isNumber(value: unknown): boolean;
   /**
-   * Determines whether a value is a primitive string or a genuine boxed `String`.
+   * Checks whether a value is a primitive string or a genuine boxed `String`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods.
@@ -112,7 +182,7 @@ declare namespace Types {
    */
   function isString(value: unknown): boolean;
   /**
-   * Determines whether a value is a primitive symbol.
+   * Checks whether a value is a primitive symbol.
    *
    * Boxed symbols return `false`.
    *
@@ -122,7 +192,7 @@ declare namespace Types {
    */
   function isSymbol(value: unknown): value is symbol;
   /**
-   * Determines whether a value is a primitive bigint.
+   * Checks whether a value is a primitive bigint.
    *
    * Boxed bigints return `false`; numeric strings are not converted.
    *
@@ -132,7 +202,7 @@ declare namespace Types {
    */
   function isBigInt(value: unknown): value is bigint;
   /**
-   * Determines whether a value is a primitive rather than an object or function.
+   * Checks whether a value is a primitive rather than an object or function.
    *
    * Includes `null` and `undefined`; rejects wrappers and functions.
    *
@@ -142,7 +212,7 @@ declare namespace Types {
    */
   function isPrimitive(value: unknown): value is undefined | null | boolean | number | string | symbol | bigint;
   /**
-   * Determines whether a value is `null` or `undefined`.
+   * Checks whether a value is `null` or `undefined`.
    *
    * @param value The value to check.
    * @returns `true` if the value is `null` or `undefined`; otherwise `false`.
@@ -150,7 +220,7 @@ declare namespace Types {
    */
   function isNullish(value: unknown): value is null | undefined;
   /**
-   * Determines whether a value is nullish or a supported string or container has no items.
+   * Checks whether a value is nullish or a supported string or container has no items.
    *
    * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
    * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
@@ -166,8 +236,8 @@ declare namespace Types {
    */
   function isEmpty(value: unknown): boolean;
   /**
-   * Determines whether a value is nullish, an empty or whitespace-only string, or a supported
-   * container containing only nullish values.
+   * Checks whether a value is nullish, an empty or whitespace-only string, or a supported container
+   * containing only nullish values.
    *
    * Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw
    * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
@@ -183,7 +253,7 @@ declare namespace Types {
    */
   function isBlank(value: unknown): boolean;
   /**
-   * Determines whether JavaScript treats a value as `true` in a condition.
+   * Checks whether JavaScript treats a value as `true` in a condition.
    *
    * @param value The value to check.
    * @returns `true` if the value is truthy under JavaScript boolean coercion; otherwise `false`.
@@ -191,7 +261,7 @@ declare namespace Types {
    */
   function isTruthy(value: unknown): boolean;
   /**
-   * Determines whether JavaScript treats a value as `false` in a condition.
+   * Checks whether JavaScript treats a value as `false` in a condition.
    *
    * @param value The value to check.
    * @returns `true` if the value is falsy under JavaScript boolean coercion; otherwise `false`.
@@ -199,7 +269,7 @@ declare namespace Types {
    */
   function isFalsy(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is an integer.
+   * Checks whether a primitive or boxed number is an integer.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -209,7 +279,7 @@ declare namespace Types {
    */
   function isInteger(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
+   * Checks whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -220,7 +290,7 @@ declare namespace Types {
    */
   function isSafeInteger(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is a finite number with a fractional part.
+   * Checks whether a primitive or boxed number is a finite number with a fractional part.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -231,7 +301,7 @@ declare namespace Types {
    */
   function isFloat(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is a finite number.
+   * Checks whether a primitive or boxed number is a finite number.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -241,7 +311,7 @@ declare namespace Types {
    */
   function isFinite(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is positive or negative infinity.
+   * Checks whether a primitive or boxed number is positive or negative infinity.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -252,7 +322,7 @@ declare namespace Types {
    */
   function isInfinite(value: unknown): boolean;
   /**
-   * Determines whether a primitive or boxed number is `NaN`.
+   * Checks whether a primitive or boxed number is `NaN`.
    *
    * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
@@ -262,7 +332,7 @@ declare namespace Types {
    */
   function isNaN(value: unknown): boolean;
   /**
-   * Determines whether a value is a finite number, a bigint, or non-blank numeric text.
+   * Checks whether a value is a finite number, a bigint, or non-blank numeric text.
    *
    * Accepts numeric text as well as finite numbers and primitive bigints. Rejects booleans, blank
    * text, `NaN`, infinities and boxed bigints.
@@ -274,7 +344,7 @@ declare namespace Types {
    */
   function isNumeric(value: unknown): boolean;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -290,7 +360,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: 'boolean'): value is boolean;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -306,7 +376,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: 'number'): value is number;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -322,7 +392,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: 'bigint'): value is bigint;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -338,7 +408,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: 'string'): value is string;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -354,7 +424,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: 'symbol'): value is symbol;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -370,7 +440,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: null): value is null;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -386,7 +456,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: undefined): value is undefined;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -402,7 +472,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown): value is undefined;
   /**
-   * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+   * Checks whether a value matches a type name, instance target, predicate or union of matchers.
    *
    * Validates the entire specification before matching. An omitted type matches `undefined`.
    * Predicates must return a synchronous primitive boolean.
@@ -418,7 +488,7 @@ declare namespace Types {
    */
   function isTypeOf(value: unknown, type: TypeMatcher): boolean;
   /**
-   * Determines whether a value is a non-null object or function.
+   * Checks whether a value is a non-null object or function.
    *
    * @param value The value to check.
    * @returns `true` if the value is a non-null object or function; otherwise `false`.
@@ -426,7 +496,7 @@ declare namespace Types {
    */
   function isObject(value: unknown): boolean;
   /**
-   * Determines whether a value has a null or ordinary `Object` prototype.
+   * Checks whether a value has a null or ordinary `Object` prototype.
    *
    * Checks the current prototype, not allocation history or a schema. Proxy traps may run; an own
    * `constructor` field is not read.
@@ -438,7 +508,7 @@ declare namespace Types {
    */
   function isPlainObject(value: unknown): boolean;
   /**
-   * Determines whether following enumerable string-keyed properties leads back to an ancestor.
+   * Checks whether following enumerable string-keyed properties leads back to an ancestor.
    *
    * Includes inherited enumerable string keys, but ignores symbols, non-enumerable properties and
    * Map/Set entries. Getters and proxy traps may run. Internal reference tracking falls back to
@@ -452,7 +522,7 @@ declare namespace Types {
    */
   function isCyclic(value: unknown): boolean;
   /**
-   * Determines whether a value exposes a synchronous iterator method.
+   * Checks whether a value exposes a synchronous iterator method.
    *
    * Reads `Symbol.iterator` without calling it. Getters and proxy traps may run; method presence
    * does not guarantee a valid iterator.
@@ -464,7 +534,7 @@ declare namespace Types {
    */
   function isIterable(value: unknown): boolean;
   /**
-   * Determines whether a value is an array, including from another realm.
+   * Checks whether a value is an array, including from another realm.
    *
    * Preserves native `Array.isArray` behaviour, including `TypeError` for a revoked proxy.
    *
@@ -475,7 +545,7 @@ declare namespace Types {
    */
   function isArray(value: unknown): boolean;
   /**
-   * Determines whether an array contains only values matching a type specification.
+   * Checks whether an array contains only values matching a type specification.
    *
    * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
    * the first mismatch. Missing array positions read as `undefined` unless inherited numeric
@@ -492,7 +562,7 @@ declare namespace Types {
    */
   function isArrayOf(value: unknown, type?: TypeMatcher): boolean;
   /**
-   * Determines whether a non-function value has a valid numeric length.
+   * Checks whether a non-function value has a valid numeric length.
    *
    * Reads `length` once. Missing indices are allowed; boxed, negative, fractional or non-finite
    * lengths are rejected.
@@ -505,7 +575,7 @@ declare namespace Types {
    */
   function isArrayLike(value: unknown): boolean;
   /**
-   * Determines whether an array-like value contains only values matching a type specification.
+   * Checks whether an array-like value contains only values matching a type specification.
    *
    * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
    * the first mismatch. Missing array positions read as `undefined` unless inherited numeric
@@ -522,7 +592,7 @@ declare namespace Types {
    */
   function isArrayLikeOf(value: unknown, type?: TypeMatcher): boolean;
   /**
-   * Determines whether a value is an array of length two.
+   * Checks whether a value is an array of length two.
    *
    * @param value The value to check.
    * @returns `true` if the value is an array of length `2`; otherwise `false`.
@@ -532,7 +602,7 @@ declare namespace Types {
    */
   function isPair(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `Map`.
+   * Checks whether a value is a genuine `Map`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
@@ -543,7 +613,7 @@ declare namespace Types {
    */
   function isMap(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `Set`.
+   * Checks whether a value is a genuine `Set`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
@@ -554,7 +624,7 @@ declare namespace Types {
    */
   function isSet(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `WeakMap`.
+   * Checks whether a value is a genuine `WeakMap`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
@@ -565,7 +635,7 @@ declare namespace Types {
    */
   function isWeakMap(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `WeakSet`.
+   * Checks whether a value is a genuine `WeakSet`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
@@ -576,7 +646,7 @@ declare namespace Types {
    */
   function isWeakSet(value: unknown): boolean;
   /**
-   * Determines whether JavaScript reports a value as a function.
+   * Checks whether JavaScript reports a value as a function.
    *
    * Includes classes and callable proxies; does not guarantee a successful call.
    *
@@ -586,7 +656,7 @@ declare namespace Types {
    */
   function isFunction(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `Date`, valid or invalid.
+   * Checks whether a value is a genuine `Date`, valid or invalid.
    *
    * @param value The value to check.
    * @returns `true` if the value is a genuine `Date`, valid or invalid; otherwise `false`.
@@ -594,7 +664,7 @@ declare namespace Types {
    */
   function isDate(value: unknown): boolean;
   /**
-   * Determines whether a genuine `Date` contains a finite timestamp.
+   * Checks whether a genuine `Date` contains a finite timestamp.
    *
    * @param value The value to check.
    * @returns `true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`.
@@ -602,7 +672,7 @@ declare namespace Types {
    */
   function isValidDate(value: unknown): boolean;
   /**
-   * Determines whether a genuine `Date` contains a `NaN` timestamp.
+   * Checks whether a genuine `Date` contains a `NaN` timestamp.
    *
    * @param value The value to check.
    * @returns `true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise `false`.
@@ -610,7 +680,7 @@ declare namespace Types {
    */
   function isInvalidDate(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine regular-expression object.
+   * Checks whether a value is a genuine regular-expression object.
    *
    * @param value The value to check.
    * @returns `true` if the value is a genuine `RegExp` instance; otherwise `false`.
@@ -618,7 +688,7 @@ declare namespace Types {
    */
   function isRegExp(value: unknown): boolean;
   /**
-   * Determines whether a value passes the local native `Promise` instance check.
+   * Checks whether a value passes the local native `Promise` instance check.
    *
    * Uses local `instanceof` semantics; it is not proof of native Promise identity. Does not call
    * `then`.
@@ -632,7 +702,7 @@ declare namespace Types {
    */
   function isPromise(value: unknown): boolean;
   /**
-   * Determines whether a value is an object or function with callable `then` and `catch` methods.
+   * Checks whether a value is an object or function with callable `then` and `catch` methods.
    *
    * Requires both `then` and `catch`, unlike TypeScript `PromiseLike`. Does not invoke them; getters
    * or proxy traps may run.
@@ -645,7 +715,7 @@ declare namespace Types {
    */
   function isPromiseLike(value: unknown): boolean;
   /**
-   * Determines whether a value is an object or function with a callable `then` method.
+   * Checks whether a value is an object or function with a callable `then` method.
    *
    * Does not invoke `then` or prove Promise behaviour. Getters and proxy traps may run.
    *
@@ -657,7 +727,7 @@ declare namespace Types {
    */
   function isThenable(value: unknown): boolean;
   /**
-   * Determines whether a value is recognised as an error by the available native check or fallback.
+   * Checks whether a value is recognised as an error by the available native check or fallback.
    *
    * The fallback rejects custom tags without reading their getters. Without native branding or a
    * usable tag key, returns `false`. Proxy traps may run; this is not a security check.
@@ -670,7 +740,7 @@ declare namespace Types {
    */
   function isError(value: unknown): boolean;
   /**
-   * Determines whether a value is an instance of the local DOM `Node` constructor.
+   * Checks whether a value is an instance of the local DOM `Node` constructor.
    *
    * Returns `false` when the local constructor is unavailable. Does not recognise all foreign-realm
    * DOM objects.
@@ -684,7 +754,7 @@ declare namespace Types {
    */
   function isNode(value: unknown): boolean;
   /**
-   * Determines whether a value is an instance of the local DOM `Element` constructor.
+   * Checks whether a value is an instance of the local DOM `Element` constructor.
    *
    * Returns `false` when the local constructor is unavailable. Does not recognise all foreign-realm
    * DOM objects.
@@ -698,7 +768,7 @@ declare namespace Types {
    */
   function isElement(value: unknown): boolean;
   /**
-   * Determines whether a value is an instance of the local DOM `DocumentFragment` constructor.
+   * Checks whether a value is an instance of the local DOM `DocumentFragment` constructor.
    *
    * Returns `false` when the local constructor is unavailable. Does not recognise all foreign-realm
    * DOM objects.
@@ -712,7 +782,7 @@ declare namespace Types {
    */
   function isFragment(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `ArrayBuffer`.
+   * Checks whether a value is a genuine `ArrayBuffer`.
    *
    * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
    * Returns `false` when the local native detection capability is unavailable.
@@ -723,7 +793,7 @@ declare namespace Types {
    */
   function isArrayBuffer(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `SharedArrayBuffer`.
+   * Checks whether a value is a genuine `SharedArrayBuffer`.
    *
    * Supports foreign instances and rejects proxies or prototype imitations. Returns `false` when
    * native shared buffers are unavailable. Returns `false` when the local native detection
@@ -736,7 +806,7 @@ declare namespace Types {
    */
   function isSharedArrayBuffer(value: unknown): boolean;
   /**
-   * Determines whether a value is a native typed array or `DataView`.
+   * Checks whether a value is a native typed array or `DataView`.
    *
    * Detached views retain their identity; passing does not guarantee usable memory. Falls back to
    * native DataView and typed-array identity checks when `ArrayBuffer.isView` is unavailable;
@@ -748,7 +818,7 @@ declare namespace Types {
    */
   function isArrayBufferView(value: unknown): boolean;
   /**
-   * Determines whether a value is a native typed array, including a Node.js `Buffer`.
+   * Checks whether a value is a native typed array, including a Node.js `Buffer`.
    *
    * Excludes `DataView` and ordinary arrays; detached views still pass. Does not identify a
    * particular element type. Uses captured native tag or length getters; returns `false` if no
@@ -762,7 +832,7 @@ declare namespace Types {
    */
   function isTypedArray(value: unknown): boolean;
   /**
-   * Determines whether a value is a genuine `DataView`.
+   * Checks whether a value is a genuine `DataView`.
    *
    * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
    * Returns `false` when the local native detection capability is unavailable.
@@ -773,7 +843,7 @@ declare namespace Types {
    */
   function isDataView(value: unknown): boolean;
   /**
-   * Determines whether a value exposes an asynchronous iterator method.
+   * Checks whether a value exposes an asynchronous iterator method.
    *
    * Does not invoke the method. Returns `false` without inspecting the value when
    * `Symbol.asyncIterator` is unavailable. Returns `false` without inspecting the input when
@@ -787,7 +857,7 @@ declare namespace Types {
    */
   function isAsyncIterable(value: unknown): boolean;
   /**
-   * Determines whether a value is an object or function with a callable `next` method.
+   * Checks whether a value is an object or function with a callable `next` method.
    *
    * Does not invoke `next` or validate iterator results. Property getters and proxy traps may run.
    *
@@ -799,7 +869,7 @@ declare namespace Types {
    */
   function isIteratorLike(value: unknown): boolean;
   /**
-   * Determines whether a value is neither `null` nor `undefined`.
+   * Checks whether a value is neither `null` nor `undefined`.
    *
    * @param value The value to check.
    * @returns `true` if the value is neither `null` nor `undefined`; otherwise `false`.
@@ -807,7 +877,7 @@ declare namespace Types {
    */
   function isNonNullish<T>(value: T): value is NonNullable<T>;
   /**
-   * Determines whether a value is a non-null object, excluding functions.
+   * Checks whether a value is a non-null object, excluding functions.
    *
    * @param value The value to check.
    * @returns `true` if the value is a non-null object other than a function; otherwise `false`.
@@ -815,7 +885,7 @@ declare namespace Types {
    */
   function isObjectLike(value: unknown): boolean;
   /**
-   * Determines whether a value is an array with a valid length greater than zero.
+   * Checks whether a value is an array with a valid length greater than zero.
    *
    * Sparse arrays count as non-empty when their length is positive. Does not validate elements.
    *
@@ -828,9 +898,9 @@ declare namespace Types {
    */
   function isNonEmptyArray(value: unknown): boolean;
   /**
-   * Determines whether primitive or boxed string text is valid JSON.
+   * Checks whether primitive or boxed string text is valid JSON.
    *
-   * Accepts JSON scalar text as well as objects and arrays. Does not validate a schema or
+   * Accepts text representing JSON objects, arrays or scalar values. Does not validate a schema or
    * arbitrary-object serialisability.
    *
    * @param value The value to check.
@@ -840,160 +910,7 @@ declare namespace Types {
    */
   function isJson(value: unknown): boolean;
   /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: 'boolean'): TypeGuard<boolean>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: 'number'): TypeGuard<number>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: 'bigint'): TypeGuard<bigint>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: 'string'): TypeGuard<string>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: 'symbol'): TypeGuard<symbol>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: null): TypeGuard<null>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: undefined): TypeGuard<undefined>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(): TypeGuard<undefined>;
-  /**
-   * Creates a reusable function that checks values against a type specification.
-   *
-   * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
-   * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
-   * back to local arrays when weak collections are unavailable; no platform globals are changed.
-   *
-   * @param type The matcher for values passed to the returned checker. An omitted matcher matches
-   * `undefined`.
-   * @returns A reusable checker that returns `true` if its input matches the compiled specification;
-   * otherwise `false`.
-   * @throws Invalid matcher configuration throws `TypeError` during creation; configuration access
-   * can also trigger proxy traps. The returned checker can throw for invalid predicate results or
-   * native instance checks. Callback and property-access errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
-   */
-  function createTypeChecker(type: TypeMatcher): (value: unknown) => boolean;
-  /**
-   * Determines whether a Set contains only values matching a type specification.
+   * Checks whether a Set contains only values matching a type specification.
    *
    * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
    * the first mismatch. Predicates must not mutate the Set. Unavailable native collection types do
@@ -1011,7 +928,7 @@ declare namespace Types {
    */
   function isSetOf(value: unknown, type?: TypeMatcher): boolean;
   /**
-   * Determines whether every Map key and value matches its respective specification.
+   * Checks whether every Map key and value matches its respective specification.
    *
    * Validates both matchers first; empty Maps pass. Checks each key before its value. Predicates
    * must not mutate the Map. Unavailable native collection types do not prevent loading or checks of
@@ -1029,7 +946,7 @@ declare namespace Types {
    */
   function isMapOf(value: unknown, keyType?: TypeMatcher, valueType?: TypeMatcher): boolean;
   /**
-   * Determines whether a synchronous iterable is empty by advancing its iterator.
+   * Checks whether a synchronous iterable is empty by advancing its iterator.
    *
    * Consumes input and may close it early, running iterator cleanup. Requires a synchronous
    * iterable; do not reuse one-shot input.
@@ -1041,7 +958,7 @@ declare namespace Types {
    */
   function isEmptyIterable(value: unknown): boolean;
   /**
-   * Determines whether every item yielded by a synchronous iterable is nullish by advancing its
+   * Checks whether every item yielded by a synchronous iterable is nullish by advancing its
    * iterator.
    *
    * Consumes input and may close it early. A nullish-only infinite iterable never completes. Map
@@ -1056,57 +973,72 @@ declare namespace Types {
   function isBlankIterable(value: unknown): boolean;
   /** Conditions are booleans or synchronous predicates invoked without a receiver. */
   type ConversionCondition<T> = boolean | ((this: undefined, value: T) => boolean);
-  /** Prefer definite iteration; a visible optional/nullable iterator can override indexed values. */
+  /** Iteration takes precedence. Otherwise include all declared record values, including symbols and length.
+   * Numeric-length shapes can also be non-plain array-likes with holes. Optional iterators remain unknown.
+   */
   type ArrayElement<T> =
     T extends Iterable<infer Item>
       ? Item
-      : T extends ArrayLike<infer Item>
+      : T extends object
         ? typeof Symbol.iterator extends keyof T
           ? T[typeof Symbol.iterator] extends null | undefined
-            ? Item
+            ? CollectionRecordValues<T>
             : unknown
-          : Item
+          : CollectionRecordValues<T>
         : unknown;
-  /** Preserve inferred key/value types for iterable entry tuples; other inputs remain unknown. */
+  /** Iterables supply entries; records preserve symbol keys and stringify numeric keys.
+   * Types cannot prove plainness, property enumerability, or the absence of a possible iterator.
+   */
   type ConvertedMap<T> =
-    T extends Iterable<readonly [infer Key, infer Value]> ? Map<Key, Value> : Map<unknown, unknown>;
-  /** Preserve inferred iterable element types; non-iterable inputs remain unknown. */
-  type ConvertedSet<T> = Set<T extends Iterable<infer Item> ? Item : unknown>;
-  /** Native Object conversion preserves objects and boxes non-nullish primitives. */
-  // Primitive intersections can satisfy `object` structurally; box them before
-  // preserving genuine object/function input types.
-  type ConvertedObject<T> = T extends null | undefined
-    ? object
-    : T extends string
-      ? String
-      : T extends number
-        ? Number
-        : T extends boolean
-          ? Boolean
-          : T extends bigint
-            ? BoxedBigInt
-            : T extends symbol
-              ? Symbol
-              : T extends object
-                ? T
-                : object;
+    T extends Iterable<readonly [infer Key, infer Value]>
+      ? Map<Key, Value>
+      : T extends Iterable<unknown>
+        ? Map<unknown, unknown>
+        : T extends object
+          ? (
+              typeof Symbol.iterator extends keyof T
+                ? T[typeof Symbol.iterator] extends null | undefined
+                  ? true
+                  : false
+                : true
+            ) extends true
+            ? Map<string | Extract<keyof T, symbol>, RecordValues<T>>
+            : Map<unknown, unknown>
+          : Map<unknown, unknown>;
+  /** Sets use the same source-value inference as arrays. Nullish sources produce empty sets. */
+  type ConvertedSet<T> = Set<ArrayElement<T>>;
+  /** Fresh plain-object results: inferred properties are optional because copying can omit them. */
+  type ConvertedPlainObject<T> = T extends string
+    ? UnknownPlainObject
+    : T extends Iterable<readonly [infer Key, infer Value]>
+      ? PlainObjectProperties<Record<Extract<Key, string | symbol>, Value>>
+      : T extends object
+        ? typeof Symbol.iterator extends keyof T
+          ? T[typeof Symbol.iterator] extends null | undefined
+            ? PlainObjectProperties<T>
+            : UnknownPlainObject
+          : PlainObjectProperties<T>
+        : never;
 
   /**
-   * Converts iterable or array-like input to a new shallow array.
+   * Converts a synchronous iterable, plain record or supported array-like input to a new shallow
+   * array.
    *
-   * Consumes iterable input and may invoke getters or iterator methods. Infinite iterables do not
-   * finish; nullish input throws. Requires native `Array.from`; missing support does not prevent
-   * loading. Requested conversion throws `TypeError` before inspecting the input when it is
-   * unavailable.
+   * Consumes iterable input, copies own enumerable string and symbol record values, or reads
+   * supported array-like indices. Array-like lengths must already be numeric safe integers at least
+   * zero. Nullish and unsupported inputs throw. Requires native `Array.from`; missing support throws
+   * `TypeError` before inspecting the input.
    *
    * @param value The value to convert.
-   * @returns A new shallow array containing the input items.
-   * @throws `TypeError` for `null`, `undefined`, malformed iterators or incompatible length
-   * conversion. Oversized lengths can throw `RangeError`. Property-access and iteration errors
-   * propagate. Unavailable native `Array.from` support throws `TypeError` before conversion.
+   * @returns A new shallow array containing iterable items, own enumerable record values or indexed
+   * array-like values.
+   * @throws TypeError for nullish or unsupported input, malformed iterators or invalid array-like
+   * lengths. Oversized array results can throw RangeError. Getter, proxy and iterator errors
+   * propagate. Missing native Array.from throws before conversion; record copying requires
+   * symbol-enumeration support.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayvalue
    */
-  function toArray<T>(value: T): ArrayElement<T>[];
+  function toArray<T>(value: T & CollectionSourceInput<T>): ArrayElement<T>[];
   /**
    * Converts a value to a primitive bigint using native conversion.
    *
@@ -1159,10 +1091,27 @@ declare namespace Types {
    */
   function toInteger(value?: unknown): number;
   /**
+   * Serialises a value to JSON text using native `JSON.stringify` behaviour.
+   *
+   * May return `undefined`. Does not transform Maps, Sets or bigints automatically. Cycles and
+   * unhandled bigints throw; getters, `toJSON` methods and replacer callbacks can run.
+   *
+   * @param value The value to convert.
+   * @param replacer A native JSON replacer callback or property-name list. Callbacks receive the
+   * containing object as `this`; omitted or `null` uses ordinary serialisation.
+   * @param space Native JSON indentation, capped at ten spaces or ten string code units.
+   * @returns JSON text, or `undefined` when native serialisation produces no text, including omitted
+   * input without a replacer.
+   * @throws Cycles and unhandled bigints throw `TypeError`. Getter, proxy, `toJSON` and replacer
+   * exceptions propagate unchanged.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tojsonvalue-replacer-space
+   */
+  function toJson(value?: unknown, replacer?: JsonReplacer, space?: string | number): string | undefined;
+  /**
    * Converts a value to a primitive number using JavaScript’s `Number` conversion.
    *
-   * May return `NaN` or infinity, lose bigint precision, or invoke object conversion hooks. Symbols
-   * throw.
+   * May return `NaN` or infinity, lose bigint precision, round numeric text, underflow to zero, or
+   * invoke object conversion hooks. Symbols throw.
    *
    * @param value The value to convert.
    * @returns The converted primitive number; it may be `NaN` or infinite.
@@ -1172,29 +1121,40 @@ declare namespace Types {
    */
   function toNumber(value?: unknown): number;
   /**
-   * Converts a value to an object, preserving existing objects and functions.
+   * Converts JSON object text, a plain object, or entry pairs into a fresh plain object.
    *
-   * Preserves existing object/function identity. Nullish input creates a fresh empty object;
-   * conversion hooks are not invoked.
+   * Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving
+   * nested references. Entry pairs must be two-element arrays with string or symbol keys. Nullish
+   * input throws.
    *
    * @param value The value to convert.
-   * @returns The original object or function, a boxed primitive, or a fresh empty object for nullish
-   * input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toobjectvalue
+   * @returns A fresh ordinary object containing the parsed properties, copied enumerable properties,
+   * or supplied entries.
+   * @throws Malformed JSON throws SyntaxError. Unsupported inputs, non-object JSON, malformed entry
+   * pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate without
+   * replacement.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
    */
-  function toObject<T>(value: T): ConvertedObject<T>;
+  function toPlainObject<Key extends string | symbol, Value>(
+    value: Iterable<readonly [Key, Value]>
+  ): PlainObjectProperties<Record<Key, Value>>;
   /**
-   * Converts a value to an object, preserving existing objects and functions.
+   * Converts JSON object text, a plain object, or entry pairs into a fresh plain object.
    *
-   * Preserves existing object/function identity. Nullish input creates a fresh empty object;
-   * conversion hooks are not invoked.
+   * Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving
+   * nested references. Entry pairs must be two-element arrays with string or symbol keys. Nullish
+   * input throws.
    *
    * @param value The value to convert.
-   * @returns The original object or function, a boxed primitive, or a fresh empty object for nullish
-   * input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toobjectvalue
+   * @returns A fresh ordinary object containing the parsed properties, copied enumerable properties,
+   * or supplied entries.
+   * @throws Malformed JSON throws SyntaxError. Unsupported inputs, non-object JSON, malformed entry
+   * pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate without
+   * replacement.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
    */
-  function toObject(): object;
+  function toPlainObject<T>(value: T & PlainObjectInput<T>): ConvertedPlainObject<T>;
+
   /**
    * Converts a value to a primitive string using JavaScript’s `String` conversion.
    *
@@ -1225,16 +1185,16 @@ declare namespace Types {
    */
   function toSymbol(value?: unknown): symbol;
   /**
-   * Converts iterable or array-like input to a new shallow array when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts supported iterable, record or array-like input to a new shallow array when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toArray`. Consumes iterable input and may invoke getters or iterator
-   * methods. Infinite iterables do not finish; nullish input throws. Requires native `Array.from`;
-   * missing support does not prevent loading. Requested conversion throws `TypeError` before
-   * inspecting the input when it is unavailable.
+   * Requested conversion uses `toArray`. Consumes iterable input, copies own enumerable string and
+   * symbol record values, or reads supported array-like indices. Array-like lengths must already be
+   * numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native
+   * `Array.from`; missing support throws `TypeError` before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1246,18 +1206,18 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayifvalue-condition
    */
-  function toArrayIf<T>(value: T, condition: true): ArrayElement<T>[];
+  function toArrayIf<T>(value: T & CollectionSourceInput<T>, condition: true): ArrayElement<T>[];
   /**
-   * Converts iterable or array-like input to a new shallow array when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts supported iterable, record or array-like input to a new shallow array when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toArray`. Consumes iterable input and may invoke getters or iterator
-   * methods. Infinite iterables do not finish; nullish input throws. Requires native `Array.from`;
-   * missing support does not prevent loading. Requested conversion throws `TypeError` before
-   * inspecting the input when it is unavailable.
+   * Requested conversion uses `toArray`. Consumes iterable input, copies own enumerable string and
+   * symbol record values, or reads supported array-like indices. Array-like lengths must already be
+   * numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native
+   * `Array.from`; missing support throws `TypeError` before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1271,16 +1231,16 @@ declare namespace Types {
    */
   function toArrayIf<T>(value: T, condition?: false): T;
   /**
-   * Converts iterable or array-like input to a new shallow array when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts supported iterable, record or array-like input to a new shallow array when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toArray`. Consumes iterable input and may invoke getters or iterator
-   * methods. Infinite iterables do not finish; nullish input throws. Requires native `Array.from`;
-   * missing support does not prevent loading. Requested conversion throws `TypeError` before
-   * inspecting the input when it is unavailable.
+   * Requested conversion uses `toArray`. Consumes iterable input, copies own enumerable string and
+   * symbol record values, or reads supported array-like indices. Array-like lengths must already be
+   * numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native
+   * `Array.from`; missing support throws `TypeError` before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1292,7 +1252,33 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayifvalue-condition
    */
-  function toArrayIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | ArrayElement<T>[];
+  function toArrayIf<T>(value: T, condition: (this: undefined, value: T) => boolean): T | ArrayElement<T>[];
+  /**
+   * Converts supported iterable, record or array-like input to a new shallow array when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toArray`. Consumes iterable input, copies own enumerable string and
+   * symbol record values, or reads supported array-like indices. Array-like lengths must already be
+   * numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native
+   * `Array.from`; missing support throws `TypeError` before inspecting the input.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A new shallow array when conversion is requested; otherwise the original input,
+   * unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toArray` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayifvalue-condition
+   */
+  function toArrayIf<T>(
+    value: T & CollectionSourceInput<T>,
+    condition: ConversionCondition<T> | undefined
+  ): T | ArrayElement<T>[];
   /**
    * Converts a value to a primitive bigint when the condition evaluates to `true`. Otherwise,
    * returns the original value unchanged.
@@ -1549,14 +1535,94 @@ declare namespace Types {
    */
   function toIntegerIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | number;
   /**
+   * Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the
+   * original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toJson`. May return `undefined`. Does not transform Maps, Sets or
+   * bigints automatically. Cycles and unhandled bigints throw; getters, `toJSON` methods and
+   * replacer callbacks can run.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param replacer A native JSON replacer callback or property-name list. Callbacks receive the
+   * containing object as `this`; omitted or `null` uses ordinary serialisation.
+   * @param space Native JSON indentation, capped at ten spaces or ten string code units.
+   * @returns JSON text or `undefined` when conversion is requested; otherwise the original input,
+   * unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toJson` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tojsonifvalue-condition-replacer-space
+   */
+  function toJsonIf<T>(value: T, condition: true, replacer?: JsonReplacer, space?: string | number): string | undefined;
+  /**
+   * Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the
+   * original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toJson`. May return `undefined`. Does not transform Maps, Sets or
+   * bigints automatically. Cycles and unhandled bigints throw; getters, `toJSON` methods and
+   * replacer callbacks can run.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param replacer A native JSON replacer callback or property-name list. Callbacks receive the
+   * containing object as `this`; omitted or `null` uses ordinary serialisation.
+   * @param space Native JSON indentation, capped at ten spaces or ten string code units.
+   * @returns JSON text or `undefined` when conversion is requested; otherwise the original input,
+   * unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toJson` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tojsonifvalue-condition-replacer-space
+   */
+  function toJsonIf<T>(value: T, condition?: false, replacer?: JsonReplacer, space?: string | number): T;
+  /**
+   * Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the
+   * original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toJson`. May return `undefined`. Does not transform Maps, Sets or
+   * bigints automatically. Cycles and unhandled bigints throw; getters, `toJSON` methods and
+   * replacer callbacks can run.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param replacer A native JSON replacer callback or property-name list. Callbacks receive the
+   * containing object as `this`; omitted or `null` uses ordinary serialisation.
+   * @param space Native JSON indentation, capped at ten spaces or ten string code units.
+   * @returns JSON text or `undefined` when conversion is requested; otherwise the original input,
+   * unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toJson` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tojsonifvalue-condition-replacer-space
+   */
+  function toJsonIf<T>(
+    value: T,
+    condition: ConversionCondition<T> | undefined,
+    replacer?: JsonReplacer,
+    space?: string | number
+  ): T | string | undefined;
+  /**
    * Converts a value to a primitive number when the condition evaluates to `true`. Otherwise,
    * returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or
-   * invoke object conversion hooks. Symbols throw.
+   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round
+   * numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1576,8 +1642,8 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or
-   * invoke object conversion hooks. Symbols throw.
+   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round
+   * numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1597,8 +1663,8 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or
-   * invoke object conversion hooks. Symbols throw.
+   * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round
+   * numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1612,68 +1678,116 @@ declare namespace Types {
    */
   function toNumberIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | number;
   /**
-   * Converts a value to an object when the condition evaluates to `true`. Otherwise, returns the
-   * original value unchanged.
+   * Converts a supported value to a fresh plain object when the condition evaluates to `true`.
+   * Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toObject`. Preserves existing object/function identity. Nullish input
-   * creates a fresh empty object; conversion hooks are not invoked.
+   * Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own
+   * enumerable string and symbol properties, preserving nested references. Entry pairs must be
+   * two-element arrays with string or symbol keys. Nullish input throws.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original object or function, a boxed primitive, or a new object for nullish input
-   * when conversion is requested; otherwise the original input, unchanged.
+   * @returns A fresh plain object when conversion is requested; otherwise the exact original input.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate. A requested conversion also follows `toObject` error behaviour; a skipped conversion
-   * does not inspect or coerce the value.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toobjectifvalue-condition
+   * propagate. A requested conversion also follows `toPlainObject` error behaviour; a skipped
+   * conversion does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectifvalue-condition
    */
-  function toObjectIf<T>(value: T, condition: true): ConvertedObject<T>;
+  function toPlainObjectIf<Key extends string | symbol, Value>(
+    value: Iterable<readonly [Key, Value]>,
+    condition: true
+  ): PlainObjectProperties<Record<Key, Value>>;
   /**
-   * Converts a value to an object when the condition evaluates to `true`. Otherwise, returns the
-   * original value unchanged.
+   * Converts a supported value to a fresh plain object when the condition evaluates to `true`.
+   * Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toObject`. Preserves existing object/function identity. Nullish input
-   * creates a fresh empty object; conversion hooks are not invoked.
+   * Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own
+   * enumerable string and symbol properties, preserving nested references. Entry pairs must be
+   * two-element arrays with string or symbol keys. Nullish input throws.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original object or function, a boxed primitive, or a new object for nullish input
-   * when conversion is requested; otherwise the original input, unchanged.
+   * @returns A fresh plain object when conversion is requested; otherwise the exact original input.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate. A requested conversion also follows `toObject` error behaviour; a skipped conversion
-   * does not inspect or coerce the value.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toobjectifvalue-condition
+   * propagate. A requested conversion also follows `toPlainObject` error behaviour; a skipped
+   * conversion does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectifvalue-condition
    */
-  function toObjectIf<T>(value: T, condition?: false): T;
+  function toPlainObjectIf<T>(value: T & PlainObjectInput<T>, condition: true): ConvertedPlainObject<T>;
   /**
-   * Converts a value to an object when the condition evaluates to `true`. Otherwise, returns the
-   * original value unchanged.
+   * Converts a supported value to a fresh plain object when the condition evaluates to `true`.
+   * Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toObject`. Preserves existing object/function identity. Nullish input
-   * creates a fresh empty object; conversion hooks are not invoked.
+   * Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own
+   * enumerable string and symbol properties, preserving nested references. Entry pairs must be
+   * two-element arrays with string or symbol keys. Nullish input throws.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original object or function, a boxed primitive, or a new object for nullish input
-   * when conversion is requested; otherwise the original input, unchanged.
+   * @returns A fresh plain object when conversion is requested; otherwise the exact original input.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate. A requested conversion also follows `toObject` error behaviour; a skipped conversion
-   * does not inspect or coerce the value.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toobjectifvalue-condition
+   * propagate. A requested conversion also follows `toPlainObject` error behaviour; a skipped
+   * conversion does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectifvalue-condition
    */
-  function toObjectIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | ConvertedObject<T>;
+  function toPlainObjectIf<T>(value: T, condition?: false): T;
+  /**
+   * Converts a supported value to a fresh plain object when the condition evaluates to `true`.
+   * Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own
+   * enumerable string and symbol properties, preserving nested references. Entry pairs must be
+   * two-element arrays with string or symbol keys. Nullish input throws.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A fresh plain object when conversion is requested; otherwise the exact original input.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toPlainObject` error behaviour; a skipped
+   * conversion does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectifvalue-condition
+   */
+  function toPlainObjectIf<T>(value: T, condition: (this: undefined, value: T) => boolean): T | ConvertedPlainObject<T>;
+  /**
+   * Converts a supported value to a fresh plain object when the condition evaluates to `true`.
+   * Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own
+   * enumerable string and symbol properties, preserving nested references. Entry pairs must be
+   * two-element arrays with string or symbol keys. Nullish input throws.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A fresh plain object when conversion is requested; otherwise the exact original input.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toPlainObject` error behaviour; a skipped
+   * conversion does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectifvalue-condition
+   */
+  function toPlainObjectIf<T>(
+    value: T & PlainObjectInput<T>,
+    condition: ConversionCondition<T> | undefined
+  ): T | ConvertedPlainObject<T>;
   /**
    * Converts a value to a primitive string when the condition evaluates to `true`. Otherwise,
    * returns the original value unchanged.
@@ -1807,50 +1921,70 @@ declare namespace Types {
    */
   function toSymbolIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | symbol;
   /**
-   * Converts an iterable of key/value entries to a new shallow Map.
+   * Converts a plain record or synchronous iterable of strict key/value pairs to a new shallow Map.
    *
-   * Consumes synchronous entries; duplicate keys keep their first position and take the last value.
-   * Nullish input creates an empty Map. Non-iterable objects are not converted into entries.
-   * Requires native `Map`; missing support does not prevent loading. Requested conversion throws
-   * `TypeError` before inspecting the input when it is unavailable.
+   * Plain records supply own enumerable string and symbol entries. Iterable pairs must be exact
+   * two-element arrays with both own indices present. Duplicate keys keep their first position and
+   * take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support
+   * throws before inspecting the input.
    *
    * @param value The value to convert.
-   * @returns A new Map containing the input entries, or an empty Map for omitted or nullish input.
-   * @throws TypeError for non-nullish non-iterable input, malformed iterators or primitive entries.
-   * Iterator and entry-property errors propagate according to native Map construction, including
-   * iterator closing when an entry cannot be processed. Unavailable native `Map` support throws
-   * `TypeError` before conversion.
+   * @returns A new Map containing own enumerable string and symbol record entries or strict iterable
+   * pairs, or an empty Map for omitted or nullish input.
+   * @throws TypeError for unsupported input, malformed iterators or entry pairs that are not exact
+   * two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry
+   * validation errors close the outer iterator. Missing native Map throws before conversion; record
+   * copying requires symbol-enumeration support.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
    */
-  function toMap<T = unknown>(value?: T): ConvertedMap<T>;
+  function toMap<Key, Value>(value: readonly (readonly [Key, Value])[]): Map<Key, Value>;
   /**
-   * Converts an iterable of values to a new shallow Set.
+   * Converts a plain record or synchronous iterable of strict key/value pairs to a new shallow Map.
    *
-   * Consumes synchronous values and removes duplicates without coercion. Strings yield Unicode code
-   * points. Nullish input creates an empty Set; non-iterable scalars and array-like objects throw.
-   * Requires native `Set`; missing support does not prevent loading. Requested conversion throws
-   * `TypeError` before inspecting the input when it is unavailable.
+   * Plain records supply own enumerable string and symbol entries. Iterable pairs must be exact
+   * two-element arrays with both own indices present. Duplicate keys keep their first position and
+   * take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support
+   * throws before inspecting the input.
    *
    * @param value The value to convert.
-   * @returns A new Set of the input values in first-insertion order, or an empty Set for omitted or
-   * nullish input.
-   * @throws TypeError for non-nullish non-iterable input or malformed iterators. Property-access and
-   * iterator errors propagate according to native Set construction. Unavailable native `Set` support
-   * throws `TypeError` before conversion.
+   * @returns A new Map containing own enumerable string and symbol record entries or strict iterable
+   * pairs, or an empty Map for omitted or nullish input.
+   * @throws TypeError for unsupported input, malformed iterators or entry pairs that are not exact
+   * two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry
+   * validation errors close the outer iterator. Missing native Map throws before conversion; record
+   * copying requires symbol-enumeration support.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
+   */
+  function toMap<T = unknown>(value?: T & MapInput<T>): ConvertedMap<T>;
+  /**
+   * Converts a synchronous iterable, plain record or supported array-like input to a new shallow
+   * Set.
+   *
+   * Copies iterable values, own enumerable string and symbol record values, or supported array-like
+   * indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty
+   * Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing
+   * support throws before inspecting the input.
+   *
+   * @param value The value to convert.
+   * @returns A new Set of iterable items, own enumerable record values or indexed array-like values,
+   * or an empty Set for omitted or nullish input.
+   * @throws TypeError for unsupported input, malformed iterators or invalid array-like lengths.
+   * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; record
+   * copying requires symbol-enumeration support.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
    */
-  function toSet<T = unknown>(value?: T): ConvertedSet<T>;
+  function toSet<T = unknown>(value?: T & SetInput<T>): ConvertedSet<T>;
   /**
-   * Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys keep their first
-   * position and take the last value. Nullish input creates an empty Map. Non-iterable objects are
-   * not converted into entries. Requires native `Map`; missing support does not prevent loading.
-   * Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+   * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+   * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+   * Map. Requires native `Map`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1861,18 +1995,40 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapifvalue-condition
    */
-  function toMapIf<T>(value: T, condition: true): ConvertedMap<T>;
+  function toMapIf<Key, Value>(value: readonly (readonly [Key, Value])[], condition: true): Map<Key, Value>;
   /**
-   * Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys keep their first
-   * position and take the last value. Nullish input creates an empty Map. Non-iterable objects are
-   * not converted into entries. Requires native `Map`; missing support does not prevent loading.
-   * Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+   * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+   * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+   * Map. Requires native `Map`; missing support throws before inspecting the input.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A new Map when conversion is requested; otherwise the original input, unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toMap` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapifvalue-condition
+   */
+  function toMapIf<T>(value: T & MapInput<T>, condition: true): ConvertedMap<T>;
+  /**
+   * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+   * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+   * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+   * Map. Requires native `Map`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1885,16 +2041,16 @@ declare namespace Types {
    */
   function toMapIf<T>(value: T, condition?: false): T;
   /**
-   * Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to
-   * `true`. Otherwise, returns the original value unchanged.
+   * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys keep their first
-   * position and take the last value. Nullish input creates an empty Map. Non-iterable objects are
-   * not converted into entries. Requires native `Map`; missing support does not prevent loading.
-   * Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+   * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+   * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+   * Map. Requires native `Map`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1905,19 +2061,40 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapifvalue-condition
    */
-  function toMapIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | ConvertedMap<T>;
+  function toMapIf<T>(value: T, condition: (this: undefined, value: T) => boolean): T | ConvertedMap<T>;
   /**
-   * Converts an iterable of values to a new shallow Set when the condition evaluates to `true`.
-   * Otherwise, returns the original value unchanged.
+   * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+   * condition evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSet`. Consumes synchronous values and removes duplicates without
-   * coercion. Strings yield Unicode code points. Nullish input creates an empty Set; non-iterable
-   * scalars and array-like objects throw. Requires native `Set`; missing support does not prevent
-   * loading. Requested conversion throws `TypeError` before inspecting the input when it is
-   * unavailable.
+   * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+   * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+   * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+   * Map. Requires native `Map`; missing support throws before inspecting the input.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A new Map when conversion is requested; otherwise the original input, unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toMap` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapifvalue-condition
+   */
+  function toMapIf<T>(value: T & MapInput<T>, condition: ConversionCondition<T> | undefined): T | ConvertedMap<T>;
+  /**
+   * Converts supported iterable, record or array-like input to a new shallow Set when the condition
+   * evaluates to `true`. Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol
+   * record values, or supported array-like indices. Lengths must be numeric safe integers at least
+   * zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`,
+   * independently of `Array.from`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1928,19 +2105,18 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetifvalue-condition
    */
-  function toSetIf<T>(value: T, condition: true): ConvertedSet<T>;
+  function toSetIf<T>(value: T & SetInput<T>, condition: true): ConvertedSet<T>;
   /**
-   * Converts an iterable of values to a new shallow Set when the condition evaluates to `true`.
-   * Otherwise, returns the original value unchanged.
+   * Converts supported iterable, record or array-like input to a new shallow Set when the condition
+   * evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSet`. Consumes synchronous values and removes duplicates without
-   * coercion. Strings yield Unicode code points. Nullish input creates an empty Set; non-iterable
-   * scalars and array-like objects throw. Requires native `Set`; missing support does not prevent
-   * loading. Requested conversion throws `TypeError` before inspecting the input when it is
-   * unavailable.
+   * Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol
+   * record values, or supported array-like indices. Lengths must be numeric safe integers at least
+   * zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`,
+   * independently of `Array.from`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1953,17 +2129,16 @@ declare namespace Types {
    */
   function toSetIf<T>(value: T, condition?: false): T;
   /**
-   * Converts an iterable of values to a new shallow Set when the condition evaluates to `true`.
-   * Otherwise, returns the original value unchanged.
+   * Converts supported iterable, record or array-like input to a new shallow Set when the condition
+   * evaluates to `true`. Otherwise, returns the original value unchanged.
    *
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSet`. Consumes synchronous values and removes duplicates without
-   * coercion. Strings yield Unicode code points. Nullish input creates an empty Set; non-iterable
-   * scalars and array-like objects throw. Requires native `Set`; missing support does not prevent
-   * loading. Requested conversion throws `TypeError` before inspecting the input when it is
-   * unavailable.
+   * Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol
+   * record values, or supported array-like indices. Lengths must be numeric safe integers at least
+   * zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`,
+   * independently of `Array.from`; missing support throws before inspecting the input.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1974,6 +2149,476 @@ declare namespace Types {
    * does not inspect or coerce the value.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetifvalue-condition
    */
-  function toSetIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | ConvertedSet<T>;
+  function toSetIf<T>(value: T, condition: (this: undefined, value: T) => boolean): T | ConvertedSet<T>;
+  /**
+   * Converts supported iterable, record or array-like input to a new shallow Set when the condition
+   * evaluates to `true`. Otherwise, returns the original value unchanged.
+   *
+   * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
+   * conditions or non-boolean predicate results throw `TypeError`.
+   *
+   * Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol
+   * record values, or supported array-like indices. Lengths must be numeric safe integers at least
+   * zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`,
+   * independently of `Array.from`; missing support throws before inspecting the input.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns A new Set when conversion is requested; otherwise the original input, unchanged.
+   * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate. A requested conversion also follows `toSet` error behaviour; a skipped conversion
+   * does not inspect or coerce the value.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetifvalue-condition
+   */
+  function toSetIf<T>(value: T & SetInput<T>, condition: ConversionCondition<T> | undefined): T | ConvertedSet<T>;
+  /** Primitive wrapper result; objects and nullish values retain identity. */
+  type Boxed<T> = unknown extends T
+    ? object | null | undefined
+    : T extends null | undefined
+      ? T
+      : T extends string
+        ? String
+        : T extends number
+          ? Number
+          : T extends boolean
+            ? Boolean
+            : T extends symbol
+              ? Symbol
+              : T extends bigint
+                ? BoxedBigInt
+                : T extends object
+                  ? T
+                  : object;
+  /** Structural object types cannot prove wrapper brands or available unboxing intrinsics. */
+  type Unboxed<T> = T extends string | number | boolean | symbol | bigint | null | undefined
+    ? T
+    : T extends object
+      ? T | string | number | boolean | symbol | bigint
+      : T;
+
+  /**
+   * Wraps non-nullish primitives in their native wrapper objects, preserving objects and nullish
+   * values.
+   *
+   * Does not call conversion hooks. Existing objects and functions, `null` and `undefined` are
+   * returned unchanged.
+   *
+   * @param value The value to convert.
+   * @returns A native wrapper for a non-nullish primitive; otherwise the original object, function
+   * or nullish input.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxvalue
+   */
+  function box(): undefined;
+  /**
+   * Wraps non-nullish primitives in their native wrapper objects, preserving objects and nullish
+   * values.
+   *
+   * Does not call conversion hooks. Existing objects and functions, `null` and `undefined` are
+   * returned unchanged.
+   *
+   * @param value The value to convert.
+   * @returns A native wrapper for a non-nullish primitive; otherwise the original object, function
+   * or nullish input.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxvalue
+   */
+  function box<T>(value: T): Boxed<T>;
+  /**
+   * Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+   *
+   * Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing
+   * `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
+   *
+   * @param value The value to convert.
+   * @returns The genuine wrapper’s primitive payload when its native unboxing operation is
+   * available; otherwise the original input.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
+   */
+  function unbox(): undefined;
+  /**
+   * Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+   *
+   * Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing
+   * `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
+   *
+   * @param value The value to convert.
+   * @returns The genuine wrapper’s primitive payload when its native unboxing operation is
+   * available; otherwise the original input.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
+   */
+  function unbox<T>(value: T): Unboxed<T>;
+  /**
+   * Converts a native pattern and optional `flags` to a genuine `RegExp`.
+   *
+   * Uses native `RegExp` syntax and `flags`. May reuse a genuine local `RegExp` without explicit
+   * `flags`; copied expressions start with `lastIndex` zero.
+   *
+   * @param value The value to convert.
+   * @param flags Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags;
+   * explicit flags replace them.
+   * @returns A genuine `RegExp`, which may retain input identity under native rules.
+   * @throws Invalid patterns or `flags` throw `SyntaxError`. Native coercion, getters and proxy
+   * errors propagate unchanged.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpvalue-flags
+   */
+  function toRegExp(value?: unknown, flags?: string): RegExp;
+  /**
+   * Converts a value to a native `Promise`, adopting thenables and preserving ordinary local
+   * promises.
+   *
+   * Preserves ordinary local `Promise` identity, assimilates thenables and wraps other values.
+   * Requires native `Promise.resolve`; functions are values, not callbacks.
+   *
+   * @param value The value to convert.
+   * @returns A native `Promise` that adopts the input; ordinary local promises retain identity.
+   * @throws Missing `Promise.resolve` support throws `TypeError` before input inspection. Native
+   * synchronous errors propagate; native resolution failures produce rejected promises.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromisevalue
+   */
+  function toPromise(): Promise<undefined>;
+  /**
+   * Converts a value to a native `Promise`, adopting thenables and preserving ordinary local
+   * promises.
+   *
+   * Preserves ordinary local `Promise` identity, assimilates thenables and wraps other values.
+   * Requires native `Promise.resolve`; functions are values, not callbacks.
+   *
+   * @param value The value to convert.
+   * @returns A native `Promise` that adopts the input; ordinary local promises retain identity.
+   * @throws Missing `Promise.resolve` support throws `TypeError` before input inspection. Native
+   * synchronous errors propagate; native resolution failures produce rejected promises.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromisevalue
+   */
+  function toPromise<T>(value: T): Promise<Awaited<T>>;
+  /**
+   * Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to
+   * `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `box`. Does not call conversion hooks. Existing objects and functions,
+   * `null` and `undefined` are returned unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `box` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `box` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxifvalue-condition
+   */
+  function boxIf<T>(value: T, condition: true): Boxed<T>;
+  /**
+   * Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to
+   * `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `box`. Does not call conversion hooks. Existing objects and functions,
+   * `null` and `undefined` are returned unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `box` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `box` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxifvalue-condition
+   */
+  function boxIf<T>(value: T, condition?: false): T;
+  /**
+   * Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to
+   * `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `box`. Does not call conversion hooks. Existing objects and functions,
+   * `null` and `undefined` are returned unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `box` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `box` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxifvalue-condition
+   */
+  function boxIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | Boxed<T>;
+  /**
+   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
+   * unboxing is available. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `unbox`. Uses captured native `valueOf` intrinsics without calling
+   * custom conversion hooks. Missing `Symbol` or `BigInt` unboxing support leaves those wrappers
+   * unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `unbox` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `unbox` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxifvalue-condition
+   */
+  function unboxIf<T>(value: T, condition: true): Unboxed<T>;
+  /**
+   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
+   * unboxing is available. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `unbox`. Uses captured native `valueOf` intrinsics without calling
+   * custom conversion hooks. Missing `Symbol` or `BigInt` unboxing support leaves those wrappers
+   * unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `unbox` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `unbox` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxifvalue-condition
+   */
+  function unboxIf<T>(value: T, condition?: false): T;
+  /**
+   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
+   * unboxing is available. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `unbox`. Uses captured native `valueOf` intrinsics without calling
+   * custom conversion hooks. Missing `Symbol` or `BigInt` unboxing support leaves those wrappers
+   * unchanged.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `unbox` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `unbox` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxifvalue-condition
+   */
+  function unboxIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | Unboxed<T>;
+  /**
+   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
+   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
+   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param flags Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags;
+   * explicit flags replace them.
+   * @returns The `toRegExp` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toRegExp` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpifvalue-condition-flags
+   */
+  function toRegExpIf<T>(value: T, condition: true, flags?: string): RegExp;
+  /**
+   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
+   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
+   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param flags Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags;
+   * explicit flags replace them.
+   * @returns The `toRegExp` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toRegExp` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpifvalue-condition-flags
+   */
+  function toRegExpIf<T>(value: T, condition?: false, flags?: string): T;
+  /**
+   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
+   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
+   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param flags Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags;
+   * explicit flags replace them.
+   * @returns The `toRegExp` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toRegExp` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpifvalue-condition-flags
+   */
+  function toRegExpIf<T>(value: T, condition: ConversionCondition<T> | undefined, flags?: string): T | RegExp;
+  /**
+   * Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise,
+   * returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toPromise`. Preserves ordinary local `Promise` identity, assimilates
+   * thenables and wraps other values. Requires native `Promise.resolve`; functions are values, not
+   * callbacks.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `toPromise` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toPromise` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromiseifvalue-condition
+   */
+  function toPromiseIf<T>(value: T, condition: true): Promise<Awaited<T>>;
+  /**
+   * Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise,
+   * returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toPromise`. Preserves ordinary local `Promise` identity, assimilates
+   * thenables and wraps other values. Requires native `Promise.resolve`; functions are values, not
+   * callbacks.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `toPromise` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toPromise` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromiseifvalue-condition
+   */
+  function toPromiseIf<T>(value: T, condition?: false): T;
+  /**
+   * Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise,
+   * returns the original input unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `toPromise`. Preserves ordinary local `Promise` identity, assimilates
+   * thenables and wraps other values. Requires native `Promise.resolve`; functions are values, not
+   * callbacks.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @returns The `toPromise` result when requested; otherwise the exact original input.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `toPromise` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromiseifvalue-condition
+   */
+  function toPromiseIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | Promise<Awaited<T>>;
+  /**
+   * Parses JSON text into a JavaScript value using native `JSON.parse` behaviour.
+   *
+   * Uses captured native `JSON.parse`, including input coercion, reviver order and errors. Parsing
+   * does not validate an application schema; reviver results are not awaited.
+   *
+   * @param value The value to convert.
+   * @param reviver A native JSON reviver, called for children before parents and finally for the
+   * root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer
+   * hosts may supply optional source context.
+   * @returns The parsed value, or any root value returned by the reviver, including `undefined`.
+   * TypeScript returns unknown until the caller validates it.
+   * @throws Invalid JSON, omitted input and `undefined` throw `SyntaxError`. Symbols throw
+   * `TypeError`. Input coercion and reviver errors propagate unchanged.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonvalue-reviver
+   */
+  function fromJson(value: unknown, reviver?: JsonReviver | null): unknown;
+  /**
+   * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
+   * unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
+   * results are not awaited.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param reviver A native JSON reviver, called for children before parents and finally for the
+   * root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer
+   * hosts may supply optional source context.
+   * @returns The parsed or revived value when requested; otherwise the original input unchanged.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `fromJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   */
+  function fromJsonIf<T>(value: T, condition: true, reviver?: JsonReviver | null): unknown;
+  /**
+   * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
+   * unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
+   * results are not awaited.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param reviver A native JSON reviver, called for children before parents and finally for the
+   * root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer
+   * hosts may supply optional source context.
+   * @returns The parsed or revived value when requested; otherwise the original input unchanged.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `fromJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   */
+  function fromJsonIf<T>(value: T, condition?: false, reviver?: JsonReviver | null): T;
+  /**
+   * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
+   * unchanged.
+   *
+   * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
+   * predicate results must be primitive booleans.
+   *
+   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
+   * results are not awaited.
+   *
+   * @param value The value to convert.
+   * @param condition A boolean or synchronous predicate called once with the original value. Omitted
+   * or `undefined` skips conversion; a predicate must return a primitive boolean.
+   * @param reviver A native JSON reviver, called for children before parents and finally for the
+   * root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer
+   * hosts may supply optional source context.
+   * @returns The parsed or revived value when requested; otherwise the original input unchanged.
+   * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
+   * propagate; requested conversion follows `fromJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   */
+  function fromJsonIf<T>(
+    value: T,
+    condition: ConversionCondition<T> | undefined,
+    reviver?: JsonReviver | null
+  ): unknown;
 }
 export = Types;

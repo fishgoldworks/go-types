@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is a primitive bigint.
+ * Checks whether a value is a primitive bigint.
  *
  * Boxed bigints return `false`; numeric strings are not converted.
  *

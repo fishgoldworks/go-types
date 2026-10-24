@@ -1,7 +1,7 @@
 var isArray = require('./isArray');
 
 /**
- * Determines whether a value is an array of length two.
+ * Checks whether a value is an array of length two.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is an array of length `2`; otherwise `false`.

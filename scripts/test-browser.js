@@ -38,6 +38,64 @@ async function load(page, mode, packageDirectory) {
       )
     });
 }
+async function checkReadmeExample(browser, url, packageDirectory) {
+  const readme = fs.readFileSync(path.join(packageDirectory, 'README.md'), 'utf8');
+  const pkg = JSON.parse(fs.readFileSync(path.join(packageDirectory, 'package.json'), 'utf8'));
+  const prefix = 'https://cdn.jsdelivr.net/npm/' + pkg.name + '@' + pkg.version + '/dist/';
+  for (const [label, filename] of [
+    ['Minified bundle', 'go-types.min.js'],
+    ['Readable bundle', 'go-types.js']
+  ]) {
+    assert.ok(
+      readme.includes('[' + label + '](' + prefix + filename + ')'),
+      'Missing exact-candidate CDN link: ' + label
+    );
+    assert.ok(fs.existsSync(path.join(packageDirectory, 'dist', filename)), 'Missing documented browser bundle');
+  }
+  const example = /```html\r?\n([\s\S]*?)```/.exec(readme);
+  assert.ok(example, 'The packaged README must include a script-tag example');
+  const sources = [...example[1].matchAll(/<script\s+src="([^"]+)"\s*><\/script>/g)].map((match) => match[1]);
+  const scriptUrl = prefix + 'go-types.min.js';
+  assert.deepEqual(sources, [scriptUrl], 'The example must load the exact candidate version');
+  let assertions = 0;
+  // Execute the documented expressions once, checking their own expected results.
+  const html = example[1].replace(/^(\s*)(.+?);\s*\/\/ => (.+)$/gm, (_, indent, expression, expected) => {
+    assertions++;
+    return (
+      indent +
+      'if (!Object.is((' +
+      expression +
+      '), (' +
+      expected +
+      '))) throw new Error(' +
+      JSON.stringify('README browser result: ' + expression) +
+      ');'
+    );
+  });
+  assert.ok(assertions > 0, 'The browser example must include checked results');
+  const page = await browser.newPage();
+  const errors = [];
+  let loaded = false;
+  try {
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.route(scriptUrl, (route) => {
+      loaded = true;
+      return route.fulfill({
+        path: path.join(packageDirectory, 'dist/go-types.min.js'),
+        contentType: 'text/javascript',
+        headers: { 'Cross-Origin-Resource-Policy': 'cross-origin' }
+      });
+    });
+    await page.goto(url);
+    await page.setContent(html, { waitUntil: 'load' });
+    assert.ok(loaded, 'The README example must request the packaged bundle');
+    assert.deepEqual(errors, [], 'The README browser example must execute successfully');
+    assert.equal(await page.evaluate(() => typeof globalThis.Types.isArray), 'function');
+    return { assertions, scriptUrl, localCandidate: true };
+  } finally {
+    await page.close();
+  }
+}
 async function checkOptionalHostFailure(browser, url, mode, packageDirectory) {
   // Use a fresh page so an earlier successful load or ESM cache cannot conceal
   // a failure while discovering the optional host bridge.
@@ -163,7 +221,8 @@ async function verifyBrowser(packageDirectory, { sourceOnly = false } = {}) {
           const optionalApis = await checkOptionalApis(browser, url, mode, packageDirectory);
           results.push({ mode, ...result, throwingOptionalBridge, optionalApis });
         }
-        engines.push({ engine, version: browser.version(), results });
+        const readmeExample = sourceOnly ? undefined : await checkReadmeExample(browser, url, packageDirectory);
+        engines.push({ engine, version: browser.version(), results, readmeExample });
       } finally {
         await browser.close();
       }
@@ -175,6 +234,7 @@ async function verifyBrowser(packageDirectory, { sourceOnly = false } = {}) {
   }
 }
 module.exports = verifyBrowser;
+module.exports.checkReadmeExample = checkReadmeExample;
 if (require.main === module)
   verifyBrowser(require('./package-layout').packageRoot, { sourceOnly: process.argv.includes('--source-only') })
     .then((result) => console.log(JSON.stringify(result, null, 2)))

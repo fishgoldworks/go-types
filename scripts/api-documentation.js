@@ -4,21 +4,27 @@
 const api = require('./api.json');
 const formatExamples = require('./format-examples');
 const conversionTypes = {
+  fromJson: 'unknown',
+  box: 'Boxed<T>',
+  unbox: 'Unboxed<T>',
+  toRegExp: 'RegExp',
+  toPromise: 'Promise<Awaited<T>>',
   toArray: 'ArrayElement<T>[]',
   toBigInt: 'bigint',
   toBoolean: 'boolean',
   toDate: 'Date',
   toInteger: 'number',
+  toJson: 'string | undefined',
   toMap: 'ConvertedMap<T>',
   toNumber: 'number',
-  toObject: 'ConvertedObject<T>',
+  toPlainObject: 'ConvertedPlainObject<T>',
   toSet: 'ConvertedSet<T>',
   toString: 'string',
   toSymbol: 'symbol'
 };
 
 function signature(item) {
-  const optionalValue = item.name.startsWith('to') && !item.name.endsWith('If') && item.name !== 'toArray';
+  const optionalValue = item.group === 'Conversion' && !['toArray', 'toPlainObject', 'fromJson'].includes(item.name);
   return (
     item.name +
     '(' +
@@ -36,7 +42,6 @@ function anchor(item) {
     .replace(/ /g, '-');
 }
 function returnType(item) {
-  if (item.name === 'createTypeChecker') return '(value: unknown) => boolean';
   if (item.name.endsWith('If')) return 'T | ' + returnType({ name: item.name.slice(0, -2) });
   return conversionTypes[item.name] || 'boolean';
 }
@@ -46,24 +51,34 @@ function parameters(item) {
     let type, description;
     if (name === 'value') {
       type =
-        item.name.endsWith('If') || ['toArray', 'toMap', 'toObject', 'toSet', 'isNonNullish'].includes(item.name)
+        item.name.endsWith('If') ||
+        ['box', 'unbox', 'toPromise', 'toArray', 'toMap', 'toPlainObject', 'toSet', 'isNonNullish'].includes(item.name)
           ? 'T'
           : 'unknown';
-      description = 'The value to ' + (item.name.startsWith('to') ? 'convert' : 'check') + '.';
+      description = 'The value to ' + (item.group.toLowerCase().includes('conversion') ? 'convert' : 'check') + '.';
     } else if (name === 'condition') {
       type = 'boolean | ((this: undefined, value: T) => boolean)';
       description =
         'A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean.';
+    } else if (name === 'flags') {
+      type = 'string';
+      description =
+        'Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags; explicit flags replace them.';
+    } else if (name === 'reviver') {
+      type = '((this: unknown, key: string, value: unknown, context?: { source?: string }) => unknown) | null';
+      description =
+        'A native JSON reviver, called for children before parents and finally for the root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer hosts may supply optional source context.';
+    } else if (name === 'replacer') {
+      type = '((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[] | null';
+      description =
+        'A native JSON replacer callback or property-name list. Callbacks receive the containing object as `this`; omitted or `null` uses ordinary serialisation.';
+    } else if (name === 'space') {
+      type = 'string | number';
+      description = 'Native JSON indentation, capped at ten spaces or ten string code units.';
     } else {
       type = 'TypeMatcher';
       const scope =
-        name === 'keyType'
-          ? 'Map keys'
-          : name === 'valueType'
-            ? 'Map values'
-            : item.name === 'createTypeChecker'
-              ? 'values passed to the returned checker'
-              : 'the value or collection items';
+        name === 'keyType' ? 'Map keys' : name === 'valueType' ? 'Map values' : 'the value or collection items';
       description = 'The matcher for ' + scope + '. An omitted matcher matches `undefined`.';
     }
     return { name, type, description, optional };
@@ -96,7 +111,7 @@ function comment(item, { source = false, indent = '' } = {}) {
     const name = source && parameter.optional ? '[' + parameter.name + ']' : parameter.name;
     lines.push(...wrap('@param ' + (source ? '{*} ' : '') + name + ' ' + parameter.description));
   }
-  const type = item.returns || (item.name === 'createTypeChecker' ? 'function(*): boolean' : 'boolean');
+  const type = item.returns || 'boolean';
   lines.push(...wrap('@returns ' + (source ? '{' + type + '} ' : '') + item.summaryReturn));
   if (item.errors)
     lines.push(...wrap('@throws ' + (source ? '{*} ' : '') + item.errors.replace(/\[([^\]]+)\]\(#[^)]*\)/g, '$1')));

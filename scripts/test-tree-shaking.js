@@ -47,7 +47,7 @@ async function verifyTreeShaking(consumer) {
         name + ' lost its actual implementation'
       );
       assert.ok(
-        !included.some((file) => /src\/(createTypeChecker|conversion\/)/.test(file)),
+        !included.some((file) => /src\/(util\/compileTypeMatcher|conversion\/)/.test(file)),
         name + ' retained unrelated API code'
       );
     }

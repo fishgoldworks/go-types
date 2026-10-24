@@ -3,7 +3,7 @@ var isDate = require('./isDate');
 var getTime = Date.prototype.getTime;
 
 /**
- * Determines whether a genuine `Date` contains a `NaN` timestamp.
+ * Checks whether a genuine `Date` contains a `NaN` timestamp.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise

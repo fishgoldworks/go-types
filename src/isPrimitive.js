@@ -1,7 +1,7 @@
 var isObject = require('./isObject');
 
 /**
- * Determines whether a value is a primitive rather than an object or function.
+ * Checks whether a value is a primitive rather than an object or function.
  *
  * Includes `null` and `undefined`; rejects wrappers and functions.
  *

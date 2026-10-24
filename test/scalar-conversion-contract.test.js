@@ -232,43 +232,6 @@ test('Symbol wrappers preserve payload despite removed prototypes, but proxies f
   assert.equal(hookCalls, backends.length);
 });
 
-test('Object conversion boxes primitives in its realm and does not inspect preserved objects or functions', () => {
-  const primitives = ['abc', 12, true, 12n, Symbol('key')];
-  const payload = [
-    String.prototype.valueOf,
-    Number.prototype.valueOf,
-    Boolean.prototype.valueOf,
-    BigInt.prototype.valueOf,
-    Symbol.prototype.valueOf
-  ];
-  const portablePrototypes = vm.runInNewContext(
-    '[String.prototype,Number.prototype,Boolean.prototype,BigInt.prototype,Symbol.prototype]',
-    scope
-  );
-  const localPrototypes = [String.prototype, Number.prototype, Boolean.prototype, BigInt.prototype, Symbol.prototype];
-  for (const [backend, api] of backends.entries()) {
-    for (const [index, primitive] of primitives.entries()) {
-      const converted = api.toObject(primitive);
-      assert.equal(typeof converted, 'object');
-      assert.equal(payload[index].call(converted), primitive);
-      assert.equal(Object.getPrototypeOf(converted), (backend ? portablePrototypes : localPrototypes)[index]);
-      assert.notEqual(converted, api.toObject(primitive));
-    }
-    for (const target of [{}, function () {}]) {
-      const input = new Proxy(target, {
-        get() {
-          throw Error('must not read');
-        },
-        getPrototypeOf() {
-          throw Error('must not read prototype');
-        }
-      });
-      assert.equal(api.toObject(input), input);
-      assert.equal(api.toBoolean(input), true);
-    }
-  }
-});
-
 test('scalar conditions run before coercion and conversion uses changes made by the callback', () => {
   for (const api of backends) {
     for (const [name, hint, expected] of hinted) {
@@ -296,7 +259,16 @@ test('scalar conditions run before coercion and conversion uses changes made by 
 });
 
 test('scalar conditions neither assimilate thenable results nor inspect input after a rejected condition', () => {
-  const scalarNames = ['toBigInt', 'toBoolean', 'toDate', 'toInteger', 'toNumber', 'toObject', 'toString', 'toSymbol'];
+  const scalarNames = [
+    'toBigInt',
+    'toBoolean',
+    'toDate',
+    'toInteger',
+    'toNumber',
+    'toPlainObject',
+    'toString',
+    'toSymbol'
+  ];
   for (const api of backends) {
     for (const name of scalarNames) {
       const revocable = Proxy.revocable({}, {});

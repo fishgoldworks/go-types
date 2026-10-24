@@ -24,6 +24,10 @@ test('ESM root shares the exact CommonJS API', async () => {
 });
 test('private and unknown imports are not public entry points', () => {
   for (const name of [
+    'createTypeChecker',
+    'src/createTypeChecker',
+    'src/createTypeChecker.js',
+    'src/util/compileTypeMatcher',
     'src/util/hasNativeBrand',
     'src/hasCircularReference',
     'src/util/shouldConvert',
@@ -33,7 +37,9 @@ test('private and unknown imports are not public entry points', () => {
   }
 });
 
-for (const name of names.filter((name) => name.startsWith('to'))) {
+for (const name of names.filter(
+  (name) => name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'fromJson', 'fromJsonIf'].includes(name)
+)) {
   for (const prefix of ['conversion/', 'src/conversion/']) {
     for (const extension of ['', '.js']) {
       const request = 'go-types/' + prefix + name + extension;
@@ -56,5 +62,18 @@ test('pre-exports CommonJS aliases exist physically and share implementations', 
       require(path.join(directory, target.require.default)),
       alias
     );
+  }
+});
+
+test('ESM rejects retired matcher entries and private compilation modules', async () => {
+  const root = await import('go-types');
+  assert.equal(Object.hasOwn(root, 'createTypeChecker'), false);
+  for (const name of [
+    'createTypeChecker',
+    'src/createTypeChecker',
+    'src/createTypeChecker.js',
+    'src/util/compileTypeMatcher'
+  ]) {
+    await assert.rejects(import('go-types/' + name), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
   }
 });

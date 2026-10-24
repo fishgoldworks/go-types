@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getTime);
 
 /**
- * Determines whether a value is a genuine `Date`, valid or invalid.
+ * Checks whether a value is a genuine `Date`, valid or invalid.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a genuine `Date`, valid or invalid; otherwise `false`.

@@ -6,7 +6,7 @@ const nativeCheck =
     : (value) => typeof value === 'number' && value !== Infinity && value !== -Infinity && floor(value) === value;
 
 /**
- * Determines whether a primitive or boxed number is an integer.
+ * Checks whether a primitive or boxed number is an integer.
  *
  * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *

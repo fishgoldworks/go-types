@@ -1,7 +1,7 @@
 const getNumberValue = require('./util/getNumberValue');
 
 /**
- * Determines whether a primitive or boxed number is positive or negative infinity.
+ * Checks whether a primitive or boxed number is positive or negative infinity.
  *
  * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *

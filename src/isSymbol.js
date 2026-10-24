@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is a primitive symbol.
+ * Checks whether a value is a primitive symbol.
  *
  * Boxed symbols return `false`.
  *

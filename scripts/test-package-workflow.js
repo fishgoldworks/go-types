@@ -167,7 +167,10 @@ test('stale packaged documentation fails with a bounded file-specific diagnostic
       .join('\n');
     fs.writeFileSync(path.join(directory, 'README.md'), headings + '\n\n' + 'a'.repeat(256) + '\n');
     const stage = fs.mkdtempSync(path.join(directory, '.go-types-build-docs-'));
-    fs.cpSync(path.join(directory, 'src'), path.join(stage, 'src'), { recursive: true });
+    fs.cpSync(path.join(directory, 'src'), path.join(stage, 'src'), {
+      recursive: true,
+      filter: (source) => !['temp', '.tmp'].includes(path.basename(source))
+    });
     const { consumerFiles } = require('./package-layout');
     for (const file of consumerFiles) {
       fs.mkdirSync(path.dirname(path.join(stage, file)), { recursive: true });
@@ -205,7 +208,10 @@ test('source-only package verification succeeds without generated bundles', () =
     }
     fs.copyFileSync(path.join(root, 'package.json'), path.join(directory, 'package.json'));
     const stage = fs.mkdtempSync(path.join(directory, '.go-types-build-source-'));
-    fs.cpSync(path.join(root, 'src'), path.join(stage, 'src'), { recursive: true });
+    fs.cpSync(path.join(root, 'src'), path.join(stage, 'src'), {
+      recursive: true,
+      filter: (source) => !['temp', '.tmp'].includes(path.basename(source))
+    });
     for (const file of require('./package-layout').consumerFiles) {
       fs.mkdirSync(path.dirname(path.join(stage, file)), { recursive: true });
       fs.copyFileSync(path.join(root, file), path.join(stage, file));

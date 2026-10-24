@@ -4,16 +4,16 @@ const toMap = require('./toMap');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to
- * `true`. Otherwise, returns the original value unchanged.
+ * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
+ * condition evaluates to `true`. Otherwise, returns the original value unchanged.
  *
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys keep their first
- * position and take the last value. Nullish input creates an empty Map. Non-iterable objects are
- * not converted into entries. Requires native `Map`; missing support does not prevent loading.
- * Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+ * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
+ * entries. Iterable pairs must be exact two-element arrays with both own indices present.
+ * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
+ * Map. Requires native `Map`; missing support throws before inspecting the input.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.
@@ -26,6 +26,7 @@ const shouldConvert = require('../util/shouldConvert');
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapifvalue-condition
  * @example Array.from(toMapIf([['key', 1]], true));   // => [["key",1]]
  * @example toMapIf(42, false);                        // => 42
+ * @example toMapIf({ a: 1 }, true).get('a');          // => 1
  */
 function toMapIf(value, condition) {
   return shouldConvert(value, condition) ? toMap(value) : value;

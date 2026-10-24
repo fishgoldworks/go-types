@@ -3,7 +3,7 @@ var objectToString = Object.prototype.toString;
 var toStringTag = typeof Symbol === 'function' ? Symbol.toStringTag : undefined;
 
 /**
- * Determines whether a value is recognised as an error by the available native check or fallback.
+ * Checks whether a value is recognised as an error by the available native check or fallback.
  *
  * The fallback rejects custom tags without reading their getters. Without native branding or a
  * usable tag key, returns `false`. Proxy traps may run; this is not a security check.

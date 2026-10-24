@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is an instance of the local DOM `Element` constructor.
+ * Checks whether a value is an instance of the local DOM `Element` constructor.
  *
  * Returns `false` when the local constructor is unavailable. Does not recognise all foreign-realm
  * DOM objects.

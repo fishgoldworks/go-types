@@ -1,5 +1,5 @@
 /**
- * Determines whether JavaScript treats a value as `false` in a condition.
+ * Checks whether JavaScript treats a value as `false` in a condition.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is falsy under JavaScript boolean coercion; otherwise

@@ -5,8 +5,8 @@ const nativeNumber = Number;
 /**
  * Converts a value to a primitive number using JavaScript’s `Number` conversion.
  *
- * May return `NaN` or infinity, lose bigint precision, or invoke object conversion hooks. Symbols
- * throw.
+ * May return `NaN` or infinity, lose bigint precision, round numeric text, underflow to zero, or
+ * invoke object conversion hooks. Symbols throw.
  *
  * @param {*} [value] The value to convert.
  * @returns {number} The converted primitive number; it may be `NaN` or infinite.

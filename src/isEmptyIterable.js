@@ -1,5 +1,5 @@
 /**
- * Determines whether a synchronous iterable is empty by advancing its iterator.
+ * Checks whether a synchronous iterable is empty by advancing its iterator.
  *
  * Consumes input and may close it early, running iterator cleanup. Requires a synchronous
  * iterable; do not reuse one-shot input.

@@ -110,10 +110,7 @@ test('README API summary links every public function to its signature with retur
     );
     assert.ok(returns.length > 0, name + ' return type');
     assert.ok(meaning.trim().length > 0, name + ' return meaning');
-    if (name === 'createTypeChecker') {
-      assert.equal(returns, 'Function');
-      assert.equal(signature, '(value: unknown) => boolean');
-    } else assert.equal(signature, undefined, name + ' is not a function factory');
+    assert.equal(signature, undefined, name + ' is not a function factory');
   }
   assert.match(summary, /\[DOM\]\(docs\/API\.md#dom\)/);
 });

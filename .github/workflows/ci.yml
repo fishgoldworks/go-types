@@ -86,3 +86,33 @@ jobs:
           name: go-types-tarball
           path: artifacts
       - run: npm run test:package -- --browser
+  typescript:
+    needs: source-and-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: ['4.5.2', '4.9.5', '5.0.2', '5.8.3']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: go-types-tarball
+          path: artifacts
+      - name: Install the verified candidate and selected compiler
+        shell: bash
+        run: |
+          mapfile -t archives < <(find artifacts -maxdepth 1 -name '*.tgz' -type f)
+          test "${#archives[@]}" -eq 1
+          npm install --prefix "$RUNNER_TEMP/consumer" --ignore-scripts --no-audit --no-fund "$PWD/${archives[0]}"
+          npm install --prefix "$RUNNER_TEMP/compiler" --ignore-scripts --no-audit --no-fund "typescript@${{ matrix.typescript }}"
+      - name: Check the installed package with shared contracts
+        run: node scripts/test-types-compat.js --compiler "${{ runner.temp }}/compiler/node_modules/typescript/lib/tsc.js" --package "${{ runner.temp }}/consumer/node_modules/go-types"

@@ -13,7 +13,6 @@ if (process.argv[2] === '--worker') {
   const values = [1, null, 'x', false, {}, undefined];
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
   const simple = ['number', null, 'string'];
-  const reused = T.createTypeChecker(simple);
   const cases = [
     ['isInteger / number primitives', (i) => T.isInteger(input[i % input.length])],
     ['isSafeInteger / boxed numbers', (i) => T.isSafeInteger(boxes[i % boxes.length])],
@@ -23,7 +22,6 @@ if (process.argv[2] === '--worker') {
     ['isBlank / arrays', (i) => T.isBlank(arrays[i % arrays.length])],
     ['isTypeOf / primitive type name', (i) => T.isTypeOf(values[i % values.length], 'number')],
     ['isTypeOf / three-way union', (i) => T.isTypeOf(values[i % values.length], simple)],
-    ['compiled checker / three-way union', (i) => reused(values[i % values.length])],
     ['isArrayOf / eight numeric items', () => T.isArrayOf(numbers, 'number')],
     ['isArray / mixed values', (i) => T.isArray(values[i % values.length])],
     ['isMap / ordinary object negative', (i) => T.isMap(values[i % values.length])]

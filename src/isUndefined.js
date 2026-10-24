@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is exactly `undefined`.
+ * Checks whether a value is exactly `undefined`.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is `undefined`; otherwise `false`.

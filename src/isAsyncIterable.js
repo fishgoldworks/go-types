@@ -1,6 +1,6 @@
 const isCallable = require('./util/isCallable');
 /**
- * Determines whether a value exposes an asynchronous iterator method.
+ * Checks whether a value exposes an asynchronous iterator method.
  *
  * Does not invoke the method. Returns `false` without inspecting the value when
  * `Symbol.asyncIterator` is unavailable. Returns `false` without inspecting the input when

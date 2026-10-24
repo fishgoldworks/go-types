@@ -224,5 +224,5 @@ const conditional: Date = T.toDateIf(wrapper, true);
 // @ts-expect-error condition true cannot promise structural subtype preservation either.
 void T.toDateIf(wrapper, true).label;
 // Exact primitive checking and nullish filtering retain narrowing.
-const values: number[] = [1, 'x', null].filter(T.createTypeChecker('number'));
+const values: number[] = [1, 'x', null].filter((value: unknown): value is number => T.isTypeOf(value, 'number'));
 const present: (number | string)[] = [1, 'x', null, undefined].filter(T.isNonNullish);

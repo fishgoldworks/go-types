@@ -14,7 +14,9 @@ import type {
   ArrayElement,
   ConvertedMap,
   ConvertedSet,
-  ConvertedObject
+  ConvertedPlainObject,
+  Boxed,
+  Unboxed
 } from 'go-types';
 
 type Equal<A, B> = (<V>() => V extends A ? 1 : 2) extends <V>() => V extends B ? 1 : 2 ? true : false;
@@ -34,7 +36,9 @@ type PublicHelpers = [
   ArrayElement<readonly number[]>,
   ConvertedMap<ReadonlyMap<string, number>>,
   ConvertedSet<readonly number[]>,
-  ConvertedObject<number>
+  ConvertedPlainObject<number>,
+  Boxed<number>,
+  Unboxed<Number>
 ];
 type NamespaceHelpers = [
   Types.TypeName,
@@ -51,7 +55,9 @@ type NamespaceHelpers = [
   Types.ArrayElement<readonly number[]>,
   Types.ConvertedMap<ReadonlyMap<string, number>>,
   Types.ConvertedSet<readonly number[]>,
-  Types.ConvertedObject<number>
+  Types.ConvertedPlainObject<number>,
+  Types.Boxed<number>,
+  Types.Unboxed<Number>
 ];
 // Every public namespace helper must also be available as a named type import.
 type HelperParity = Expect<Equal<PublicHelpers, NamespaceHelpers>>;

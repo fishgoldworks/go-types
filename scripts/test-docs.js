@@ -152,8 +152,9 @@ test('conditional converter tooltips include the requested conversion boundaries
     toBooleanIf: /truthiness rather than parsing boolean text/,
     toDateIf: /May return an invalid Date/,
     toIntegerIf: /Does not guarantee a finite or safe integer/,
+    toJsonIf: /Cycles and unhandled bigints throw/,
     toNumberIf: /lose bigint precision/,
-    toObjectIf: /Nullish input creates a fresh empty object/,
+    toPlainObjectIf: /fresh ordinary object/,
     toStringIf: /including for boxed symbols/,
     toSymbolIf: /unboxes genuine wrappers/
   };

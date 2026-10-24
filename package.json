@@ -22,12 +22,8 @@
     "url": "https://github.com/koyote130708/go-types.git"
   },
   "type": "commonjs",
-  "engines": {
-    "node": ">=8"
-  },
   "main": "./index.js",
   "types": "./index.d.ts",
-  "sideEffects": false,
   "scripts": {
     "build": "node scripts/build.js",
     "docs": "node scripts/docs.js",
@@ -44,7 +40,7 @@
     "test:tree-shaking": "node scripts/test-tree-shaking.js",
     "test:package": "node scripts/test-package.js",
     "test:browser": "node scripts/test-browser.js",
-    "coverage": "npm test -- --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=100",
+    "coverage": "npm test -- --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-exclude=\"**/temp/**\" --test-coverage-exclude=\"**/.tmp/**\" --test-coverage-lines=100",
     "verify": "npm run lint && npm run format:check && node scripts/verify.js",
     "verify:all": "npm run lint && npm run format:check && node scripts/verify.js --all",
     "benchmark": "node scripts/benchmark.js",

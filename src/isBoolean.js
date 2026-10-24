@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, valueOf);
 
 /**
- * Determines whether a value is a primitive boolean or a genuine boxed `Boolean`.
+ * Checks whether a value is a primitive boolean or a genuine boxed `Boolean`.
  *
  * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
  * wrappers. Does not invoke overridden conversion methods.

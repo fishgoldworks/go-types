@@ -2,7 +2,7 @@ const nativeIsView = typeof ArrayBuffer === 'function' ? ArrayBuffer.isView : un
 const isDataView = require('./isDataView');
 const isTypedArray = require('./isTypedArray');
 /**
- * Determines whether a value is a native typed array or `DataView`.
+ * Checks whether a value is a native typed array or `DataView`.
  *
  * Detached views retain their identity; passing does not guarantee usable memory. Falls back to
  * native DataView and typed-array identity checks when `ArrayBuffer.isView` is unavailable;

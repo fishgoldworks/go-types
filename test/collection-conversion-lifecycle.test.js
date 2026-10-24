@@ -164,19 +164,14 @@ for (const name of ['toArray', 'toMap', 'toSet']) {
   });
 }
 
-test('toArray snapshots coerced length while later indices and inherited values stay live', () => {
+test('toArray snapshots validated length while later indices and inherited values stay live', () => {
   const events = [];
   const input = Object.assign(Object.create({ 1: 'inherited' }), { 1: 'deleted' });
   Object.defineProperties(input, {
     length: {
       get() {
         events.push('length');
-        return {
-          valueOf() {
-            events.push('coerce');
-            return 2.9;
-          }
-        };
+        return 2;
       }
     },
     0: {
@@ -189,29 +184,34 @@ test('toArray snapshots coerced length while later indices and inherited values 
   });
   const output = Types.toArray(input);
   assert.deepEqual(output, ['first', 'inherited']);
-  assert.deepEqual(events, ['length', 'coerce', '0']);
+  assert.deepEqual(events, ['length', '0']);
 });
 
 test('toMap reads entry slots in order without enumerating or iterating the entry', () => {
   const events = [];
   const key = {};
   const value = {};
-  const entry = {
-    get 0() {
-      events.push('0');
-      Object.defineProperty(entry, '1', { value, configurable: true });
-      return key;
+  const entry = ['key', undefined];
+  Object.defineProperties(entry, {
+    0: {
+      get() {
+        events.push('0');
+        Object.defineProperty(entry, '1', { value, configurable: true });
+        return key;
+      }
     },
-    get 1() {
-      throw Error('replaced value read');
+    1: {
+      configurable: true,
+      get() {
+        throw Error('replaced value read');
+      }
     },
-    get length() {
-      throw Error('entry length read');
-    },
-    get [Symbol.iterator]() {
-      throw Error('entry iterated');
+    [Symbol.iterator]: {
+      get() {
+        throw Error('entry iterated');
+      }
     }
-  };
+  });
   const result = Types.toMap([entry]);
   assert.equal(result.get(key), value);
   assert.deepEqual(events, ['0']);
@@ -222,12 +222,12 @@ test('toMap preserves the entry error even when closing throws or returns a non-
     const entryError = { result };
     const closeError = Error('close failed');
     const events = [];
-    const entry = {
-      get 0() {
+    const entry = Object.defineProperty(['key', 1], '0', {
+      get() {
         events.push('entry');
         throw entryError;
       }
-    };
+    });
     const input = {
       [Symbol.iterator]() {
         return this;
@@ -294,7 +294,8 @@ for (const base of ['toMap', 'toSet']) {
     const heading = '### `' + base + 'If(value, condition?)`';
     const section = reference.split(heading)[1];
     assert.ok(section, 'Conditional conversion heading exists');
-    const errors = section.split('**Errors:**')[1].split('\n')[0];
+    const errors = section.split('**Errors**')[1]?.split('**Examples**')[0];
+    assert.ok(errors, 'Conditional conversion error guidance exists');
     assert.ok(errors.includes('[`' + base + '`](#' + base.toLowerCase() + 'value)'), errors);
   });
 }

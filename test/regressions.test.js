@@ -631,7 +631,7 @@ test('JSON: boxed string parser ignores a custom toString', () => {
   assert.equal(T.isJson(text), true);
 });
 
-//  Second-pass review cases for accidental receiver binding and native special cases.
+//  Receiver binding and native special cases.
 test('matching: explicit predicates are invoked without a descriptor receiver', () => {
   let receiver;
   assert.equal(

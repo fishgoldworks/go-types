@@ -1,7 +1,7 @@
 const isCallable = require('./util/isCallable');
 const isObject = require('./isObject');
 /**
- * Determines whether a value is an object or function with a callable `next` method.
+ * Checks whether a value is an object or function with a callable `next` method.
  *
  * Does not invoke `next` or validate iterator results. Property getters and proxy traps may run.
  *

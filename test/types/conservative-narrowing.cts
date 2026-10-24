@@ -7,12 +7,6 @@ export function dynamic(value: number | string, matcher: 'number' | 'boolean') {
   value.toUpperCase();
   expectType<number | string>(value);
 }
-export function factory(value: number | string, matcher: 'number' | 'boolean') {
-  const check = T.createTypeChecker(matcher);
-  if (check(value)) return;
-  // @ts-expect-error failure can still be a number.
-  value.toUpperCase();
-}
 export function array(value: number[] | string) {
   if (T.isArrayOf(value, 'number')) return;
   // @ts-expect-error a sparse number[] can fail validation.

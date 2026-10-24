@@ -4,7 +4,6 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const { root } = require('./package-layout');
 const { run, withStagedConsumer } = require('./consumer-tools');
-const names = require('./exports.json');
 function verifyTypes(consumer, executables = [process.execPath], { sourceOnly = false } = {}) {
   const installed = path.join(consumer, 'node_modules', 'go-types');
   const pkg = JSON.parse(fs.readFileSync(path.join(installed, 'package.json'), 'utf8'));
@@ -50,47 +49,7 @@ function verifyTypes(consumer, executables = [process.execPath], { sourceOnly = 
   ]) {
     fs.copyFileSync(path.join(root, 'test/runtime', source), path.join(consumer, target));
   }
-  const aliases = Object.keys(pkg.exports).filter(
-    (alias) => alias !== '.' && alias !== './package.json' && !alias.startsWith('./dist/')
-  );
-  const aliasTypes = [
-    "import Types = require('go-types');",
-    'type IsAny<T> = 0 extends (1 & T) ? true : false;',
-    'type NotAny<T extends false> = T;'
-  ];
-  const esmAliasTypes = [
-    "import Types from 'go-types';",
-    'type IsAny<T> = 0 extends (1 & T) ? true : false;',
-    'type NotAny<T extends false> = T;'
-  ];
-  for (const [index, alias] of aliases.entries()) {
-    const name = path.posix.basename(alias).replace(/\.js$/, '');
-    assert.ok(names.includes(name), 'Unknown public alias: ' + alias);
-    aliasTypes.push(
-      'import alias' + index + ' = require(' + JSON.stringify('go-types/' + alias.slice(2)) + ');',
-      'const typed' + index + ': typeof Types.' + name + ' = alias' + index + ';',
-      'type Checked' + index + ' = NotAny<IsAny<typeof alias' + index + '>>;',
-      'if (typed' +
-        index +
-        ' !== Types.' +
-        name +
-        ') throw new Error(' +
-        JSON.stringify('Alias identity: ' + alias) +
-        ');'
-    );
-    esmAliasTypes.push(
-      'import alias' + index + ' from ' + JSON.stringify('go-types/' + alias.slice(2)) + ';',
-      'const typed' + index + ': typeof Types.' + name + ' = alias' + index + ';',
-      'type Checked' + index + ' = NotAny<IsAny<typeof alias' + index + '>>;',
-      'if (typed' +
-        index +
-        ' !== Types.' +
-        name +
-        ') throw new Error(' +
-        JSON.stringify('ESM alias identity: ' + alias) +
-        ');'
-    );
-  }
+  const { aliases, aliasTypes, esmAliasTypes } = require('./type-alias-fixtures')(pkg);
   fs.writeFileSync(path.join(consumer, 'runtime-aliases.cts'), aliasTypes.join('\n') + '\n');
   fs.writeFileSync(path.join(consumer, 'runtime-aliases.mts'), esmAliasTypes.join('\n') + '\n');
   const configurations = [];
@@ -184,6 +143,7 @@ module.exports = verifyTypes;
 if (require.main === module)
   withStagedConsumer((consumer) => {
     console.log(JSON.stringify(verifyTypes(consumer), null, 2));
+    require('./test-types-compat')({ directory: path.join(consumer, 'node_modules/go-types') });
   }).catch((error) => {
     console.error(error);
     process.exitCode = 1;

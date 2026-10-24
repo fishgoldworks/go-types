@@ -17,7 +17,6 @@ for (const name of [
   'isObjectLike',
   'isNonEmptyArray',
   'isJson',
-  'createTypeChecker',
   'isSetOf',
   'isMapOf',
   'isEmptyIterable',

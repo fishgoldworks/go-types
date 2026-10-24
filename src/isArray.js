@@ -1,6 +1,6 @@
 const nativeIsArray = Array.isArray;
 /**
- * Determines whether a value is an array, including from another realm.
+ * Checks whether a value is an array, including from another realm.
  *
  * Preserves native `Array.isArray` behaviour, including `TypeError` for a revoked proxy.
  *

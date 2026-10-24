@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const T = require('../index.js');
 
 // Small bounded graph interpreter: deliberately recursive and not compiled or
@@ -86,7 +87,7 @@ for (let seed = 1; seed <= 128; seed++) {
     }
     const specification = [pool[pool.length - 1], pool[pool.length - 2], pool[pool.length - 1]];
     trace = [];
-    const compiled = T.createTypeChecker(specification);
+    const compiled = compileTypeMatcher(specification);
     assert.deepEqual(trace, []);
     for (const value of [undefined, null, 0, 42, NaN, '42', '', false, true, 1n, Symbol('x'), {}, [], () => {}]) {
       trace = [];
@@ -103,14 +104,17 @@ for (let seed = 1; seed <= 128; seed++) {
 // Native conversions are the oracle for the supported conversion contracts;
 // object-returning identity exceptions (Date/Symbol) have explicit assertions.
 const conversions = {
-  toArray: (value) => Array.from(value),
   toBigInt: (value) => BigInt(value),
   toBoolean: (value) => Boolean(value),
   toInteger: (value) => Math.trunc(Number(value)),
   toNumber: (value) => Number(value),
-  toObject: (value) => Object(value),
   toString: (value) => String(value)
 };
+test('toArray preserves native iteration for supported iterable collections', () => {
+  for (const value of [[1, 2], Array(2), 'A\u{1F600}B', new Set([1, 2]), new Map([['a', 1]]), new Uint8Array([2, 1])]) {
+    assert.deepEqual(T.toArray(value), Array.from(value));
+  }
+});
 const inputFactories = [
   () => undefined,
   () => null,
@@ -163,7 +167,7 @@ for (const [name, native] of Object.entries(conversions)) {
     }
   });
 }
-for (const name of Object.keys(conversions).concat(['toDate', 'toSymbol'])) {
+for (const name of Object.keys(conversions).concat(['toArray', 'toDate', 'toSymbol'])) {
   test(name + 'If does not inspect a skipped revoked proxy and invokes conditions once', () => {
     const { proxy, revoke } = Proxy.revocable({}, {});
     revoke();

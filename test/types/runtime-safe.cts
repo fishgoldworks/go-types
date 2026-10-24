@@ -7,8 +7,7 @@ function scalar(value: number | string, matcher: 'number' | 'boolean'): string {
   return typeof value === 'string' ? value.toUpperCase() : String(value);
 }
 function compiled(value: number | string, matcher: 'number' | 'boolean'): string {
-  const check = T.createTypeChecker(matcher);
-  if (check(value)) return 'matched';
+  if (T.isTypeOf(value, matcher)) return 'matched';
   return typeof value === 'string' ? value.toUpperCase() : String(value);
 }
 function array(value: number[] | string, matcher: 'number' | 'boolean'): string {
@@ -31,8 +30,8 @@ assert(array([42], 'boolean') === '1');
 assert(array(new Array<number>(1), 'number') === '1');
 assert(set(new Set([42]), 'boolean') === '1');
 assert(map(new Map([[42, 42]]), 'boolean') === '1');
-assert(T.createTypeChecker('number')(42));
-assert(!T.createTypeChecker('number')('42'));
+assert(T.isTypeOf(42, 'number'));
+assert(!T.isTypeOf('42', 'number'));
 
 // Structural types and typed proxies can fail native branding; refine explicitly.
 function safeNative(
@@ -119,26 +118,13 @@ assert(
 );
 
 // Primitive intersections are boxed, even when they satisfy an object-shaped constraint.
-const scalarText: string & { readonly length: number } = 'abc';
-const scalarNumber: number & { toFixed(fractionDigits?: number): string } = 12;
-const scalarFlag: boolean & { valueOf(): boolean } = true;
-const scalarBigInt: bigint & { valueOf(): bigint } = 12n;
-const scalarSymbol: symbol & { valueOf(): symbol } = Symbol('key');
-const objectText: String = T.toObject(scalarText);
-const objectNumber: Number = T.toObjectIf(scalarNumber, true);
-const objectFlag: Boolean = T.toObject(scalarFlag);
-const objectBigInt: BigInt = T.toObject(scalarBigInt);
-const objectSymbol: Symbol = T.toObject(scalarSymbol);
-assert(typeof objectText === 'object' && objectText.valueOf() === scalarText);
-assert(typeof objectNumber === 'object' && objectNumber.valueOf() === scalarNumber);
-assert(typeof objectFlag === 'object' && objectFlag.valueOf() === scalarFlag);
-assert(typeof objectBigInt === 'object' && objectBigInt.valueOf() === scalarBigInt);
-assert(typeof objectSymbol === 'object' && objectSymbol.valueOf() === scalarSymbol);
-assert(T.toObjectIf(scalarText, false) === scalarText);
-assert(T.toObjectIf(scalarNumber, () => false) === scalarNumber);
-const labelledWrapper = Object.assign(new Number(4), { label: 'kept' });
-const sameWrapper: typeof labelledWrapper = T.toObject(labelledWrapper);
-assert(sameWrapper === labelledWrapper && sameWrapper.label === 'kept');
+const jsonObject = T.toPlainObject('{"a":1}');
+assert(jsonObject.a === 1 && Object.getPrototypeOf(jsonObject) === Object.prototype);
+const recordObject = { a: 1 };
+const copiedObject: Partial<typeof recordObject> = T.toPlainObject(recordObject);
+assert(copiedObject !== recordObject && copiedObject.a === 1);
+assert(T.toPlainObjectIf(null, false) === null);
+assert(T.toPlainObjectIf(recordObject, () => false) === recordObject);
 
 // Optional/nullable iterators can override numeric indexed values at conversion time.
 interface OptionalArrayIterator extends ArrayLike<number> {
@@ -158,7 +144,7 @@ assert(T.toArrayIf(optionalArrayInput, false) === optionalArrayInput);
 assert(T.toArrayIf(optionalArrayInput) === optionalArrayInput);
 optionalArrayInput[Symbol.iterator] = null;
 const indexedValues: unknown[] = T.toArray(optionalArrayInput);
-assert(indexedValues.length === 1 && indexedValues[0] === 1);
+assert(indexedValues.length === 3 && indexedValues[0] === 1 && indexedValues[1] === 1 && indexedValues[2] === null);
 const convertedAfterCondition = T.toArrayIf(optionalArrayInput, (value) => {
   value[Symbol.iterator] = function* () {
     yield 'changed';
@@ -167,8 +153,8 @@ const convertedAfterCondition = T.toArrayIf(optionalArrayInput, (value) => {
 });
 assert(Array.isArray(convertedAfterCondition) && convertedAfterCondition[0] === 'changed');
 const definiteArrayLike: ArrayLike<number> = { 0: 7, length: 1 };
-const definiteValues: number[] = T.toArray(definiteArrayLike);
-assert(definiteValues[0] === 7);
+const definiteValues: (number | undefined)[] = T.toArray(definiteArrayLike);
+assert(definiteValues.length === 2 && definiteValues[0] === 7 && definiteValues[1] === 1);
 const definiteAbsent: ArrayLike<number> & { [Symbol.iterator]: null } = { 0: 8, length: 1, [Symbol.iterator]: null };
-const definiteAbsentValues: number[] = T.toArray(definiteAbsent);
-assert(definiteAbsentValues[0] === 8);
+const definiteAbsentValues: (number | null | undefined)[] = T.toArray(definiteAbsent);
+assert(definiteAbsentValues.length === 3 && definiteAbsentValues[0] === 8 && definiteAbsentValues[2] === null);

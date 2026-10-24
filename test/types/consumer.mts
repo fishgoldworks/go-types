@@ -11,7 +11,6 @@ import Types, {
   isArray,
   isNonEmptyArray,
   isTypeOf,
-  createTypeChecker,
   isArrayOf,
   isMapOf,
   isSetOf,
@@ -75,12 +74,12 @@ if (!isTypeOf(partial, { predicate: (x: unknown): boolean => x === 1 })) {
   // @ts-expect-error a boolean predicate is not a type predicate.
   expectType<string>(partial);
 }
-const onlyStrings = createTypeChecker('string');
+const onlyStrings = (value: unknown): value is string => isTypeOf(value, 'string');
 expectType<string[]>([1, 'a', null].filter(onlyStrings));
-const union = createTypeChecker(['number', null] as const);
+const union = (value: unknown): boolean => isTypeOf(value, ['number', null] as const);
 // @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
 expectType<(number | null)[]>([1, 'a', null].filter(union));
-const callbacks = createTypeChecker({ predicate: (x: unknown): boolean => x === 1 });
+const callbacks = (value: unknown): boolean => isTypeOf(value, { predicate: (x: unknown): boolean => x === 1 });
 if (!callbacks(partial)) {
   // @ts-expect-error no negative-branch narrowing for general validation predicates.
   expectType<string>(partial);
@@ -96,7 +95,7 @@ Types.isTypeOf(1, config);
 // @ts-expect-error misspelled typeof name.
 isTypeOf(value, 'nubmer');
 // @ts-expect-error type specifications are not arbitrary numbers.
-createTypeChecker(42);
+isTypeOf(value, 42);
 // @ts-expect-error ambiguous descriptors have no valid mode.
 isTypeOf(1, { predicate: () => true, instanceOf: Object });
 // @ts-expect-error async validators are not accepted.
@@ -121,8 +120,8 @@ expectType<boolean>(arrayCheck([]));
 expectType<boolean>(numericCheck('1'));
 // @ts-expect-error private helpers are not supported entry points.
 import privateCheck from 'go-types/src/util/hasNativeBrand';
-import legacyObjectConversion from 'go-types/src/conversion/toObject';
-expectType<object>(legacyObjectConversion(null));
+import legacyObjectConversion from 'go-types/src/conversion/toPlainObject';
+expectType<object>(legacyObjectConversion('{}'));
 
 // Conversion return types retain element types, original identities and conditional branches.
 import {
@@ -133,12 +132,12 @@ import {
   toDate,
   toInteger,
   toNumber,
-  toObject,
+  toPlainObject,
   toString as convertToString,
   toSymbol,
   toNumberIf,
   toDateIf,
-  toObjectIf,
+  toPlainObjectIf,
   type ConversionCondition
 } from 'go-types';
 expectType<number[]>(toArray(new Set([1, 2])));
@@ -153,21 +152,8 @@ expectType<number>(toNumber('1.9'));
 expectType<string>(convertToString(Symbol('x')));
 expectType<symbol>(toSymbol('x'));
 const originalObject = { score: 1 };
-expectType<typeof originalObject>(toObject(originalObject));
-expectType<Number>(toObject(1));
-// Rich native bigint declarations remain available when the consumer selects ES2020.
-const boxedBigInt = toObject(1n);
-expectType<BigInt>(boxedBigInt);
-expectType<bigint>(boxedBigInt.valueOf());
-expectType<string>(boxedBigInt.toLocaleString(new Intl.Locale('en-NZ'), { notation: 'compact' }));
-expectType<BigInt>(toObjectIf(1n, true));
-// @ts-expect-error A boxed bigint is an object, not a primitive bigint.
-expectType<bigint>(boxedBigInt);
-// @ts-expect-error A boxed bigint's valueOf does not return a number.
-expectType<number>(boxedBigInt.valueOf());
-// @ts-expect-error toObject boxes a primitive; it does not return a primitive number.
-expectType<number>(toObject(1));
-expectType<object>(toObject(null));
+expectType<Partial<typeof originalObject>>(toPlainObject(originalObject));
+expectType<Record<string | symbol, unknown>>(toPlainObject('{}'));
 expectType<number>(toNumberIf('1', true));
 expectType<'1'>(toNumberIf('1' as const, false));
 expectType<'1'>(toNumberIf('1' as const));
@@ -186,8 +172,8 @@ expectType<number[]>(toArrayIf(new Set([1]), true));
 expectType<Set<number>>(toArrayIf(new Set([1]), false));
 expectType<Date>(toDateIf(0, true));
 expectType<0>(toDateIf(0 as const, false));
-expectType<Number>(toObjectIf(1, true));
-expectType<1>(toObjectIf(1 as const, false));
+expectType<Partial<typeof originalObject>>(toPlainObjectIf(originalObject, true));
+expectType<1>(toPlainObjectIf(1 as const, false));
 import numberConversion from 'go-types/toNumber';
 import nestedNumberConversion from 'go-types/conversion/toNumber';
 import sourceConversion from 'go-types/src/conversion/toNumber.js';
@@ -236,3 +222,10 @@ expectType<Set<string>>(toSetIf('abc', () => true));
 toMapIf(entries, async () => true);
 // @ts-expect-error Collection conversions do not accept truthiness coercion.
 toSetIf('abc', () => 1);
+
+const recordMapInput = { a: 1, b: 2 } as const;
+expectType<Map<string, 1 | 2>>(toMap(recordMapInput));
+expectType<Map<string, 1 | 2>>(focusedMap(recordMapInput));
+expectType<ConvertedMap<typeof recordMapInput>>(toMapIf(recordMapInput, true));
+// @ts-expect-error object keys are strings, not numeric values.
+expectType<Map<number, number>>(focusedMap(recordMapInput));

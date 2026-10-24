@@ -130,9 +130,18 @@ for (const mode of ['bundle', 'minify']) {
 }
 test('one build replaces stale output with the complete distribution', () =>
   fixture((directory, build) => {
+    const playgrounds = ['src/temp', 'src/.tmp', 'src/util/temp', 'src/conversion/.tmp'];
+    for (const playground of playgrounds) {
+      fs.mkdirSync(path.join(directory, playground), { recursive: true });
+      fs.writeFileSync(path.join(directory, playground, 'test2.js'), 'local playground');
+    }
     const result = build('');
     assert.ifError(result.error);
     assert.equal(result.status, 0, result.stdout + result.stderr);
+    for (const playground of playgrounds) {
+      assert.equal(fs.existsSync(path.join(directory, 'package', playground)), false, playground);
+      assert.equal(fs.readFileSync(path.join(directory, playground, 'test2.js'), 'utf8'), 'local playground');
+    }
     const expected =
       name === 'go-types'
         ? [
@@ -211,8 +220,10 @@ test('package builds are repeatable, self-contained and leave canonical inputs u
     assert.equal(packaged.private, undefined);
     assert.equal(packaged.scripts, undefined);
     assert.equal(packaged.devDependencies, undefined);
-    assert.equal(Object.keys(packaged.exports).length, 345);
-    assert.equal(Object.keys(packaged.typesVersions['*']).length, 343);
+    assert.equal(Object.keys(packaged.exports).length, 426);
+    assert.equal(Object.keys(packaged.typesVersions['*']).length, 424);
+    assert.equal(packaged.exports['./createTypeChecker'], undefined);
+    assert.equal(packaged.typesVersions['*'].createTypeChecker, undefined);
     const files = contents(output);
     for (const file of ['scripts', 'test', 'node_modules']) assert.ok(!fs.existsSync(path.join(output, file)));
     for (const file of ['README.md', 'LICENSE.md', 'index.d.ts', 'docs/API.md'])

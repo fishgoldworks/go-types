@@ -2,7 +2,7 @@ const isCallable = require('./util/isCallable');
 var isObject = require('./isObject');
 
 /**
- * Determines whether a value is an object or function with a callable `then` method.
+ * Checks whether a value is an object or function with a callable `then` method.
  *
  * Does not invoke `then` or prove Promise behaviour. Getters and proxy traps may run.
  *

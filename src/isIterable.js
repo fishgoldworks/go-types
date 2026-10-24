@@ -1,6 +1,6 @@
 const isCallable = require('./util/isCallable');
 /**
- * Determines whether a value exposes a synchronous iterator method.
+ * Checks whether a value exposes a synchronous iterator method.
  *
  * Reads `Symbol.iterator` without calling it. Getters and proxy traps may run; method presence
  * does not guarantee a valid iterator.

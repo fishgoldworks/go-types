@@ -2,7 +2,7 @@ const isCallable = require('./util/isCallable');
 var isObject = require('./isObject');
 
 /**
- * Determines whether a value is an object or function with callable `then` and `catch` methods.
+ * Checks whether a value is an object or function with callable `then` and `catch` methods.
  *
  * Requires both `then` and `catch`, unlike TypeScript `PromiseLike`. Does not invoke them; getters
  * or proxy traps may run.

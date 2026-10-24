@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getter);
 
 /**
- * Determines whether a value is a genuine `DataView`.
+ * Checks whether a value is a genuine `DataView`.
  *
  * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
  * Returns `false` when the local native detection capability is unavailable.

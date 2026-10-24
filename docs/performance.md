@@ -26,21 +26,11 @@ Root named ESM exports point directly to per-function implementations so bundler
 
 This is a bundler optimisation, not native Node lazy loading. Use `import isArray from 'go-types/isArray'` to load only that implementation in Node. `npm run test:tree-shaking` performs an actual esbuild consumer-bundle check and compares root named versus focused imports while rejecting unrelated matcher/conversion code in the output.
 
-## Reuse specifications deliberately
+## Repeated validation
 
-```js
-const { createTypeChecker } = require('go-types');
-const acceptsValue = createTypeChecker(['number', null]);
-const values = [1, 'text', null];
+Each call to `isTypeOf(value, specification)` validates and snapshots the specification again so later mutations are respected. Collection checks such as `isArrayOf` prepare the matcher once per call and reuse it for their entries. Fixed type names do not require graph compilation.
 
-for (const value of values) {
-  if (acceptsValue(value)) {
-    // Handle the accepted value.
-  }
-}
-```
-
-Compile reusable specifications outside repeated validation loops. Each call to `isTypeOf(value, mutableSpecification)` validates and snapshots the specification again; caching it across calls would ignore later mutations. Fixed type names do not require graph compilation.
+Use the logic utilities in [go-fns](https://github.com/koyote130708/go-fns) to combine existing predicates into reusable functions. Go Types does not depend on go-fns.
 
 Conversions retain native coercion semantics. Where the converted value is needed, convert once and validate the result rather than performing redundant conversion and validation passes.
 

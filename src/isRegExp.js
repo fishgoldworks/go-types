@@ -10,7 +10,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getSource);
 
 /**
- * Determines whether a value is a genuine regular-expression object.
+ * Checks whether a value is a genuine regular-expression object.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a genuine `RegExp` instance; otherwise `false`.

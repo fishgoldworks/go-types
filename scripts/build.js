@@ -90,7 +90,7 @@ async function verifyBundles(temporary) {
   for (const api of apis) {
     assert.deepEqual(Object.keys(api).sort(), [...names].sort());
     assert.equal(api.isArrayOf([], 'number'), true);
-    assert.equal(api.createTypeChecker(['number', null])(1), true);
+    assert.equal(api.isTypeOf(1, ['number', null]), true);
   }
 }
 
@@ -125,6 +125,8 @@ async function replaceDistribution(temporary) {
 async function copyRuntime(source, target) {
   await fs.mkdir(target, { recursive: true });
   for (const entry of await fs.readdir(source, { withFileTypes: true })) {
+    // Preserve local playgrounds in the checkout without distributing them.
+    if (entry.isDirectory() && ['temp', '.tmp'].includes(entry.name)) continue;
     if (entry.isSymbolicLink()) throw Error('Runtime sources must not be symbolic links: ' + entry.name);
     if (entry.isDirectory()) await copyRuntime(path.join(source, entry.name), path.join(target, entry.name));
     else if (entry.name.endsWith('.js'))

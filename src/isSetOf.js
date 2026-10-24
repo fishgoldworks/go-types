@@ -1,8 +1,8 @@
 const isSet = require('./isSet');
-const createTypeChecker = require('./createTypeChecker');
+const compileTypeMatcher = require('./util/compileTypeMatcher');
 const values = typeof Set === 'function' ? Set.prototype.values : undefined;
 /**
- * Determines whether a Set contains only values matching a type specification.
+ * Checks whether a Set contains only values matching a type specification.
  *
  * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
  * the first mismatch. Predicates must not mutate the Set. Unavailable native collection types do
@@ -22,7 +22,7 @@ const values = typeof Set === 'function' ? Set.prototype.values : undefined;
  * @example isSetOf(new Set(), "number");          // => true
  */
 function isSetOf(value, type) {
-  const check = createTypeChecker(type);
+  const check = compileTypeMatcher(type);
   if (!isSet(value)) return false;
   if (typeof values !== 'function') throw new TypeError('Native Set iteration is unavailable in this runtime.');
   // Native Set iteration is live. Predicates must not mutate the collection.

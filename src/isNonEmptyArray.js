@@ -1,7 +1,7 @@
 const isArray = require('./isArray');
 const isValidArrayLength = require('./util/isValidArrayLength');
 /**
- * Determines whether a value is an array with a valid length greater than zero.
+ * Checks whether a value is an array with a valid length greater than zero.
  *
  * Sparse arrays count as non-empty when their length is positive. Does not validate elements.
  *

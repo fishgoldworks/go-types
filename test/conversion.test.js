@@ -6,7 +6,20 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const Types = require('../index.js');
 
-const targets = ['Array', 'BigInt', 'Boolean', 'Date', 'Integer', 'Map', 'Number', 'Object', 'Set', 'String', 'Symbol'];
+const targets = [
+  'Array',
+  'BigInt',
+  'Boolean',
+  'Date',
+  'Integer',
+  'Json',
+  'Map',
+  'Number',
+  'PlainObject',
+  'Set',
+  'String',
+  'Symbol'
+];
 for (const target of targets) {
   for (const suffix of ['', 'If']) {
     const name = 'to' + target + suffix;
@@ -24,22 +37,17 @@ const arrayCases = [
   ['sparse array becomes dense', () => Array(2), [undefined, undefined]],
   ['string uses Unicode code points', () => 'A\u{1F600}B', ['A', '\u{1F600}', 'B']],
   ['empty string', () => '', []],
-  ['boxed string', () => new String('ab'), ['a', 'b']],
   ['set preserves insertion order', () => new Set([2, 1, 2]), [2, 1]],
   ['map yields entries', () => new Map([['a', 1]]), [['a', 1]]],
   ['typed array', () => new Uint8Array([1, 2]), [1, 2]],
   ['bigint typed array', () => new BigInt64Array([1n, 2n]), [1n, 2n]],
-  ['array-like values', () => ({ 0: 'x', 1: 'y', length: 2 }), ['x', 'y']],
-  ['missing array-like indices', () => ({ length: 2 }), [undefined, undefined]],
-  ['fractional length follows Array.from', () => ({ 0: 'x', 1: 'y', length: 1.9 }), ['x']],
-  ['string length is converted', () => ({ 0: 'x', length: '1' }), ['x']],
-  ['negative length is zero', () => ({ length: -1 }), []],
-  ['NaN length is zero', () => ({ length: NaN }), []],
+  ['record with length', () => ({ 0: 'x', 1: 'y', length: 2 }), ['x', 'y', 2]],
+  ['record length is data', () => ({ length: 2 }), [2]],
+  ['fractional record length', () => ({ 0: 'x', 1: 'y', length: 1.9 }), ['x', 'y', 1.9]],
+  ['string record length', () => ({ 0: 'x', length: '1' }), ['x', '1']],
+  ['negative record length', () => ({ length: -1 }), [-1]],
+  ['NaN record length', () => ({ length: NaN }), [NaN]],
   ['no collection shape gives empty array', () => ({}), []],
-  ['number has no collection shape', () => 42, []],
-  ['boolean has no collection shape', () => false, []],
-  ['symbol has no collection shape', () => Symbol('x'), []],
-  ['bigint has no collection shape', () => 1n, []],
   [
     'arguments object',
     () =>
@@ -50,9 +58,9 @@ const arrayCases = [
   ],
   ['foreign array', () => vm.runInNewContext('[1, 2]'), [1, 2]],
   ['foreign set', () => vm.runInNewContext('new Set([2, 1])'), [2, 1]],
-  ['null-prototype array-like', () => Object.assign(Object.create(null), { 0: 'x', length: 1 }), ['x']],
+  ['null-prototype record', () => Object.assign(Object.create(null), { 0: 'x', length: 1 }), ['x', 1]],
   ['inherited indices', () => Object.assign(Object.create({ 0: 'x' }), { length: 1 }), ['x']],
-  ['null iterator falls back to length', () => ({ 0: 'x', length: 1, [Symbol.iterator]: null }), ['x']]
+  ['null iterator becomes record data', () => ({ 0: 'x', length: 1, [Symbol.iterator]: null }), ['x', 1, null]]
 ];
 for (const [label, input, expected] of arrayCases) {
   test('toArray: ' + label, () => assert.deepEqual(Types.toArray(input()), expected));
@@ -105,27 +113,27 @@ test('toArray prefers the iterator and does not inspect a conflicting length', (
 });
 test('toArray snapshots array-like length once and reads values live', () => {
   let reads = 0;
-  const input = {
+  const input = Object.assign(Object.create({}), {
     0: 'x',
     1: 'y',
     get length() {
       reads++;
       return 2;
     }
-  };
+  });
   assert.deepEqual(Types.toArray(input), ['x', 'y']);
   assert.equal(reads, 1);
 });
-for (const value of [null, undefined]) {
+for (const value of [null, undefined, 42, false, Symbol('x'), 1n, new String('ab')]) {
   test('toArray rejects ' + String(value), () => assert.throws(() => Types.toArray(value), TypeError));
 }
 for (const [label, value, error] of [
   ['non-callable iterator', { [Symbol.iterator]: 1 }, TypeError],
   ['iterator returns a primitive', { [Symbol.iterator]: () => 1 }, TypeError],
   ['next returns a primitive', { [Symbol.iterator]: () => ({ next: () => 1 }) }, TypeError],
-  ['symbol length', { length: Symbol('length') }, TypeError],
-  ['bigint length', { length: 1n }, TypeError],
-  ['array length overflow', { length: 2 ** 32 }, RangeError]
+  ['symbol length', Object.assign(Object.create({}), { length: Symbol('length') }), TypeError],
+  ['bigint length', Object.assign(Object.create({}), { length: 1n }), TypeError],
+  ['array length overflow', Object.assign(Object.create({}), { length: 2 ** 32 }), RangeError]
 ]) {
   test('toArray rejects ' + label, () => assert.throws(() => Types.toArray(value), error));
 }
@@ -377,51 +385,6 @@ test('toString propagates conversion exceptions', () => {
   assert.throws(() => Types.toString(Object.create(null)), TypeError);
 });
 
-for (const [label, value] of [
-  ['plain object', {}],
-  ['array', []],
-  ['function', () => {}],
-  ['date', new Date(0)],
-  ['map', new Map()],
-  ['null-prototype dictionary', Object.create(null)],
-  ['foreign object', vm.runInNewContext('({x: 1})')],
-  ['boxed number', new Number(1)]
-]) {
-  test('toObject preserves ' + label + ' identity', () => assert.equal(Types.toObject(value), value));
-}
-for (const [label, value] of [
-  ['number', 42],
-  ['NaN', NaN],
-  ['negative zero', -0],
-  ['string', 'abc'],
-  ['boolean', false],
-  ['bigint', 12n],
-  ['symbol', Symbol('x')]
-]) {
-  test('toObject boxes ' + label, () => {
-    const output = Types.toObject(value);
-    assert.equal(typeof output, 'object');
-    assert.equal(output.valueOf(), value);
-  });
-}
-for (const value of [null, undefined]) {
-  test('toObject creates a fresh empty object for ' + String(value), () => {
-    const first = Types.toObject(value);
-    assert.deepEqual(first, {});
-    assert.notEqual(first, Types.toObject(value));
-  });
-}
-test('toObject does not parse JSON text', () => {
-  const output = Types.toObject('{"x":1}');
-  assert.equal(output.valueOf(), '{"x":1}');
-  assert.equal(output.x, undefined);
-});
-test('toObject does not inspect or unwrap a revoked proxy', () => {
-  const revocable = Proxy.revocable({}, {});
-  revocable.revoke();
-  assert.equal(Types.toObject(revocable.proxy), revocable.proxy);
-});
-
 for (const [label, value, expected] of [
   ['timestamp zero', 0, 0],
   ['positive timestamp', 1234, 1234],
@@ -560,6 +523,7 @@ test('toSymbol invokes string conversion on other objects and propagates errors'
 });
 
 const conditionalFixtures = {
+  Json: { input: () => ({ a: 1 }), check: (value) => assert.equal(value, '{"a":1}') },
   Array: { input: () => 'ab', check: (output) => assert.deepEqual(output, ['a', 'b']) },
   BigInt: { input: () => '42', check: (output) => assert.equal(output, 42n) },
   Boolean: { input: () => '', check: (output) => assert.equal(output, false) },
@@ -568,13 +532,7 @@ const conditionalFixtures = {
   Map: { input: () => [['key', 1]], check: (output) => assert.deepEqual([...output], [['key', 1]]) },
   Set: { input: () => [1, 1, 2], check: (output) => assert.deepEqual([...output], [1, 2]) },
   Number: { input: () => '4.8', check: (output) => assert.equal(output, 4.8) },
-  Object: {
-    input: () => 4,
-    check: (output) => {
-      assert.equal(typeof output, 'object');
-      assert.equal(output.valueOf(), 4);
-    }
-  },
+  PlainObject: { input: () => '{"a":1}', check: (output) => assert.deepEqual(output, { a: 1 }) },
   String: { input: () => 4, check: (output) => assert.equal(output, '4') },
   Symbol: {
     input: () => 'x',
@@ -691,7 +649,7 @@ test('conversion functions retain captured built-ins after initialisation', () =
         assert.strictEqual(T.toBigInt('12'), 12n);
         assert.strictEqual(T.toString(12), '12');
         assert.strictEqual(T.toBoolean(0), false);
-        assert.strictEqual(T.toObject(12).valueOf(), 12);
+        assert.strictEqual(T.toPlainObject('{"a":12}').a, 12);
         assert.strictEqual(T.toDate(date), date);
         assert.strictEqual(T.toDate(0).getTime(), 0);
         assert.strictEqual(T.toSymbol(boxed), symbol);
@@ -703,23 +661,36 @@ test('conversion functions retain captured built-ins after initialisation', () =
   assert.equal(result.status, 0, result.stdout + result.stderr);
 });
 
-test('toArray uses function arity as array-like length without invoking the function', () => {
+test('toArray rejects functions without invoking them', () => {
   function input(first, second) {
     throw Error('must not be called');
   }
-  assert.deepEqual(Types.toArray(input), [undefined, undefined]);
+  assert.throws(() => Types.toArray(input), TypeError);
 });
-test('toArray does not invoke or await the asynchronous iterator protocol', () => {
+test('toArray copies an async method from a record without invoking or awaiting it', () => {
   let reads = 0;
+  const method = () => {
+    throw Error('must not be called');
+  };
   const input = {
     get [Symbol.asyncIterator]() {
       reads++;
-      throw Error('must not be read');
+      return method;
     }
   };
-  assert.deepEqual(Types.toArray(input), []);
-  assert.equal(reads, 0);
+  assert.deepEqual(Types.toArray(input), [method]);
+  assert.equal(reads, 1);
+  assert.throws(
+    () =>
+      Types.toArray(
+        (async function* () {
+          yield 1;
+        })()
+      ),
+    TypeError
+  );
 });
+
 test('toArray uses native truthy iterator completion without reading its final value', () => {
   const input = {
     [Symbol.iterator]() {

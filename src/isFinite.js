@@ -5,7 +5,7 @@ const nativeCheck =
     : (value) => typeof value === 'number' && value === value && value !== Infinity && value !== -Infinity;
 
 /**
- * Determines whether a primitive or boxed number is a finite number.
+ * Checks whether a primitive or boxed number is a finite number.
  *
  * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *

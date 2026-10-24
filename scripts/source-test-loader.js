@@ -11,6 +11,7 @@ function sourceTestLoader() {
   function collect(directory) {
     for (const entry of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
       const name = directory + '/' + entry.name;
+      if (entry.isDirectory() && ['temp', '.tmp'].includes(entry.name)) continue;
       if (entry.isDirectory()) collect(name);
       else if (name.endsWith('.js')) files.push(name);
     }

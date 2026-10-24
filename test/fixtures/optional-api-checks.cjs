@@ -7,6 +7,7 @@ module.exports = function optionalApiChecks() {
     'WeakMap',
     'Symbol',
     'Promise',
+    'Promise.resolve',
     'BigInt',
     'SharedArrayBuffer',
     'ArrayBuffer',
@@ -20,6 +21,9 @@ module.exports = function optionalApiChecks() {
     'Number.isSafeInteger',
     'Math.trunc',
     'Array.from',
+    'Object.entries',
+    'Object.getOwnPropertySymbols',
+    'Reflect.ownKeys',
     'Error.isError',
     'Map.prototype.has',
     'Set.prototype.has',
@@ -37,11 +41,24 @@ module.exports = function optionalApiChecks() {
   ];
   const scenarios = [[]].concat(
     features.map((name) => [name]),
-    [['Symbol', 'Error.isError'], features]
+    [
+      ['Symbol', 'Error.isError'],
+      ['Reflect.ownKeys', 'Object.getOwnPropertySymbols'],
+      ['Symbol', 'Reflect.ownKeys', 'Object.getOwnPropertySymbols'],
+      features
+    ]
   );
   function prepare(missing) {
     const held = {
       map: new Map([['a', null]]),
+      recordIterable: {
+        a: 1,
+        [Symbol.iterator]: function* () {
+          yield ['from iterator', 2];
+        }
+      },
+      recordSymbol: Symbol('record'),
+      symbolRecord: { a: 1 },
       set: new Set([null]),
       weakMap: new WeakMap(),
       weakSet: new WeakSet(),
@@ -49,6 +66,9 @@ module.exports = function optionalApiChecks() {
       view: new DataView(new ArrayBuffer(4)),
       typed: new Uint8Array(2),
       promise: Promise.resolve(1),
+      boxedSymbol: Object(Symbol('held')),
+      bigint: typeof BigInt === 'function' ? BigInt('12') : undefined,
+      boxedBigInt: typeof BigInt === 'function' ? Object(BigInt('12')) : undefined,
       date: new Date(0),
       error: new Error('native'),
       spoofedError: { [Symbol.toStringTag]: 'Error' },
@@ -59,6 +79,8 @@ module.exports = function optionalApiChecks() {
       }),
       shared: typeof SharedArrayBuffer === 'function' ? new SharedArrayBuffer(4) : undefined
     };
+    held.symbolValue = Symbol.prototype.valueOf.call(held.boxedSymbol);
+    held.symbolRecord[held.recordSymbol] = 2;
     for (const name of missing) {
       const parts = name.split('.');
       let owner = globalThis;
@@ -91,6 +113,64 @@ module.exports = function optionalApiChecks() {
       equal(value, undefined, name + ' must not be polyfilled globally');
     }
     equal(api.isArray([]), true, 'unrelated array check');
+    equal(api.fromJson('{"a":1}').a, 1, 'JSON parsing without optional capabilities');
+    equal(api.fromJson('false'), false, 'JSON boolean parsing');
+    equal(
+      api.fromJson('1', (key, value) => (typeof value === 'number' ? value + 1 : value)),
+      2,
+      'JSON reviver'
+    );
+    equal(api.fromJsonIf('[', false), '[', 'skipped invalid JSON');
+    equal(api.box(null), null, 'box preserves null');
+    equal(Number.prototype.valueOf.call(api.box(3)), 3, 'box number');
+    equal(typeof api.box(held.symbolValue), 'object', 'box held symbol');
+    equal(api.unbox(Object(3)), 3, 'unbox number');
+    equal(api.unbox(Object(false)), false, 'unbox boolean');
+    equal(api.unbox(Object('x')), 'x', 'unbox string');
+    equal(
+      api.unbox({
+        valueOf() {
+          throw Error('unbox hook');
+        }
+      }).valueOf instanceof Function,
+      true,
+      'unbox ignores hooks'
+    );
+    equal(
+      api.unbox(held.boxedSymbol),
+      absent('Symbol') || absent('Symbol.prototype.valueOf') ? held.boxedSymbol : held.symbolValue,
+      'optional symbol unboxing'
+    );
+    if (held.boxedBigInt) {
+      equal(
+        api.unbox(held.boxedBigInt),
+        absent('BigInt') || absent('BigInt.prototype.valueOf') ? held.boxedBigInt : held.bigint,
+        'optional bigint unboxing'
+      );
+      equal(typeof api.box(held.bigint), 'object', 'box held bigint');
+    }
+    equal(api.toRegExp('a', 'i').test('A'), true, 'regex conversion without optional APIs');
+    const hostile = {
+      get then() {
+        throw Error('must not inspect');
+      }
+    };
+    equal(api.toPromiseIf(hostile, false), hostile, 'skipped Promise conversion');
+    if (absent('Promise') || absent('Promise.resolve')) {
+      throws(() => api.toPromise(hostile), 'toPromise requires native Promise.resolve support.');
+      throws(() => api.toPromiseIf(hostile, true), 'toPromise requires native Promise.resolve support.');
+    } else equal(api.toPromise(held.promise), held.promise, 'native Promise identity');
+    equal(api.toPlainObject('{"a":1}').a, 1, 'JSON object without optional capabilities');
+    equal(api.toPlainObject([['a', 1]]).a, 1, 'plain entry conversion without optional capabilities');
+    equal(api.toPlainObjectIf(held.map, false), held.map, 'skipped plain conversion preserves identity');
+    const missingKeys = (absent('Reflect') || absent('Reflect.ownKeys')) && absent('Object.getOwnPropertySymbols');
+    if (missingKeys) {
+      throws(() => api.toPlainObject({ a: 1 }));
+    } else {
+      equal(api.toPlainObject({ a: 1 }).a, 1, 'record copying without optional capabilities');
+      if (!absent('Map.prototype.entries')) equal(api.toPlainObject(held.map).a, null, 'held Map conversion');
+    }
+
     equal(api.isString('x'), true, 'unrelated string check');
     equal(api.isEmpty({}), true, 'empty dictionary');
     equal(api.isBlank({ a: null }), true, 'blank dictionary');
@@ -137,14 +217,14 @@ module.exports = function optionalApiChecks() {
     equal(api.isCyclic({ a: shared, b: shared }), false, 'completed shared child');
     equal(reads, 1, 'shared child is read once');
     const union = ['number', 'string'];
-    const matcher = api.createTypeChecker([union, [union, null]]);
+    const matcher = (value) => api.isTypeOf(value, [union, [union, null]]);
     equal(matcher(1), true, 'nested numeric matcher');
     equal(matcher('a'), true, 'shared string matcher');
     equal(matcher({}), false, 'nested matcher rejects objects');
-    equal(api.createTypeChecker(Date)(held.date), true, 'instance matcher');
+    equal(api.isTypeOf(held.date, Date), true, 'instance matcher');
     const cyclicMatcher = [];
     cyclicMatcher.push(cyclicMatcher);
-    throws(() => api.createTypeChecker(cyclicMatcher));
+    throws(() => api.isTypeOf(undefined, cyclicMatcher));
     throws(() => api.isMapOf({}, 'invalid-type'));
     throws(() => api.isSetOf({}, 'invalid-type'));
     equal(api.isSetOf({}, 'number'), false, 'invalid Set input');
@@ -201,6 +281,26 @@ module.exports = function optionalApiChecks() {
         const value = api[name](argument);
         equal(value !== undefined, true, name + ' native conversion');
       }
+    }
+    if (!absent('Map')) {
+      if (missingKeys) throws(() => api.toMap({ a: 1 }));
+      else equal(api.toMap({ a: 1, b: 2 }).get('b'), 2, 'record conversion without optional APIs');
+      equal(api.toMap(held.recordIterable).get('from iterator'), 2, 'iterable record precedence without Symbol global');
+    }
+    for (const [native, name] of [
+      ['Array.from', 'toArray'],
+      ['Set', 'toSet'],
+      ['Map', 'toMap']
+    ]) {
+      if (absent(native)) continue;
+      if (missingKeys) throws(() => api[name](held.symbolRecord));
+      else {
+        const output = api[name](held.symbolRecord);
+        const values = [];
+        for (const item of output) values.push(item);
+        equal(name === 'toMap' ? output.get(held.recordSymbol) : values[1], 2, name + ' preserves symbols');
+      }
+      if (name === 'toMap') throws(() => api.toMap([['a']]));
     }
     for (const [native, operation, label] of [
       ['Map.prototype.entries', () => api.isMapOf(held.map, 'string', null), 'Map iteration'],

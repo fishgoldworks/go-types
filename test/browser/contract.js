@@ -1,11 +1,19 @@
 /* Browser black-box checks, shared by bundle verification and the explicit source-only run. */
-globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExamples = []) {
+globalThis.runGoTypesBrowserTests = async function (api, metadata, names, sourceExamples = []) {
   const failures = [];
   let passed = 0;
   let skipped = 0;
   function test(name, body) {
     try {
       body();
+      passed++;
+    } catch (error) {
+      failures.push({ name, message: String(error.stack || error) });
+    }
+  }
+  async function testAsync(name, body) {
+    try {
+      await body();
       passed++;
     } catch (error) {
       failures.push({ name, message: String(error.stack || error) });
@@ -30,6 +38,229 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     }
     throw new Error('Expected TypeError');
   }
+  test('matcher compilation is internal to the browser API', () => {
+    equal(Object.prototype.hasOwnProperty.call(api, 'createTypeChecker'), false);
+    equal(Object.prototype.hasOwnProperty.call(api, 'compileTypeMatcher'), false);
+  });
+  test('JSON parsing preserves revivers, safe keys and conditional identity', () => {
+    equal(api.fromJson('null'), null);
+    exampleEqual(api.fromJson('[1,2]'), [1, 2]);
+    exampleEqual(
+      api.fromJson('{"a":1,"b":2}', (key, value) => (key === 'a' ? undefined : value)),
+      { b: 2 }
+    );
+    const own = api.fromJson('{"__proto__":{"polluted":true}}');
+    equal(Object.getPrototypeOf(own), Object.prototype);
+    equal(Object.prototype.hasOwnProperty.call(own, '__proto__'), true);
+    equal({}.polluted, undefined);
+    const visits = [];
+    equal(
+      api.fromJson('1', function (key, value) {
+        equal(this[key], value);
+        visits.push(key);
+        return 2;
+      }),
+      2
+    );
+    exampleEqual(visits, ['']);
+    const error = new Error('reviver');
+    let caught;
+    try {
+      api.fromJson('1', () => {
+        throw error;
+      });
+    } catch (failure) {
+      caught = failure;
+    }
+    equal(caught, error);
+    const revoked = Proxy.revocable({}, {});
+    revoked.revoke();
+    equal(api.fromJsonIf(revoked.proxy, false, revoked.proxy), revoked.proxy);
+    equal(api.fromJsonIf('invalid'), 'invalid');
+    equal(
+      api.fromJsonIf('2', true, (_key, value) => (typeof value === 'number' ? value * 2 : value)),
+      4
+    );
+  });
+  test('boxing and unboxing preserve brands and HTMLDDA identity', () => {
+    for (const value of [false, 3, -0, NaN, 'text', Symbol('key'), BigInt('12')])
+      equal(api.unbox(api.box(value)), value);
+    equal(api.box(null), null);
+    equal(api.box(), undefined);
+    equal(api.box(document.all), document.all);
+    equal(api.unbox(document.all), document.all);
+    const input = {
+      valueOf() {
+        throw Error('must not run');
+      }
+    };
+    equal(api.unbox(input), input);
+    const proxy = Proxy.revocable({}, {});
+    proxy.revoke();
+    equal(api.box(proxy.proxy), proxy.proxy);
+    equal(api.unbox(proxy.proxy), proxy.proxy);
+    equal(api.boxIf(3, false), 3);
+    equal(api.unboxIf(input, false), input);
+  });
+  test('RegExp conversion guarantees a brand and native flag semantics', () => {
+    const value = /a/g;
+    value.lastIndex = 2;
+    equal(api.toRegExp(value), value);
+    equal(value.lastIndex, 2);
+    equal(api.toRegExp(value, 'i').lastIndex, 0);
+    equal(api.toRegExpIf('a', true, 'i').test('A'), true);
+    const fake = { [Symbol.match]: true, constructor: RegExp, source: 'a', flags: 'i' };
+    const converted = api.toRegExp(fake);
+    equal(api.isRegExp(converted), true);
+    equal(converted.test('A'), true);
+  });
+  await testAsync('Promise conversion adopts values and propagates rejections', async () => {
+    const promise = Promise.resolve(3);
+    equal(api.toPromise(promise), promise);
+    equal(await api.toPromise(4), 4);
+    equal(
+      await api.toPromise({
+        then(resolve) {
+          resolve(5);
+        }
+      }),
+      5
+    );
+    const fn = () => {
+      throw Error('must not call');
+    };
+    equal(await api.toPromise(fn), fn);
+    const error = new Error('then');
+    let caught;
+    try {
+      await api.toPromise({
+        get then() {
+          throw error;
+        }
+      });
+    } catch (failure) {
+      caught = failure;
+    }
+    equal(caught, error);
+    equal(api.toPromiseIf(3, false), 3);
+    equal(await api.toPromiseIf(3, true), 3);
+  });
+  test('collection conversions share record, symbol and strict entry rules', () => {
+    const key = Symbol('value');
+    const input = { a: 1, length: 2, [key]: 3 };
+    exampleEqual(api.toArray(input), [1, 2, 3]);
+    exampleEqual(Array.from(api.toSet(input)), [1, 2, 3]);
+    equal(api.toMap(input).get(key), 3);
+    for (const pair of [[], ['a'], ['a', 1, 2], Array(2), { 0: 'a', 1: 1, length: 2 }]) {
+      let closed = false;
+      function* entries() {
+        try {
+          yield pair;
+        } finally {
+          closed = true;
+        }
+      }
+      throws(() => api.toMap(entries()));
+      equal(closed, true);
+    }
+    equal(api.toMap([['a', undefined]]).has('a'), true);
+    for (const value of [1, new Date(), /x/, Object('abc'), Promise.resolve(1), function () {}]) {
+      throws(() => api.toArray(value));
+      throws(() => api.toSet(value));
+      throws(() => api.toMap(value));
+    }
+    const host = document.createElement('div');
+    host.innerHTML = '<span></span><span></span>';
+    equal(api.toSet(host.children).size, 2);
+    equal(api.toArray(host.children)[1], host.lastChild);
+  });
+  test('array and Set conversion preserve document.all array-like contents', () => {
+    const doc = document.implementation.createHTMLDocument('collection values');
+    const input = doc.all;
+    const array = api.toArray(input);
+    const set = api.toSet(input);
+    equal(array.length, input.length);
+    equal(set.size, input.length);
+    for (let i = 0; i < input.length; i++) {
+      equal(array[i], input[i]);
+      equal(set.has(input[i]), true);
+    }
+    equal(api.toArrayIf(input, false), input);
+    equal(api.toSetIf(input, false), input);
+  });
+  test('JSON serialization preserves native options and unsupported-value rules', () => {
+    equal(api.toJson({ a: 1, b: 2 }, ['a'], 2), '{\n  "a": 1\n}');
+    equal(api.toJson('hello'), '"hello"');
+    equal(api.toJson(undefined), undefined);
+    equal(api.toJson({ a: undefined }), '{}');
+    equal(api.toJson([undefined, NaN]), '[null,null]');
+    equal(api.toJson(new Date(0)), '"1970-01-01T00:00:00.000Z"');
+    equal(api.toJson(new Map([['a', 1]])), '{}');
+    const failure = new Error('JSON getter');
+    let observed;
+    try {
+      api.toJson({
+        get a() {
+          throw failure;
+        }
+      });
+    } catch (error) {
+      observed = error;
+    }
+    equal(observed, failure);
+    const cycle = {};
+    cycle.self = cycle;
+    throws(() => api.toJson(cycle));
+    throws(() => api.toJson(BigInt('1')));
+  });
+  test('JSON serialization preserves native hook order and replacer receiver', () => {
+    const input = {
+      toJSON() {
+        return { a: 1 };
+      }
+    };
+    let rootCalls = 0;
+    equal(
+      api.toJson(input, function (key, value) {
+        if (key === '') {
+          equal(this[key], input);
+          rootCalls++;
+        }
+        return key === 'a' ? 2 : value;
+      }),
+      '{"a":2}'
+    );
+    equal(rootCalls, 1);
+    equal(
+      api.toJson(undefined, () => 42),
+      '42'
+    );
+  });
+  test('conditional JSON serialization skips all option inspection and forwards requested options', () => {
+    const poison = new Proxy([], {
+      get() {
+        throw Error('unexpected inspection');
+      }
+    });
+    equal(api.toJsonIf(poison, false, poison, poison), poison);
+    equal(api.toJsonIf(poison), poison);
+    let calls = 0;
+    equal(
+      api.toJsonIf(
+        { a: 1, b: 2 },
+        (value) => {
+          calls++;
+          return value.a === 1;
+        },
+        ['a'],
+        2
+      ),
+      '{\n  "a": 1\n}'
+    );
+    equal(calls, 1);
+    throws(() => api.toJsonIf(poison, async () => false));
+    throws(() => api.toJsonIf(poison, () => 1));
+  });
   test('public export names', () => equal(Object.keys(api).sort().join(','), [...names].sort().join(',')));
   test('cycle traversal recognises HTMLDDA vertices and does not retain prior graph state', () => {
     const isolated = document.implementation.createHTMLDocument('graph fixture');
@@ -137,7 +368,7 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     equal(api.isTypeOf(document.all, 'undefined'), true);
     equal(api.isTypeOf(document.all, undefined), false);
     equal(api.toBoolean(document.all), false);
-    equal(api.toObject(document.all), document.all);
+    throws(() => api.toPlainObject(document.all));
   });
   // A protocol method can have [[Call]] without reporting typeof "function".
   // Keep this separate from isFunction(), whose public contract is literal typeof.
@@ -214,7 +445,7 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
       };
       withMatcherSelectors(document.all, selectors, (descriptor) => {
         const shared = [descriptor];
-        const check = api.createTypeChecker([shared, shared]);
+        const check = (value) => api.isTypeOf(value, [shared, shared]);
         equal(calls, 0);
         equal(check(7), true);
         equal(check(8), false);
@@ -241,7 +472,7 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
           }
         }
       },
-      (value) => throws(() => api.createTypeChecker(value))
+      (value) => throws(() => api.isTypeOf(undefined, value))
     );
     equal(reads, 0);
     withMatcherSelectors(
@@ -250,14 +481,14 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
         predicate: { configurable: true, value: () => true },
         instanceOf: { configurable: true, value: Object }
       },
-      (value) => throws(() => api.createTypeChecker(value))
+      (value) => throws(() => api.isTypeOf(undefined, value))
     );
-    withMatcherSelectors(document.all, {}, (value) => throws(() => api.createTypeChecker(value)));
+    withMatcherSelectors(document.all, {}, (value) => throws(() => api.isTypeOf(undefined, value)));
   });
   test('shared pure matcher graph stays compact', () => {
     let spec = ['number'];
     for (let i = 0; i < 2000; i++) spec = [spec, spec];
-    const check = api.createTypeChecker(spec);
+    const check = (value) => api.isTypeOf(value, spec);
     equal(check(1), true);
     equal(check('x'), false);
   });
@@ -354,7 +585,7 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     });
   }
   test('foreign arrow defers native instanceof errors', () => {
-    const check = api.createTypeChecker(realm.eval('(x => true)'));
+    const check = (value) => api.isTypeOf(value, realm.eval('(x => true)'));
     equal(check(1), false);
     let failure;
     try {
@@ -372,10 +603,70 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     equal(nodes[0], host.firstChild);
     equal(api.toArray(host.children)[1], host.lastChild);
   });
-  test('conversion: document.all keeps native truthiness and object identity', () => {
+  test('conversion: plain objects preserve symbols, shallow values and safe prototypes', () => {
+    const symbol = Symbol('field');
+    const nested = {};
+    const input = new realm.Object();
+    input.a = nested;
+    input[symbol] = 2;
+    Object.defineProperty(input, 'hidden', { value: 3 });
+    const result = api.toPlainObject(input);
+    equal(Object.getPrototypeOf(result), Object.prototype);
+    equal(result === input, false);
+    equal(result.a, nested);
+    equal(result[symbol], 2);
+    equal(Object.prototype.hasOwnProperty.call(result, 'hidden'), false);
+    const special = api.toPlainObject([['__proto__', { injected: true }]]);
+    equal(Object.getPrototypeOf(special), Object.prototype);
+    equal(special.injected, undefined);
+    equal(special.__proto__.injected, true);
+    equal(api.toPlainObject(new realm.Map([['a', 1]])).a, 1);
+    equal(api.toPlainObjectIf(null, false), null);
+    for (const value of [
+      null,
+      undefined,
+      new realm.String(''),
+      new realm.Date(),
+      [[1, 2]],
+      [['a']],
+      [['a', 1, 2]],
+      '[]'
+    ])
+      throws(() => api.toPlainObject(value));
+    equal('toObject' in api, false);
+  });
+  test('conversion: plain entry validation closes iterators and propagates errors', () => {
+    let closed = false;
+    throws(() =>
+      api.toPlainObject(
+        (function* () {
+          try {
+            yield ['a', 1];
+            yield ['bad'];
+          } finally {
+            closed = true;
+          }
+        })()
+      )
+    );
+    equal(closed, true);
+    const failure = new Error('getter');
+    let caught;
+    try {
+      api.toPlainObject({
+        get value() {
+          throw failure;
+        }
+      });
+    } catch (error) {
+      caught = error;
+    }
+    equal(caught, failure);
+  });
+  test('conversion: document.all retains truthiness and skipped identity', () => {
     equal(api.toBoolean(document.all), false);
-    equal(api.toObject(document.all), document.all);
-    equal(api.toObjectIf(document.all, false), document.all);
+    throws(() => api.toPlainObject(document.all));
+    equal(api.toPlainObjectIf(document.all, false), document.all);
   });
   test('conversion: foreign Date and Symbol identity', () => {
     const date = new realm.Date(0);
@@ -429,8 +720,13 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
       2
     );
     equal(Array.from(api.toSet('A😀A')).join(''), 'A😀');
-    throws(() => api.toMap({ key: 1 }));
-    throws(() => api.toSet({ 0: 1, length: 1 }));
+    equal(api.toMap({ key: 1 }).get('key'), 1);
+    equal(api.toMap(Object.assign(Object.create(null), { key: value })).get('key'), value);
+    const foreignRecord = new realm.Object();
+    foreignRecord.key = value;
+    equal(api.toMap(foreignRecord).get('key'), value);
+    equal(api.toMapIf({ key: 1 }, true).get('key'), 1);
+    equal(api.toSet({ 0: 1, length: 1 }).size, 1);
     const revoked = realm.Proxy.revocable({}, {});
     revoked.revoke();
     equal(api.toMapIf(revoked.proxy, false), revoked.proxy);
@@ -509,8 +805,8 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     function Target() {}
     Object.defineProperty(Target, Symbol.hasInstance, { value: document.all });
     equal({} instanceof Target, false);
-    equal(api.createTypeChecker(Target)({}), false);
-    equal(api.createTypeChecker({ instanceOf: Target })({}), false);
+    equal(api.isTypeOf({}, Target), false);
+    equal(api.isTypeOf({}, { instanceOf: Target }), false);
     equal(api.isTypeOf({}, Target), false);
     equal(api.isArrayOf([{}], Target), false);
   });
@@ -518,8 +814,8 @@ globalThis.runGoTypesBrowserTests = function (api, metadata, names, sourceExampl
     throws(() => api.isTypeOf(1, ['number', 42]));
     const cycle = [];
     cycle.push(cycle);
-    throws(() => api.createTypeChecker(cycle));
-    equal(api.createTypeChecker(['string', null])('x'), true);
+    throws(() => api.isTypeOf(undefined, cycle));
+    equal(api.isTypeOf('x', ['string', null]), true);
   });
   test('empty checks do not consume a generator', () => {
     function* values() {

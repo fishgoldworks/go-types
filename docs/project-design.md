@@ -2,7 +2,7 @@
 
 This guide records go-types design constraints. The library provides small, composable checks and explicit conversions with stable, documented contracts.
 
-- Keep zero runtime dependencies and small CommonJS source modules. Preserve 46 original root export names. The 84-function API also includes reusable checkers, typed Map/Set validators and 22 conversions.
+- Keep zero runtime dependencies and small CommonJS source modules. Preserve 45 original root export names. The 95-function API also includes typed Map/Set validators and 34 conversions. Matcher compilation stays internal; use go-fns to combine predicates.
 - Prefer captured standard intrinsics where their contracts match; no speculative legacy polyfills and no security claims about a compromised runtime.
 - Compile and fully validate matcher configuration before checking any input. No constructor bodies or predicates run during compilation. Compile a compact directed acyclic graph of unions using an explicit stack, reject cyclic unions, snapshot each array once per compilation, and preserve callback order and number of calls. Native instance prototype errors are deferred until evaluation rather than inferred from constructibility. Instance matching remains native instanceof.
 - `isArrayOf` and `isArrayLikeOf` accept empty inputs. Holes are read through ordinary indexed access. Non-empty array detection is separate.
@@ -14,11 +14,11 @@ This guide records go-types design constraints. The library provides small, comp
 - Type declarations are conservative: no unsafe integer/blank/plain-object/boxed-primitive negative-branch narrowing. Exact primitive checks and non-nullish filtering narrow.
 - Use `node:test` for public-API tests, alongside independent generated graph/model tests, TypeScript consumer tests, browser tests and packed-package checks.
 - Publish supported source, entries, declarations, bundles and documentation. Keep private helpers, tests and development tooling outside the public API.
-- Expose all eleven native-first conversions and their eleven conditional counterparts. Document nullish input, output identity, exceptions, precision and iteration; skipped conversions do not inspect the input.
+- Expose the conversion functions and their conditional counterparts listed in the public inventory. Document nullish input, output identity, exceptions, precision and iteration; skipped conversions do not inspect the input.
 - Target Node >=8 for CommonJS consumers and the [documented ESM and browser requirements](runtime.md#supported-environments-and-verification). Keep development tools on Node >=22.16.0. Keep measured verification evidence separate from product documentation.
 
 ## Source and package boundaries
 
-The root manifest owns identity, version, runtime requirements and development tooling; it is private. `scripts/package-layout.js` explicitly selects consumer metadata, and `scripts/generate-entries.js` derives the full import and declaration surface from `scripts/exports.json` into an owned staging directory. `scripts/build.js` assembles source and consumer docs, builds and checks bundles, then replaces `package/` with rollback on failure. Generated aliases, ESM wrappers, type wrappers and distributions belong only in that ignored output.
+The private root manifest owns identity, version and development tooling. `scripts/package-layout.js` owns consumer runtime requirements and explicitly selects shared consumer metadata, and `scripts/generate-entries.js` derives the full import and declaration surface from `scripts/exports.json` into an owned staging directory. `scripts/build.js` assembles source and consumer docs, builds and checks bundles, then replaces `package/` with rollback on failure. Generated aliases, ESM wrappers, type wrappers and distributions belong only in that ignored output.
 
 `pack:package` builds and packs fresh output. `verify` and `verify:all` use the same packer once and pass its exact tarball to the installed-consumer checks; the latter adds browser checks. Source tests continue to measure canonical implementations. Consumer resolution, type, tree-shaking and browser tests share reusable checks against the installed output. Local linking targets the built package. See [Contributing](../CONTRIBUTING.md) for commands and manual publication.

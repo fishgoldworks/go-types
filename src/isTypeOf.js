@@ -1,6 +1,6 @@
-const createTypeChecker = require('./createTypeChecker');
+const compileTypeMatcher = require('./util/compileTypeMatcher');
 /**
- * Determines whether a value matches a type name, instance target, predicate or union of matchers.
+ * Checks whether a value matches a type name, instance target, predicate or union of matchers.
  *
  * Validates the entire specification before matching. An omitted type matches `undefined`.
  * Predicates must return a synchronous primitive boolean.
@@ -19,6 +19,6 @@ const createTypeChecker = require('./createTypeChecker');
  * @example isTypeOf([], {predicate:Array.isArray});   // => true
  */
 function isTypeOf(value, type) {
-  return createTypeChecker(type)(value);
+  return compileTypeMatcher(type)(value);
 }
 module.exports = isTypeOf;

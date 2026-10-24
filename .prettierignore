@@ -8,8 +8,9 @@ node_modules/
 /package/
 
 # Build staging and temporary files
-.tmp/
 /.go-types-build-*/
+.tmp/
+temp/
 
 # Coverage and local test results
 /coverage/

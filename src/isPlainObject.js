@@ -5,7 +5,7 @@ var functionToString = Function.prototype.toString;
 var objectConstructorSource = functionToString.call(Object);
 
 /**
- * Determines whether a value has a null or ordinary `Object` prototype.
+ * Checks whether a value has a null or ordinary `Object` prototype.
  *
  * Checks the current prototype, not allocation history or a schema. Proxy traps may run; an own
  * `constructor` field is not read.

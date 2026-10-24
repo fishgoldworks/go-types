@@ -26,10 +26,8 @@ function consumerManifest(entries = {}) {
     'repository',
     'bugs',
     'funding',
-    'engines',
     'os',
     'cpu',
-    'sideEffects',
     'dependencies',
     'peerDependencies',
     'peerDependenciesMeta',
@@ -38,8 +36,11 @@ function consumerManifest(entries = {}) {
   ];
   const manifest = {};
   for (const field of fields) if (metadata[field] !== undefined) manifest[field] = metadata[field];
+  // Consumer bundlers may omit unused modules; importing the library requires no setup.
+  manifest.sideEffects = ['./dist/go-types.js', './dist/go-types.min.js'];
   Object.assign(manifest, {
     type: 'commonjs',
+    engines: { node: '>=8' },
     main: './index.js',
     module: './index.mjs',
     types: './index.d.ts',

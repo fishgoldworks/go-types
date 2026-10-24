@@ -1,5 +1,5 @@
 /**
- * Determines whether JavaScript reports a value as a function.
+ * Checks whether JavaScript reports a value as a function.
  *
  * Includes classes and callable proxies; does not guarantee a successful call.
  *

@@ -57,7 +57,7 @@ expectType<OptionalIterator | unknown[]>(dynamic);
 // @ts-expect-error a skipped conversion can retain the original non-array object.
 expectType<unknown[]>(dynamic);
 
-// Definite iteration and definite absence retain useful element inference.
+// Definite iteration remains precise; absent iteration includes record values and possible array-like holes.
 const definite: Iterable<string> & ArrayLike<number> = {
   0: 1,
   length: 1,
@@ -69,9 +69,9 @@ const absent: ArrayLike<number> = { 0: 1, length: 1 };
 const undefinedMethod: ArrayLike<number> & { readonly [Symbol.iterator]?: undefined } = absent;
 const nullMethod: ArrayLike<number> & { readonly [Symbol.iterator]: null } = { ...absent, [Symbol.iterator]: null };
 expectType<string[]>(toArray(definite));
-expectType<number[]>(toArray(absent));
-expectType<number[]>(toArray(undefinedMethod));
-expectType<number[]>(toArray(nullMethod));
+expectType<(number | undefined)[]>(toArray(absent));
+expectType<(number | undefined)[]>(toArray(undefinedMethod));
+expectType<(number | null | undefined)[]>(toArray(nullMethod));
 expectType<number[]>(toArray([1, 2] as readonly number[]));
 expectType<string[]>(toArray('text'));
 expectType<(1 | 2)[]>(toArray([1, 2] as const));
@@ -82,9 +82,9 @@ expectType<Promise<number>[]>(toArray([Promise.resolve(1)]));
 expectType<number[]>(toArray(definite));
 // @ts-expect-error conversion is synchronous, not promise unwrapping.
 expectType<number[]>(toArray([Promise.resolve(1)]));
-type Plain = Expect<Equal<T.ArrayElement<ArrayLike<number>>, number>>;
+type Plain = Expect<Equal<T.ArrayElement<ArrayLike<number>>, number | undefined>>;
 type Required = Expect<Equal<T.ArrayElement<typeof definite>, string>>;
-type Nullish = Expect<Equal<T.ArrayElement<typeof nullMethod | typeof undefinedMethod>, number>>;
+type Nullish = Expect<Equal<T.ArrayElement<typeof nullMethod | typeof undefinedMethod>, number | null | undefined>>;
 type Mixed = Expect<Equal<T.ArrayElement<OptionalIterator | readonly boolean[]>, unknown>>;
 type UnknownInput = Expect<Equal<T.ArrayElement<unknown>, unknown>>;
 type NeverInput = Expect<Equal<T.ArrayElement<never>, never>>;

@@ -6,6 +6,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
   // isPromise intentionally follows the library realm's local constructor.
   const LocalPromise = PromiseConstructor || Promise;
   const checked = new Set();
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(T, 'createTypeChecker'), false);
   function result(name, args, expected) {
     checked.add(name);
     assert.strictEqual(T[name].apply(undefined, args), expected, name);
@@ -132,9 +133,8 @@ module.exports = function assertAPI(T, PromiseConstructor) {
   result('isMapOf', [new Map([['x', '1']]), 'string', 'number'], false);
   result('isTypeOf', [1, [['number', 'string'], null]], true);
   result('isTypeOf', [false, [['number', 'string'], null]], false);
-  checked.add('createTypeChecker');
   const shared = ['number', 'string'];
-  const check = T.createTypeChecker([shared, [shared, null]]);
+  const check = (value) => T.isTypeOf(value, [shared, [shared, null]]);
   for (const value of [1, 'x', null]) assert.strictEqual(check(value), true);
   assert.strictEqual(check(false), false);
   let calls = 0;
@@ -144,17 +144,119 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       return false;
     }
   };
-  assert.strictEqual(T.createTypeChecker([[predicate], [predicate], 'number'])(1), true);
+  assert.strictEqual(T.isTypeOf(1, [[predicate], [predicate], 'number']), true);
   assert.strictEqual(calls, 2);
   const recursive = [];
   recursive.push(recursive);
-  assert.throws(() => T.createTypeChecker(recursive), /cycles/);
+  assert.throws(() => T.isTypeOf(undefined, recursive), /cycles/);
 
+  const plainSymbol = Symbol('plain');
+  const plainNested = { value: 1 };
+  const plainInput = Object.create(null);
+  plainInput.a = plainNested;
+  plainInput[plainSymbol] = 2;
+  Object.defineProperty(plainInput, 'hidden', { value: 3 });
+  const plain = T.toPlainObject(plainInput);
+  assert.strictEqual(Object.getPrototypeOf(plain), Object.getPrototypeOf(LocalPromise.prototype));
+  assert.notStrictEqual(plain, plainInput);
+  assert.strictEqual(plain.a, plainNested);
+  assert.strictEqual(plain[plainSymbol], 2);
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(plain, 'hidden'), false);
+  const special = T.toPlainObject([['__proto__', { injected: true }]]);
+  assert.strictEqual(Object.getPrototypeOf(special), Object.getPrototypeOf(LocalPromise.prototype));
+  assert.strictEqual(special.injected, undefined);
+  assert.strictEqual(Object.prototype.hasOwnProperty.call(special, '__proto__'), true);
+  assert.throws(
+    () => T.toPlainObject(null),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.toPlainObject([['a']]),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.toPlainObject([[1, 2]]),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.toPlainObject('[]'),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.toPlainObject('{'),
+    (error) => error.name === 'SyntaxError'
+  );
+  assert.strictEqual(T.toPlainObjectIf(null, false), null);
+  let plainClosed = false;
+  assert.throws(
+    () =>
+      T.toPlainObject(
+        (function* () {
+          try {
+            yield ['a', 1];
+            yield ['bad'];
+          } finally {
+            plainClosed = true;
+          }
+        })()
+      ),
+    (error) => error.name === 'TypeError'
+  );
+  assert.strictEqual(plainClosed, true);
+  assert.strictEqual('toObject' in T, false);
+  assert.strictEqual('toObjectIf' in T, false);
+
+  const collectionSymbol = Symbol('record value');
+  const collectionRecord = { a: 1, length: 2, [collectionSymbol]: 3 };
+  assert.deepStrictEqual(Array.from(T.toArray(collectionRecord)), [1, 2, 3]);
+  assert.deepStrictEqual(Array.from(T.toSet(collectionRecord)), [1, 2, 3]);
+  assert.strictEqual(T.toMap(collectionRecord).get(collectionSymbol), 3);
+  for (const pair of [[], ['a'], ['a', 1, 2], Array(2), { 0: 'a', 1: 1, length: 2 }]) {
+    let closed = false;
+    function* entries() {
+      try {
+        yield pair;
+      } finally {
+        closed = true;
+      }
+    }
+    assert.throws(
+      () => T.toMap(entries()),
+      (error) => error.name === 'TypeError'
+    );
+    assert.strictEqual(closed, true);
+  }
+  assert.strictEqual(T.toMap([['a', undefined]]).has('a'), true);
+  for (const name of ['toArray', 'toSet', 'toMap'])
+    assert.throws(
+      () => T[name](Object('abc')),
+      (error) => error.name === 'TypeError'
+    );
+  const revivedKeys = [];
+  const revivedJson = T.fromJson('{"a":1}', function (key, value, context) {
+    assert.strictEqual(this[key], value);
+    revivedKeys.push(key);
+    if (Number(process.versions.node.split('.')[0]) === 8) assert.strictEqual(context, undefined);
+    return typeof value === 'number' ? value + 1 : value;
+  });
+  assert.strictEqual(revivedJson.a, 2);
+  assert.strictEqual(revivedKeys.join(','), 'a,');
+  assert.throws(
+    () => T.fromJson('['),
+    (error) => error.name === 'SyntaxError'
+  );
+  const promiseInput = LocalPromise.resolve(3);
   const conversions = [
+    ['fromJson', '{"a":1}', (value) => value.a, 1],
+    ['box', 3, (value) => Number.prototype.valueOf.call(value), 3],
+    ['unbox', Object(3), (value) => value, 3],
+    ['toRegExp', 'a', (value) => value.source, 'a'],
+    ['toPromise', promiseInput, (value) => value, promiseInput],
     ['toArray', new Set([1, 2]), (value) => Array.from(value).join(','), '1,2'],
     ['toBoolean', 'false', (value) => value, true],
     ['toDate', 0, (value) => value.getTime(), 0],
     ['toInteger', '2.7', (value) => value, 2],
+    ['toJson', { a: 1 }, (value) => value, '{"a":1}'],
     [
       'toMap',
       [
@@ -164,9 +266,10 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       (value) => value.get('key'),
       2
     ],
+    ['toMap', { a: 1, b: 2 }, (value) => value.get('a') + value.get('b'), 3],
     ['toSet', [2, 1, 2], (value) => Array.from(value).join(','), '2,1'],
     ['toNumber', '12.5', (value) => value, 12.5],
-    ['toObject', 12, (value) => value.valueOf(), 12],
+    ['toPlainObject', '{"a":12}', (value) => value.a, 12],
     ['toString', null, (value) => value, 'null'],
     ['toSymbol', 'key', (value) => value.toString(), 'Symbol(key)']
   ];

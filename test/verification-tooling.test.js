@@ -55,6 +55,9 @@ test('test runner discovers root and nested tests, excluding compile-only and co
   f.write('test/runtime/consumer.cjs', 'throw Error("consumer fixture must not be discovered");');
   f.write('test/package/entrypoints.cjs', 'throw Error("package fixture must not be discovered");');
   f.write('test/helper.js', 'throw Error("helper must not be discovered");');
+  for (const folder of ['temp', '.tmp', 'nested/temp', 'nested/.tmp']) {
+    f.write('test/' + folder + '/playground.test.js', 'throw Error("playground must not be discovered");');
+  }
   const result = f.run('--test-reporter=tap');
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /ok \d+ - direct fixture/);
@@ -162,9 +165,9 @@ test('consumer process runner preserves output, working directory and explicit e
   const f = consumerFixture(t);
   const output = f.tools.run(
     process.execPath,
-    ['-e', 'console.log(JSON.stringify({cwd: process.cwd(), marker: process.env.GO_TYPES_A01_MARKER}));'],
+    ['-e', 'console.log(JSON.stringify({cwd: process.cwd(), marker: process.env.GO_TYPES_PROCESS_MARKER}));'],
     f.directory,
-    { env: { GO_TYPES_A01_MARKER: 'forwarded' } }
+    { env: { GO_TYPES_PROCESS_MARKER: 'forwarded' } }
   );
   assert.deepEqual(JSON.parse(output), { cwd: fs.realpathSync(f.directory), marker: 'forwarded' });
 });
@@ -245,6 +248,9 @@ test('source-only loader resolves relative dependencies once per isolated contex
     'src/shared/value.js',
     '"use strict"; globalThis.loads = (globalThis.loads || 0) + 1; module.exports = () => 42;'
   );
+  for (const folder of ['src/temp', 'src/.tmp', 'src/shared/temp', 'src/shared/.tmp']) {
+    f.write(folder + '/draft.js', 'invalid JavaScript playground');
+  }
   const source = require(path.join(f.directory, 'scripts/source-test-loader.js'))();
   for (let i = 0; i < 2; i++) {
     const context = {};

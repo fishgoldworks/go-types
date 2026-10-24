@@ -39,7 +39,7 @@ module.exports = function generateEntries(destination) {
     'index.d.mts',
     "import Types from './index.js';\nexport default Types;\nexport { " +
       names.join(', ') +
-      " } from './index.js';\nexport type { TypeName, PrimitiveTypeName, PrimitiveTypeMap, TypeMatcher, NarrowingMatcher, TypeGuard, PredicateMatcher, InstanceMatcher, TypedArray, Matched, ConversionCondition, ArrayElement, ConvertedMap, ConvertedObject, ConvertedSet } from './index.js';\n"
+      " } from './index.js';\nexport type { TypeName, PrimitiveTypeName, PrimitiveTypeMap, TypeMatcher, NarrowingMatcher, TypeGuard, PredicateMatcher, InstanceMatcher, TypedArray, Matched, ConversionCondition, ArrayElement, Boxed, Unboxed, ConvertedMap, ConvertedPlainObject, ConvertedSet } from './index.js';\n"
   );
   const exportsMap = {
     '.': {
@@ -62,7 +62,7 @@ module.exports = function generateEntries(destination) {
       default: './' + sourcePath(name)
     };
     const aliases = ['./' + name, './src/' + name, './src/' + name + '.js'];
-    if (name.startsWith('to'))
+    if (sourcePath(name).startsWith('src/conversion/'))
       aliases.push(
         './conversion/' + name,
         './conversion/' + name + '.js',

@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, has);
 
 /**
- * Determines whether a value is a genuine `Set`.
+ * Checks whether a value is a genuine `Set`.
  *
  * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
  * imitations. Returns `false` when the local native detection capability is unavailable.

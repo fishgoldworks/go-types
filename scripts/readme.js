@@ -11,20 +11,7 @@ const pkg = require('../package.json');
 // extend the related categories; conversions have their own complete sections.
 const categories = [
   ['Primitive', ['isUndefined', 'isNull', 'isBoolean', 'isNumber', 'isString', 'isSymbol', 'isBigInt', 'isPrimitive']],
-  [
-    'Utility',
-    [
-      'isNullish',
-      'isNonNullish',
-      'isEmpty',
-      'isBlank',
-      'isTruthy',
-      'isFalsy',
-      'isTypeOf',
-      'createTypeChecker',
-      'isJson'
-    ]
-  ],
+  ['Utility', ['isNullish', 'isNonNullish', 'isEmpty', 'isBlank', 'isTruthy', 'isFalsy', 'isTypeOf', 'isJson']],
   ['Number', ['isInteger', 'isSafeInteger', 'isFloat', 'isFinite', 'isInfinite', 'isNaN', 'isNumeric']],
   [
     'Object',
@@ -56,14 +43,20 @@ const categories = [
   [
     'Conversion',
     [
+      'box',
+      'unbox',
+      'toRegExp',
+      'toPromise',
       'toArray',
       'toBigInt',
       'toBoolean',
       'toDate',
       'toInteger',
+      'toJson',
+      'fromJson',
       'toMap',
       'toNumber',
-      'toObject',
+      'toPlainObject',
       'toSet',
       'toString',
       'toSymbol'
@@ -72,14 +65,20 @@ const categories = [
   [
     'Conditional conversion',
     [
+      'boxIf',
+      'unboxIf',
+      'toRegExpIf',
+      'toPromiseIf',
       'toArrayIf',
       'toBigIntIf',
       'toBooleanIf',
       'toDateIf',
       'toIntegerIf',
+      'toJsonIf',
+      'fromJsonIf',
       'toMapIf',
       'toNumberIf',
-      'toObjectIf',
+      'toPlainObjectIf',
       'toSetIf',
       'toStringIf',
       'toSymbolIf'
@@ -106,16 +105,6 @@ isTypeOf('hello', { predicate: isString }); // => true
 isTypeOf(null, ['string', null]); // => true
 isTypeOf('42', Number); // => false
 isTypeOf(42, 'nubmer'); // => throws TypeError`,
-  createTypeChecker: `const isNumberOrNull = createTypeChecker(['number', null]);
-
-isNumberOrNull(42); // => true
-isNumberOrNull(null); // => true
-isNumberOrNull('42'); // => false
-
-const isText = createTypeChecker('string');
-[1, 'hello', null, 'world'].filter(isText); // => ['hello', 'world']
-
-createTypeChecker([])(undefined); // => false`,
   isAsyncIterable: `async function* values() {
   yield 1;
 }
@@ -158,13 +147,12 @@ isInvalidDate(toDate(undefined)); // => true
 
 const date = new Date(0);
 toDate(date) === date; // => true`,
-  toObject: `toObject(42).valueOf(); // => 42
-typeof toObject(42); // => 'object'
-toObject(null); // => ({})
+  toPlainObject: `toPlainObject('{"a":1}'); // => ({ a: 1 })
+toPlainObject([['a', 1]]); // => ({ a: 1 })
 
 const object = { x: 1 };
-toObject(object) === object; // => true`,
-  toSymbol: `toSymbol('key').description; // => 'key'
+toPlainObject(object) === object; // => false`,
+  toSymbol: `toSymbol('key').toString(); // => 'Symbol(key)'
 toSymbol('key') !== toSymbol('key'); // => true
 
 const symbol = Symbol('key');
@@ -257,7 +245,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
       const item = byName.get(name);
       if (!item.summaryReturn) throw new Error('Missing summary return description: ' + name);
       const type = returnType(item).replace(/\|/g, '\\|');
-      const label = name === 'createTypeChecker' ? '**`Function`** — `' + type + '`' : '**`' + type + '`**';
+      const label = '**`' + type + '`**';
       summary.push(
         `| [\`${signature(item)}\`](#${anchor(item)}) | ${item.summary} | ${label}<br><br>${item.summaryReturn} |`
       );
@@ -275,7 +263,13 @@ module.exports = function generateReadme({ write = true, documents = false } = {
         returns(item),
         ''
       );
-      if (item.errors) documentation.push('**Errors:** ' + item.errors, '');
+      if (item.errors)
+        documentation.push(
+          '**Errors**',
+          '',
+          ...item.errors.split(/(?<=\.)\s+(?=[A-Z`])/).map((condition) => '- ' + condition),
+          ''
+        );
       documentation.push('**Examples**', '');
       if (name === 'isSharedArrayBuffer')
         documentation.push('The positive example requires native `SharedArrayBuffer` support.', '');
@@ -328,11 +322,12 @@ module.exports = function generateReadme({ write = true, documents = false } = {
     summary.push('');
   }
   summary.push(
-    '`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable/array-like element types, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedObject<T>` preserves objects or describes the native boxed result. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).',
+    '`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).',
     ''
   );
   const replacements = {
     VERSION: pkg.version,
+    NAME: pkg.name,
     COUNT: String(names.length),
     DOCS_COVERAGE: String((100 * allNames.length) / names.length),
     DOCUMENTATION: documentation.join('\n').trimEnd(),

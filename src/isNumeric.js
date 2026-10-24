@@ -5,7 +5,7 @@ var isString = require('./isString');
 var isBigInt = require('./isBigInt');
 
 /**
- * Determines whether a value is a finite number, a bigint, or non-blank numeric text.
+ * Checks whether a value is a finite number, a bigint, or non-blank numeric text.
  *
  * Accepts numeric text as well as finite numbers and primitive bigints. Rejects booleans, blank
  * text, `NaN`, infinities and boxed bigints.

@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getter);
 
 /**
- * Determines whether a value is a genuine `SharedArrayBuffer`.
+ * Checks whether a value is a genuine `SharedArrayBuffer`.
  *
  * Supports foreign instances and rejects proxies or prototype imitations. Returns `false` when
  * native shared buffers are unavailable. Returns `false` when the local native detection

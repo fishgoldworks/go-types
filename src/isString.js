@@ -9,7 +9,7 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, valueOf);
 
 /**
- * Determines whether a value is a primitive string or a genuine boxed `String`.
+ * Checks whether a value is a primitive string or a genuine boxed `String`.
  *
  * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
  * wrappers. Does not invoke overridden conversion methods.

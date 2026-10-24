@@ -1,5 +1,5 @@
 /**
- * Determines whether a value passes the local native `Promise` instance check.
+ * Checks whether a value passes the local native `Promise` instance check.
  *
  * Uses local `instanceof` semantics; it is not proof of native Promise identity. Does not call
  * `then`.

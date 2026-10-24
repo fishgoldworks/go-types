@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is a non-null object or function.
+ * Checks whether a value is a non-null object or function.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a non-null object or function; otherwise `false`.

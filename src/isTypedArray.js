@@ -9,7 +9,7 @@ const lengthDescriptor = typedArrayPrototype && Object.getOwnPropertyDescriptor(
 const getTypedArrayTag = tagDescriptor && tagDescriptor.get;
 const getLength = lengthDescriptor && lengthDescriptor.get;
 /**
- * Determines whether a value is a native typed array, including a Node.js `Buffer`.
+ * Checks whether a value is a native typed array, including a Node.js `Buffer`.
  *
  * Excludes `DataView` and ordinary arrays; detached views still pass. Does not identify a
  * particular element type. Uses captured native tag or length getters; returns `false` if no

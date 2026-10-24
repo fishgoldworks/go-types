@@ -8,9 +8,9 @@ if (process.argv[2] === '--worker') {
   let type = [];
   for (let i = 0; i < depth; i++) type = [type, type];
   const start = performance.now();
-  const check = T.createTypeChecker(type);
-  const compileMilliseconds = performance.now() - start;
-  console.log(JSON.stringify({ depth, distinctArrays: depth + 1, compileMilliseconds, result: check(42) }));
+  const result = T.isTypeOf(42, type);
+  const matchMilliseconds = performance.now() - start;
+  console.log(JSON.stringify({ depth, distinctArrays: depth + 1, matchMilliseconds, result }));
 } else {
   const baseline = process.argv[2];
   const updated = process.argv[3] || path.join(__dirname, '..');
@@ -41,7 +41,7 @@ if (process.argv[2] === '--worker') {
       {
         node: process.version,
         warning:
-          'Fresh processes; cold compile timings, not portable throughput guarantees. Child deadlines include startup. Empty leaves isolate compilation from callback work.',
+          'Fresh processes; cold matching timings, not portable throughput guarantees. Child deadlines include startup. Empty leaves isolate matcher preparation from callback work.',
         results
       },
       null,

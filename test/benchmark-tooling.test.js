@@ -92,10 +92,10 @@ test('matcher scaling reports an intentional worker timeout without treating it 
     const slow = path.join(directory, 'slow.cjs');
     fs.writeFileSync(
       slow,
-      'exports.createTypeChecker = type => {' +
+      'exports.isTypeOf = (value, type) => {' +
         'let depth = 0; while (type.length) { depth++; type = type[0]; }' +
         'if (depth === 12) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0);' +
-        'return () => false; };'
+        'return false; };'
     );
     const result = run('benchmark-matcher-scaling.js', [slow, entry]);
     assert.equal(result.status, 0, result.stderr);

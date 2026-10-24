@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const T = require('../index.js');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 
 // Keep this independently seeded corpus in the normal runtime suite. It covers
 // shared graph evaluation with stateful predicates, callback order and errors.
@@ -57,7 +57,7 @@ test('shared matcher graphs retain ordered effects for seed 0x7317aa', () => {
     }
     const child = pool[pool.length - 1];
     const root = round % 2 ? [child, child, pool[rand(pool.length)]] : child;
-    const checker = T.createTypeChecker(root);
+    const checker = compileTypeMatcher(root);
     for (const v of values) {
       const expected = observe(() => reference(v, root));
       const actual = observe(() => checker(v));

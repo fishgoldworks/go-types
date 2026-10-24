@@ -10,8 +10,8 @@ const shouldConvert = require('../util/shouldConvert');
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or
- * invoke object conversion hooks. Symbols throw.
+ * Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round
+ * numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.

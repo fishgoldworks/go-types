@@ -1,5 +1,5 @@
 /**
- * Determines whether a value is neither `null` nor `undefined`.
+ * Checks whether a value is neither `null` nor `undefined`.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is neither `null` nor `undefined`; otherwise `false`.

@@ -74,7 +74,7 @@ function verifyDistributions(installed) {
     assert.deepEqual(Object.keys(amd).sort(), [...names].sort());
     assert.equal(amd.toNumber('12.5'), 12.5);
     assert.equal(amd.isArrayOf([1, '2'], 'number'), false);
-    assert.equal(amd.createTypeChecker(['number', null])(null), true);
+    assert.equal(amd.isTypeOf(null, ['number', null]), true);
     assert.equal(amd.isDate(new Date(0)), true);
     assert.equal(amd.isDate(Object.create(Date.prototype)), false);
   }

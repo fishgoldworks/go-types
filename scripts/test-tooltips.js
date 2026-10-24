@@ -26,7 +26,9 @@ module.exports = function testTooltips(consumer) {
       );
       for (const name of [rootName, focusedName]) {
         const marker = name + '(';
-        statements.push(marker + 'undefined);');
+        // Use valid inputs for strict converters; skipped If calls still accept undefined.
+        const argument = ['toArray', 'toPlainObject'].includes(item.name) ? '{ a: 1 }' : 'undefined';
+        statements.push(marker + argument + ');');
         probes.push({ item, marker });
       }
     }

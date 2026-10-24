@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
-const { root, packageRoot, artifactPath } = require('./package-layout');
+const { root, packageRoot, artifactPath, consumerManifest } = require('./package-layout');
 const { run } = require('./consumer-tools');
 const names = require('./exports.json');
 const metadata = require('../package.json');
@@ -25,17 +25,30 @@ function verifyFiles(directory, pkg, sourceOnly) {
   assert.equal(pkg.name, metadata.name);
   assert.equal(pkg.version, metadata.version);
   assert.equal(pkg.license, metadata.license);
-  assert.deepEqual(pkg.engines, metadata.engines);
+  assert.deepEqual(pkg.engines, consumerManifest().engines);
   assert.equal(pkg.private, undefined, 'The generated package must be publishable.');
   assert.equal(pkg.scripts, undefined, 'Repository lifecycle hooks must not ship.');
   assert.equal(pkg.devDependencies, undefined, 'Development dependencies must not ship.');
   for (const field of ['dependencies', 'peerDependencies', 'peerDependenciesMeta', 'optionalDependencies']) {
     assert.deepEqual(pkg[field], metadata[field], 'Consumer dependency metadata differs: ' + field);
   }
+  for (const retired of [
+    'createTypeChecker.js',
+    'src/createTypeChecker.js',
+    'esm/createTypeChecker.mjs',
+    'types/createTypeChecker.d.ts',
+    'types/createTypeChecker.d.mts'
+  ]) {
+    assert.equal(
+      fs.existsSync(path.join(directory, retired)),
+      false,
+      'Retired public matcher entry shipped: ' + retired
+    );
+  }
   const expected = ['.', './package.json', './dist/go-types.js', './dist/go-types.min.js', './dist/go-types.mjs'];
   for (const name of names) {
     expected.push('./' + name, './src/' + name, './src/' + name + '.js');
-    if (name.startsWith('to'))
+    if (name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'fromJson', 'fromJsonIf'].includes(name))
       for (const prefix of ['./conversion/', './src/conversion/']) expected.push(prefix + name, prefix + name + '.js');
   }
   assert.deepEqual(Object.keys(pkg.exports).sort(), expected.sort(), 'Public alias set changed.');
@@ -125,7 +138,7 @@ async function main() {
     const files = filesIn(installed);
     for (const filename of files) {
       assert.ok(
-        !/(^|\/)(drafts|test|scripts|benchmarks|bench|verification|artifacts|package|\.tmp|node_modules)(\/|$)/.test(
+        !/(^|\/)(drafts|test|scripts|benchmarks|bench|verification|artifacts|package|temp|\.tmp|node_modules)(\/|$)/.test(
           filename
         ),
         'Unexpected published file: ' + filename

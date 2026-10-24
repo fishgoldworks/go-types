@@ -22,13 +22,6 @@ for (const [name, Native] of [
       1,
       true,
       Symbol('value'),
-      {},
-      { 0: ['key', 1], length: 1 },
-      {
-        [Symbol.asyncIterator]: async function* () {
-          yield 1;
-        }
-      },
       { [Symbol.iterator]: 1 },
       { [Symbol.iterator]: () => 1 },
       { [Symbol.iterator]: () => ({ next: () => 1 }) }
@@ -81,7 +74,7 @@ for (const [name, Native] of [
       return true;
     });
     assert.equal(output.size, 1);
-    const invalid = {};
+    const invalid = 42;
     assert.equal(Types[name + 'If'](invalid), invalid);
     assert.throws(() => Types[name + 'If'](invalid, true), TypeError);
     assert.equal(Types[name + 'If'](null, true).size, 0);
@@ -118,36 +111,26 @@ test('toMap copies shallowly, retaining key identity and insertion order when ke
     ]
   );
 });
-test('toMap reads object entry indices using native property access', () => {
+test('toMap rejects inherited, missing, extra and non-array entry slots', () => {
   const entry = Object.create({ 0: 'inherited', 1: 7 });
-  assert.deepEqual(
-    [...Types.toMap([entry, [], ['extra', 2, 3]])],
-    [
-      ['inherited', 7],
-      [undefined, undefined],
-      ['extra', 2]
-    ]
-  );
+  for (const pair of [entry, [], ['extra', 2, 3]]) assert.throws(() => Types.toMap([pair]), TypeError);
   assert.equal(Types.toMap('').size, 0);
-  for (const value of ['ab', [1], [null], [undefined], Array(1)]) {
-    assert.throws(() => Types.toMap(value), TypeError);
-  }
+  for (const value of ['ab', [1], [null], [undefined], Array(1)]) assert.throws(() => Types.toMap(value), TypeError);
 });
 test('toMap closes the input iterator on invalid entries and entry-getter failures', () => {
   const failure = Error('entry read failed');
   for (const entry of [
     1,
-    {
-      get 0() {
+    Object.defineProperty(['key', 1], '0', {
+      get() {
         throw failure;
       }
-    },
-    {
-      0: 'key',
-      get 1() {
+    }),
+    Object.defineProperty(['key', 1], '1', {
+      get() {
         throw failure;
       }
-    }
+    })
   ]) {
     let closed = 0;
     function* entries() {

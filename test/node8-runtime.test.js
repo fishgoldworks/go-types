@@ -23,7 +23,9 @@ test('missing BigInt does not prevent importing the API or skipping conversion',
   inHost(() => {
     delete globalThis.BigInt;
     const T = require('./index.js');
-    assert.equal(Object.keys(T).length, 84);
+    assert.deepEqual(Object.keys(T).sort(), require('./scripts/exports.json').slice().sort());
+    assert.equal(T.toJson({ a: 1 }), '{"a":1}');
+    assert.equal(T.toJsonIf({ a: 1 }, true), '{"a":1}');
     assert.equal(T.toNumber('42'), 42);
     assert.equal(T.isBigInt(42), false);
     const value = {
@@ -54,7 +56,7 @@ test('nested pure unions work without flatMap and preserve effectful branches', 
     Array.prototype.flatMap = undefined;
     const T = require('./index.js');
     const shared = ['number', 'string'];
-    const check = T.createTypeChecker([shared, [shared, null]]);
+    const check = (value) => T.isTypeOf(value, [shared, [shared, null]]);
     for (const value of [1, 'x', null]) assert.equal(check(value), true);
     assert.equal(check(false), false);
     assert.equal(T.isArrayOf([1, 'x', null], [shared, null]), true);
@@ -65,11 +67,11 @@ test('nested pure unions work without flatMap and preserve effectful branches', 
         return false;
       }
     };
-    assert.equal(T.createTypeChecker([[effect], [effect], 'number'])(1), true);
+    assert.equal(T.isTypeOf(1, [[effect], [effect], 'number']), true);
     assert.deepEqual(calls, [1, 1]);
     const cycle = [];
     cycle.push(cycle);
-    assert.throws(() => T.createTypeChecker(cycle), /cycles/);
+    assert.throws(() => T.isTypeOf(undefined, cycle), /cycles/);
   }));
 
 test('missing async-iterator symbol never reads the string undefined property', () =>

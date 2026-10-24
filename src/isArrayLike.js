@@ -2,7 +2,7 @@
 var getArrayLikeLength = require('./util/getArrayLikeLength');
 
 /**
- * Determines whether a non-function value has a valid numeric length.
+ * Checks whether a non-function value has a valid numeric length.
  *
  * Reads `length` once. Missing indices are allowed; boxed, negative, fractional or non-finite
  * lengths are rejected.

@@ -2,7 +2,7 @@ const getNumberValue = require('./util/getNumberValue');
 const floor = Math.floor;
 
 /**
- * Determines whether a primitive or boxed number is a finite number with a fractional part.
+ * Checks whether a primitive or boxed number is a finite number with a fractional part.
  *
  * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *

@@ -1,8 +1,8 @@
 const isArray = require('./isArray');
 const isValidArrayLength = require('./util/isValidArrayLength');
-const createTypeChecker = require('./createTypeChecker');
+const compileTypeMatcher = require('./util/compileTypeMatcher');
 /**
- * Determines whether an array contains only values matching a type specification.
+ * Checks whether an array contains only values matching a type specification.
  *
  * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
  * the first mismatch. Missing array positions read as `undefined` unless inherited numeric
@@ -21,7 +21,7 @@ const createTypeChecker = require('./createTypeChecker');
  * @example isArrayOf([], "number");       // => true
  */
 function isArrayOf(value, type) {
-  const check = createTypeChecker(type);
+  const check = compileTypeMatcher(type);
   if (!isArray(value)) return false;
   const length = value.length;
   if (!isValidArrayLength(length)) return false;

@@ -7,7 +7,7 @@ const nativeCheck =
         typeof value === 'number' && value >= -9007199254740991 && value <= 9007199254740991 && floor(value) === value;
 
 /**
- * Determines whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
+ * Checks whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
  *
  * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *

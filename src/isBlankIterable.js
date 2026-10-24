@@ -1,5 +1,5 @@
 /**
- * Determines whether every item yielded by a synchronous iterable is nullish by advancing its
+ * Checks whether every item yielded by a synchronous iterable is nullish by advancing its
  * iterator.
  *
  * Consumes input and may close it early. A nullish-only infinite iterable never completes. Map

@@ -25,18 +25,17 @@ const wrongInferred: Inferred = 'text';
 
 for (const predicate of [ordinary, receiverFree, undefinedReceiver]) {
   const matcher: NarrowingMatcher = { predicate };
-  const check = Types.createTypeChecker(matcher);
-  if (!check(1) || check('1')) throw new Error('Receiver-free matcher failed');
+  if (!Types.isTypeOf(1, matcher) || Types.isTypeOf('1', matcher)) throw new Error('Receiver-free matcher failed');
 }
-const generated: Types.TypeGuard<number> = Types.createTypeChecker('number');
+const generated: Types.TypeGuard<number> = (value: unknown): value is number => Types.isTypeOf(value, 'number');
 const holder = { check: generated };
 const bound = receiverGuard.bind({ enabled: true });
 if (
   !generated(inferred) ||
   generated('text') ||
-  !Types.createTypeChecker('number')(1) ||
+  !Types.isTypeOf(1, 'number') ||
   !holder.check(1) ||
-  !Types.createTypeChecker({ predicate: bound })(1)
+  !Types.isTypeOf(1, { predicate: bound })
 ) {
   throw new Error('Valid matcher invocation changed');
 }

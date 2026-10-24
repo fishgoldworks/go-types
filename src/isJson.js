@@ -3,9 +3,9 @@ var stringValueOf = String.prototype.valueOf;
 var parse = JSON.parse;
 
 /**
- * Determines whether primitive or boxed string text is valid JSON.
+ * Checks whether primitive or boxed string text is valid JSON.
  *
- * Accepts JSON scalar text as well as objects and arrays. Does not validate a schema or
+ * Accepts text representing JSON objects, arrays or scalar values. Does not validate a schema or
  * arbitrary-object serialisability.
  *
  * @param {*} value The value to check.

@@ -25,8 +25,6 @@ isMapOf(new Map([[1, 1]]), bad, 'number');
 isMapOf(new Map([[1, 1]]), 'number', bad);
 // @ts-expect-error the same shared contract applies to direct matching.
 T.isTypeOf(1, bad);
-// @ts-expect-error compiled matchers cannot supply a callback receiver.
-T.createTypeChecker(bad);
 // @ts-expect-error the exported descriptor type must retain the invocation contract.
 const invalidDescriptor: T.PredicateMatcher = bad;
 

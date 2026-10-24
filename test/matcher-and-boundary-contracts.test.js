@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const vm = require('node:vm');
 const T = require('..');
 
@@ -15,7 +16,7 @@ test('shared unions are snapshotted once per array identity', () => {
       }
     });
   }
-  const check = T.createTypeChecker(union);
+  const check = compileTypeMatcher(union);
   assert.equal(check(1), false);
   assert.equal(reads, 24, 'each of the 24 exposed edges must be inspected only once');
 });
@@ -31,7 +32,7 @@ test('shared predicates retain multiplicity, order, short-circuiting and live cl
       }
     }
   ];
-  const check = T.createTypeChecker([shared, shared, shared, shared]);
+  const check = compileTypeMatcher([shared, shared, shared, shared]);
   assert.equal(check(7), true);
   assert.deepEqual(visits, [7, 7, 7]);
   visits.length = 0;
@@ -50,7 +51,7 @@ test('compiled union evaluation is iterative, not recursive', () => {
   };
   let union = 'number';
   for (let i = 0; i < 20000; i++) union = [reject, union];
-  const check = T.createTypeChecker(union);
+  const check = compileTypeMatcher(union);
   assert.equal(check(1), true);
   assert.equal(calls, 20000);
   assert.equal(check('x'), false);
@@ -58,10 +59,10 @@ test('compiled union evaluation is iterative, not recursive', () => {
 });
 
 test('compilation validates late invalid alternatives even after pure union simplification', () => {
-  assert.throws(() => T.createTypeChecker([['number'], ['number'], ['bogus']]), TypeError);
+  assert.throws(() => compileTypeMatcher([['number'], ['number'], ['bogus']]), TypeError);
   const cycle = [];
   cycle.push(cycle);
-  assert.throws(() => T.createTypeChecker([[], ['number'], cycle]), TypeError);
+  assert.throws(() => compileTypeMatcher([[], ['number'], cycle]), TypeError);
 });
 
 for (const explicit of [false, true]) {
@@ -76,7 +77,7 @@ for (const explicit of [false, true]) {
         }
       });
       const bound = target.bind(null);
-      const check = T.createTypeChecker(explicit ? { instanceOf: bound } : bound);
+      const check = compileTypeMatcher(explicit ? { instanceOf: bound } : bound);
       assert.equal(calls, 0, 'compilation never invokes the hook');
       assert.equal(check(value), value === 42);
       assert.equal(calls, 1);
@@ -86,7 +87,7 @@ for (const explicit of [false, true]) {
 
 test('opaque nonconstructible targets defer native instanceof errors until evaluation', () => {
   const target = () => {};
-  const check = T.createTypeChecker(target);
+  const check = compileTypeMatcher(target);
   assert.equal(check(1), false);
   assert.throws(() => check({}), TypeError);
   assert.equal(T.isArrayOf([], target), true);
@@ -94,7 +95,7 @@ test('opaque nonconstructible targets defer native instanceof errors until evalu
 
 test('custom instance hooks remain live after compilation', () => {
   function C() {}
-  const check = T.createTypeChecker(C.bind(null));
+  const check = compileTypeMatcher(C.bind(null));
   const instance = new C();
   assert.equal(check(instance), true);
   Object.defineProperty(C, Symbol.hasInstance, { value: () => false });
@@ -220,7 +221,7 @@ test('bound targets ignore their own prototype just as native instanceof does', 
 test('instance prototype errors are deferred rather than executing validation probes', () => {
   function Invalid() {}
   Invalid.prototype = null;
-  const check = T.createTypeChecker(Invalid);
+  const check = compileTypeMatcher(Invalid);
   assert.equal(check(1), false);
   assert.throws(() => check({}), TypeError);
 });
@@ -234,7 +235,7 @@ test('reentrant compiled checks have independent evaluation stacks', () => {
       return value === 'outer' ? check('inner') : false;
     }
   };
-  check = T.createTypeChecker([[predicate, ['number']], 'string']);
+  check = compileTypeMatcher([[predicate, ['number']], 'string']);
   assert.equal(check('outer'), true);
   assert.deepEqual(calls, ['outer', 'inner']);
   assert.equal(check(false), false);
@@ -250,7 +251,7 @@ test('shared effectful graph compilation does not run or deduplicate callbacks',
     }
   ];
   for (let i = 0; i < 1000; i++) spec = [spec, spec];
-  const check = T.createTypeChecker(spec);
+  const check = compileTypeMatcher(spec);
   assert.equal(calls, 0);
   assert.equal(check(1), true);
   assert.equal(calls, 3);
@@ -259,7 +260,7 @@ test('shared effectful graph compilation does not run or deduplicate callbacks',
 test('shared pure unions retain both matching and nonmatching outcomes', () => {
   const leaf = ['number', 'boolean'];
   const specification = [leaf, leaf];
-  const check = T.createTypeChecker(specification);
+  const check = compileTypeMatcher(specification);
   assert.equal(check(0), true);
   assert.equal(check(false), true);
   assert.equal(check('0'), false);

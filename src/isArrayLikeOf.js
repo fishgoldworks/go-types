@@ -1,7 +1,7 @@
 const getArrayLikeLength = require('./util/getArrayLikeLength');
-const createTypeChecker = require('./createTypeChecker');
+const compileTypeMatcher = require('./util/compileTypeMatcher');
 /**
- * Determines whether an array-like value contains only values matching a type specification.
+ * Checks whether an array-like value contains only values matching a type specification.
  *
  * Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at
  * the first mismatch. Missing array positions read as `undefined` unless inherited numeric
@@ -20,7 +20,7 @@ const createTypeChecker = require('./createTypeChecker');
  * @example isArrayLikeOf({length:0}, "number");         // => true
  */
 function isArrayLikeOf(value, type) {
-  const check = createTypeChecker(type);
+  const check = compileTypeMatcher(type);
   const length = getArrayLikeLength(value);
   if (length === undefined) return false;
   for (let index = 0; index < length; index++) if (!check(value[index])) return false;

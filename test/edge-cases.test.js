@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const vm = require('node:vm');
 const T = require('../');
 const F = (s) => vm.runInNewContext(s);
@@ -220,7 +221,7 @@ test('DOM checks return false when the corresponding constructors are absent', (
 });
 test('cross-realm arrows defer native instance errors until evaluation', () => {
   const arrow = F('(()=>true)');
-  const check = T.createTypeChecker(arrow);
+  const check = compileTypeMatcher(arrow);
   assert.equal(check(1), false);
   assert.throws(
     () => check({}),
@@ -230,7 +231,7 @@ test('cross-realm arrows defer native instance errors until evaluation', () => {
 test('invalid and throwing Symbol.hasInstance configurations are observable', () => {
   function A() {}
   Object.defineProperty(A, Symbol.hasInstance, { value: 1 });
-  assert.throws(() => T.createTypeChecker(A), TypeError);
+  assert.throws(() => compileTypeMatcher(A), TypeError);
   const error = Error('hook');
   function B() {}
   Object.defineProperty(B, Symbol.hasInstance, {
@@ -238,7 +239,7 @@ test('invalid and throwing Symbol.hasInstance configurations are observable', ()
       throw error;
     }
   });
-  const check = T.createTypeChecker(B);
+  const check = compileTypeMatcher(B);
   assert.throws(
     () => check(1),
     (e) => e === error

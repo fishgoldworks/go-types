@@ -6,11 +6,14 @@ const root = path.resolve(__dirname, '..');
 
 // Discover files explicitly: Node can succeed when a glob matches no tests.
 // Keep compile-only TypeScript and installed-consumer fixtures out of this suite.
-const tests = fs
-  .readdirSync(path.join(root, 'test'), { recursive: true, withFileTypes: true })
-  .filter((entry) => entry.isFile() && entry.name.endsWith('.test.js'))
-  .map((entry) => path.join(entry.parentPath, entry.name))
-  .sort();
+function discover(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const filename = path.join(directory, entry.name);
+    if (entry.isDirectory()) return ['temp', '.tmp'].includes(entry.name) ? [] : discover(filename);
+    return entry.isFile() && entry.name.endsWith('.test.js') ? [filename] : [];
+  });
+}
+const tests = discover(path.join(root, 'test')).sort();
 if (tests.length === 0) throw Error('No runtime test files found under test/ (expected *.test.js).');
 
 // Node options must precede test paths; otherwise coverage/filter flags can be ignored.

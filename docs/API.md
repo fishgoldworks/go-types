@@ -1,6 +1,8 @@
-# Go Types API reference
+# Go Types API
 
-Version [2.0.0](../CHANGELOG.md). Return to the [README](../README.md) for installation, runtime requirements and usage. Conversion behaviour is also summarised in the [conversion guide](conversions.md).
+Full API documentation for [go-types 2.0.0](../CHANGELOG.md). [Back to README](../README.md) · [Runtime support](../README.md#runtime-support).
+
+Conversion behaviour is also summarised in the [conversion guide](conversions.md).
 
 ## Contents
 
@@ -26,7 +28,7 @@ Version [2.0.0](../CHANGELOG.md). Return to the [README](../README.md) for insta
 
 ## API summary
 
-All **84 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
+All **95 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
 
 Examples assume the named functions have been imported from `go-types`, unless an import is shown. DOM examples run in a web browser. `// =>` comments show expected results or exceptions.
 
@@ -38,117 +40,122 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isUndefined(value)`](#isundefinedvalue) | Determines whether a value is exactly `undefined`. | **`boolean`**<br><br>`true` if the value is `undefined`; otherwise `false`. |
-| [`isNull(value)`](#isnullvalue) | Determines whether a value is exactly `null`. | **`boolean`**<br><br>`true` if the value is `null`; otherwise `false`. |
-| [`isBoolean(value)`](#isbooleanvalue) | Determines whether a value is a primitive boolean or a genuine boxed `Boolean`. | **`boolean`**<br><br>`true` if the value is a primitive boolean or genuine boxed `Boolean`; otherwise `false`. |
-| [`isNumber(value)`](#isnumbervalue) | Determines whether a value is a primitive number or a genuine boxed `Number`. | **`boolean`**<br><br>`true` if the value is a primitive number or genuine boxed `Number`, including `NaN` and infinities; otherwise `false`. |
-| [`isString(value)`](#isstringvalue) | Determines whether a value is a primitive string or a genuine boxed `String`. | **`boolean`**<br><br>`true` if the value is a primitive string or genuine boxed `String`; otherwise `false`. |
-| [`isSymbol(value)`](#issymbolvalue) | Determines whether a value is a primitive symbol. | **`boolean`**<br><br>`true` if the value is a primitive symbol; otherwise `false`. |
-| [`isBigInt(value)`](#isbigintvalue) | Determines whether a value is a primitive bigint. | **`boolean`**<br><br>`true` if the value is a primitive bigint; otherwise `false`. |
-| [`isPrimitive(value)`](#isprimitivevalue) | Determines whether a value is a primitive rather than an object or function. | **`boolean`**<br><br>`true` if the value is a primitive, including `null` or `undefined`; otherwise `false`. |
+| [`isUndefined(value)`](#isundefinedvalue) | Checks whether a value is exactly `undefined`. | **`boolean`**<br><br>`true` if the value is `undefined`; otherwise `false`. |
+| [`isNull(value)`](#isnullvalue) | Checks whether a value is exactly `null`. | **`boolean`**<br><br>`true` if the value is `null`; otherwise `false`. |
+| [`isBoolean(value)`](#isbooleanvalue) | Checks whether a value is a primitive boolean or a genuine boxed `Boolean`. | **`boolean`**<br><br>`true` if the value is a primitive boolean or genuine boxed `Boolean`; otherwise `false`. |
+| [`isNumber(value)`](#isnumbervalue) | Checks whether a value is a primitive number or a genuine boxed `Number`. | **`boolean`**<br><br>`true` if the value is a primitive number or genuine boxed `Number`, including `NaN` and infinities; otherwise `false`. |
+| [`isString(value)`](#isstringvalue) | Checks whether a value is a primitive string or a genuine boxed `String`. | **`boolean`**<br><br>`true` if the value is a primitive string or genuine boxed `String`; otherwise `false`. |
+| [`isSymbol(value)`](#issymbolvalue) | Checks whether a value is a primitive symbol. | **`boolean`**<br><br>`true` if the value is a primitive symbol; otherwise `false`. |
+| [`isBigInt(value)`](#isbigintvalue) | Checks whether a value is a primitive bigint. | **`boolean`**<br><br>`true` if the value is a primitive bigint; otherwise `false`. |
+| [`isPrimitive(value)`](#isprimitivevalue) | Checks whether a value is a primitive rather than an object or function. | **`boolean`**<br><br>`true` if the value is a primitive, including `null` or `undefined`; otherwise `false`. |
 
 **Utility**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isNullish(value)`](#isnullishvalue) | Determines whether a value is `null` or `undefined`. | **`boolean`**<br><br>`true` if the value is `null` or `undefined`; otherwise `false`. |
-| [`isNonNullish(value)`](#isnonnullishvalue) | Determines whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
-| [`isEmpty(value)`](#isemptyvalue) | Determines whether a value is nullish or a supported string or container has no items. | **`boolean`**<br><br>`true` if the value is nullish or a supported string or container with no items; otherwise `false`. |
-| [`isBlank(value)`](#isblankvalue) | Determines whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`. |
-| [`isTruthy(value)`](#istruthyvalue) | Determines whether JavaScript treats a value as `true` in a condition. | **`boolean`**<br><br>`true` if the value is truthy under JavaScript boolean coercion; otherwise `false`. |
-| [`isFalsy(value)`](#isfalsyvalue) | Determines whether JavaScript treats a value as `false` in a condition. | **`boolean`**<br><br>`true` if the value is falsy under JavaScript boolean coercion; otherwise `false`. |
-| [`isTypeOf(value, type?)`](#istypeofvalue-type) | Determines whether a value matches a type name, instance target, predicate or union of matchers. | **`boolean`**<br><br>`true` if the value matches the type specification (omission matches `undefined`); otherwise `false`. |
-| [`createTypeChecker(type?)`](#createtypecheckertype) | Creates a reusable function that checks values against a type specification. | **`Function`** — `(value: unknown) => boolean`<br><br>A reusable checker that returns `true` if its input matches the compiled specification; otherwise `false`. |
-| [`isJson(value)`](#isjsonvalue) | Determines whether primitive or boxed string text is valid JSON. | **`boolean`**<br><br>`true` if the value is primitive or boxed string text that parses as JSON; otherwise `false`. |
+| [`isNullish(value)`](#isnullishvalue) | Checks whether a value is `null` or `undefined`. | **`boolean`**<br><br>`true` if the value is `null` or `undefined`; otherwise `false`. |
+| [`isNonNullish(value)`](#isnonnullishvalue) | Checks whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
+| [`isEmpty(value)`](#isemptyvalue) | Checks whether a value is nullish or a supported string or container has no items. | **`boolean`**<br><br>`true` if the value is nullish or a supported string or container with no items; otherwise `false`. |
+| [`isBlank(value)`](#isblankvalue) | Checks whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`. |
+| [`isTruthy(value)`](#istruthyvalue) | Checks whether JavaScript treats a value as `true` in a condition. | **`boolean`**<br><br>`true` if the value is truthy under JavaScript boolean coercion; otherwise `false`. |
+| [`isFalsy(value)`](#isfalsyvalue) | Checks whether JavaScript treats a value as `false` in a condition. | **`boolean`**<br><br>`true` if the value is falsy under JavaScript boolean coercion; otherwise `false`. |
+| [`isTypeOf(value, type?)`](#istypeofvalue-type) | Checks whether a value matches a type name, instance target, predicate or union of matchers. | **`boolean`**<br><br>`true` if the value matches the type specification (omission matches `undefined`); otherwise `false`. |
+| [`isJson(value)`](#isjsonvalue) | Checks whether primitive or boxed string text is valid JSON. | **`boolean`**<br><br>`true` if the value is primitive or boxed string text that parses as JSON; otherwise `false`. |
 
 **Number**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isInteger(value)`](#isintegervalue) | Determines whether a primitive or boxed number is an integer. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite integral number; otherwise `false`. |
-| [`isSafeInteger(value)`](#issafeintegervalue) | Determines whether a primitive or boxed number is an integer in JavaScript’s safe-integer range. | **`boolean`**<br><br>`true` if the value is a primitive or boxed integer within the safe-integer range; otherwise `false`. |
-| [`isFloat(value)`](#isfloatvalue) | Determines whether a primitive or boxed number is a finite number with a fractional part. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite non-integer number; otherwise `false`. |
-| [`isFinite(value)`](#isfinitevalue) | Determines whether a primitive or boxed number is a finite number. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite number; otherwise `false`. |
-| [`isInfinite(value)`](#isinfinitevalue) | Determines whether a primitive or boxed number is positive or negative infinity. | **`boolean`**<br><br>`true` if the value is primitive or boxed positive or negative infinity; otherwise `false`. |
-| [`isNaN(value)`](#isnanvalue) | Determines whether a primitive or boxed number is `NaN`. | **`boolean`**<br><br>`true` if the value is primitive or boxed `NaN`; otherwise `false`. |
-| [`isNumeric(value)`](#isnumericvalue) | Determines whether a value is a finite number, a bigint, or non-blank numeric text. | **`boolean`**<br><br>`true` if the value is a finite primitive or boxed number, a primitive bigint, or non-blank string text converting to a finite number; otherwise `false`. |
+| [`isInteger(value)`](#isintegervalue) | Checks whether a primitive or boxed number is an integer. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite integral number; otherwise `false`. |
+| [`isSafeInteger(value)`](#issafeintegervalue) | Checks whether a primitive or boxed number is an integer in JavaScript’s safe-integer range. | **`boolean`**<br><br>`true` if the value is a primitive or boxed integer within the safe-integer range; otherwise `false`. |
+| [`isFloat(value)`](#isfloatvalue) | Checks whether a primitive or boxed number is a finite number with a fractional part. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite non-integer number; otherwise `false`. |
+| [`isFinite(value)`](#isfinitevalue) | Checks whether a primitive or boxed number is a finite number. | **`boolean`**<br><br>`true` if the value is a primitive or boxed finite number; otherwise `false`. |
+| [`isInfinite(value)`](#isinfinitevalue) | Checks whether a primitive or boxed number is positive or negative infinity. | **`boolean`**<br><br>`true` if the value is primitive or boxed positive or negative infinity; otherwise `false`. |
+| [`isNaN(value)`](#isnanvalue) | Checks whether a primitive or boxed number is `NaN`. | **`boolean`**<br><br>`true` if the value is primitive or boxed `NaN`; otherwise `false`. |
+| [`isNumeric(value)`](#isnumericvalue) | Checks whether a value is a finite number, a bigint, or non-blank numeric text. | **`boolean`**<br><br>`true` if the value is a finite primitive or boxed number, a primitive bigint, or non-blank string text converting to a finite number; otherwise `false`. |
 
 **Object**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isObject(value)`](#isobjectvalue) | Determines whether a value is a non-null object or function. | **`boolean`**<br><br>`true` if the value is a non-null object or function; otherwise `false`. |
-| [`isObjectLike(value)`](#isobjectlikevalue) | Determines whether a value is a non-null object, excluding functions. | **`boolean`**<br><br>`true` if the value is a non-null object other than a function; otherwise `false`. |
-| [`isPlainObject(value)`](#isplainobjectvalue) | Determines whether a value has a null or ordinary `Object` prototype. | **`boolean`**<br><br>`true` if the value has a null or ordinary `Object` prototype; otherwise `false`. |
-| [`isCyclic(value)`](#iscyclicvalue) | Determines whether following enumerable string-keyed properties leads back to an ancestor. | **`boolean`**<br><br>`true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`. |
-| [`isIterable(value)`](#isiterablevalue) | Determines whether a value exposes a synchronous iterator method. | **`boolean`**<br><br>`true` if the value has a callable `Symbol.iterator` method; otherwise `false`. |
-| [`isAsyncIterable(value)`](#isasynciterablevalue) | Determines whether a value exposes an asynchronous iterator method. | **`boolean`**<br><br>`true` if the async-iterator symbol is available and the value has a callable `Symbol.asyncIterator` method; otherwise `false`. |
-| [`isIteratorLike(value)`](#isiteratorlikevalue) | Determines whether a value is an object or function with a callable `next` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `next` method; otherwise `false`. |
-| [`isEmptyIterable(value)`](#isemptyiterablevalue) | Determines whether a synchronous iterable is empty by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items; otherwise `false`. |
-| [`isBlankIterable(value)`](#isblankiterablevalue) | Determines whether every item yielded by a synchronous iterable is nullish by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items or only nullish items; otherwise `false`. |
-| [`isFunction(value)`](#isfunctionvalue) | Determines whether JavaScript reports a value as a function. | **`boolean`**<br><br>`true` if `typeof value` is `"function"`; otherwise `false`. |
-| [`isDate(value)`](#isdatevalue) | Determines whether a value is a genuine `Date`, valid or invalid. | **`boolean`**<br><br>`true` if the value is a genuine `Date`, valid or invalid; otherwise `false`. |
-| [`isValidDate(value)`](#isvaliddatevalue) | Determines whether a genuine `Date` contains a finite timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`. |
-| [`isInvalidDate(value)`](#isinvaliddatevalue) | Determines whether a genuine `Date` contains a `NaN` timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise `false`. |
-| [`isRegExp(value)`](#isregexpvalue) | Determines whether a value is a genuine regular-expression object. | **`boolean`**<br><br>`true` if the value is a genuine `RegExp` instance; otherwise `false`. |
-| [`isPromise(value)`](#ispromisevalue) | Determines whether a value passes the local native `Promise` instance check. | **`boolean`**<br><br>`true` if the value passes the local native `Promise` instance check; otherwise `false`. |
-| [`isPromiseLike(value)`](#ispromiselikevalue) | Determines whether a value is an object or function with callable `then` and `catch` methods. | **`boolean`**<br><br>`true` if the value is a non-null object or function with callable `then` and `catch` methods; otherwise `false`. |
-| [`isThenable(value)`](#isthenablevalue) | Determines whether a value is an object or function with a callable `then` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `then` method; otherwise `false`. |
-| [`isError(value)`](#iserrorvalue) | Determines whether a value is recognised as an error by the available native check or fallback. | **`boolean`**<br><br>`true` if the captured native error check, or its conservative fallback, recognises the value as an error; otherwise `false`. |
+| [`isObject(value)`](#isobjectvalue) | Checks whether a value is a non-null object or function. | **`boolean`**<br><br>`true` if the value is a non-null object or function; otherwise `false`. |
+| [`isObjectLike(value)`](#isobjectlikevalue) | Checks whether a value is a non-null object, excluding functions. | **`boolean`**<br><br>`true` if the value is a non-null object other than a function; otherwise `false`. |
+| [`isPlainObject(value)`](#isplainobjectvalue) | Checks whether a value has a null or ordinary `Object` prototype. | **`boolean`**<br><br>`true` if the value has a null or ordinary `Object` prototype; otherwise `false`. |
+| [`isCyclic(value)`](#iscyclicvalue) | Checks whether following enumerable string-keyed properties leads back to an ancestor. | **`boolean`**<br><br>`true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`. |
+| [`isIterable(value)`](#isiterablevalue) | Checks whether a value exposes a synchronous iterator method. | **`boolean`**<br><br>`true` if the value has a callable `Symbol.iterator` method; otherwise `false`. |
+| [`isAsyncIterable(value)`](#isasynciterablevalue) | Checks whether a value exposes an asynchronous iterator method. | **`boolean`**<br><br>`true` if the async-iterator symbol is available and the value has a callable `Symbol.asyncIterator` method; otherwise `false`. |
+| [`isIteratorLike(value)`](#isiteratorlikevalue) | Checks whether a value is an object or function with a callable `next` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `next` method; otherwise `false`. |
+| [`isEmptyIterable(value)`](#isemptyiterablevalue) | Checks whether a synchronous iterable is empty by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items; otherwise `false`. |
+| [`isBlankIterable(value)`](#isblankiterablevalue) | Checks whether every item yielded by a synchronous iterable is nullish by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items or only nullish items; otherwise `false`. |
+| [`isFunction(value)`](#isfunctionvalue) | Checks whether JavaScript reports a value as a function. | **`boolean`**<br><br>`true` if `typeof value` is `"function"`; otherwise `false`. |
+| [`isDate(value)`](#isdatevalue) | Checks whether a value is a genuine `Date`, valid or invalid. | **`boolean`**<br><br>`true` if the value is a genuine `Date`, valid or invalid; otherwise `false`. |
+| [`isValidDate(value)`](#isvaliddatevalue) | Checks whether a genuine `Date` contains a finite timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`. |
+| [`isInvalidDate(value)`](#isinvaliddatevalue) | Checks whether a genuine `Date` contains a `NaN` timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise `false`. |
+| [`isRegExp(value)`](#isregexpvalue) | Checks whether a value is a genuine regular-expression object. | **`boolean`**<br><br>`true` if the value is a genuine `RegExp` instance; otherwise `false`. |
+| [`isPromise(value)`](#ispromisevalue) | Checks whether a value passes the local native `Promise` instance check. | **`boolean`**<br><br>`true` if the value passes the local native `Promise` instance check; otherwise `false`. |
+| [`isPromiseLike(value)`](#ispromiselikevalue) | Checks whether a value is an object or function with callable `then` and `catch` methods. | **`boolean`**<br><br>`true` if the value is a non-null object or function with callable `then` and `catch` methods; otherwise `false`. |
+| [`isThenable(value)`](#isthenablevalue) | Checks whether a value is an object or function with a callable `then` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `then` method; otherwise `false`. |
+| [`isError(value)`](#iserrorvalue) | Checks whether a value is recognised as an error by the available native check or fallback. | **`boolean`**<br><br>`true` if the captured native error check, or its conservative fallback, recognises the value as an error; otherwise `false`. |
 
 **Array**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isArray(value)`](#isarrayvalue) | Determines whether a value is an array, including from another realm. | **`boolean`**<br><br>`true` if the value passes native `Array.isArray`; otherwise `false`. |
-| [`isNonEmptyArray(value)`](#isnonemptyarrayvalue) | Determines whether a value is an array with a valid length greater than zero. | **`boolean`**<br><br>`true` if the value is an array with a valid length greater than zero; otherwise `false`. |
-| [`isArrayOf(value, type?)`](#isarrayofvalue-type) | Determines whether an array contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is an array and every element matches the specification, including an empty array; otherwise `false`. |
-| [`isArrayLike(value)`](#isarraylikevalue) | Determines whether a non-function value has a valid numeric length. | **`boolean`**<br><br>`true` if the value is not a function and has a numeric integer length from `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`. |
-| [`isArrayLikeOf(value, type?)`](#isarraylikeofvalue-type) | Determines whether an array-like value contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is array-like and every indexed value matches the specification, including an empty input; otherwise `false`. |
-| [`isPair(value)`](#ispairvalue) | Determines whether a value is an array of length two. | **`boolean`**<br><br>`true` if the value is an array of length `2`; otherwise `false`. |
+| [`isArray(value)`](#isarrayvalue) | Checks whether a value is an array, including from another realm. | **`boolean`**<br><br>`true` if the value passes native `Array.isArray`; otherwise `false`. |
+| [`isNonEmptyArray(value)`](#isnonemptyarrayvalue) | Checks whether a value is an array with a valid length greater than zero. | **`boolean`**<br><br>`true` if the value is an array with a valid length greater than zero; otherwise `false`. |
+| [`isArrayOf(value, type?)`](#isarrayofvalue-type) | Checks whether an array contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is an array and every element matches the specification, including an empty array; otherwise `false`. |
+| [`isArrayLike(value)`](#isarraylikevalue) | Checks whether a non-function value has a valid numeric length. | **`boolean`**<br><br>`true` if the value is not a function and has a numeric integer length from `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`. |
+| [`isArrayLikeOf(value, type?)`](#isarraylikeofvalue-type) | Checks whether an array-like value contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is array-like and every indexed value matches the specification, including an empty input; otherwise `false`. |
+| [`isPair(value)`](#ispairvalue) | Checks whether a value is an array of length two. | **`boolean`**<br><br>`true` if the value is an array of length `2`; otherwise `false`. |
 
 **Collection**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isMap(value)`](#ismapvalue) | Determines whether a value is a genuine `Map`. | **`boolean`**<br><br>`true` if the value is a genuine `Map`; otherwise `false`. |
-| [`isMapOf(value, keyType?, valueType?)`](#ismapofvalue-keytype-valuetype) | Determines whether every Map key and value matches its respective specification. | **`boolean`**<br><br>`true` if the value is a `Map` whose keys and values match their respective specifications, including an empty `Map`; otherwise `false`. |
-| [`isSet(value)`](#issetvalue) | Determines whether a value is a genuine `Set`. | **`boolean`**<br><br>`true` if the value is a genuine `Set`; otherwise `false`. |
-| [`isSetOf(value, type?)`](#issetofvalue-type) | Determines whether a Set contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is a `Set` whose items all match the specification, including an empty `Set`; otherwise `false`. |
-| [`isWeakMap(value)`](#isweakmapvalue) | Determines whether a value is a genuine `WeakMap`. | **`boolean`**<br><br>`true` if the value is a genuine `WeakMap`; otherwise `false`. |
-| [`isWeakSet(value)`](#isweaksetvalue) | Determines whether a value is a genuine `WeakSet`. | **`boolean`**<br><br>`true` if the value is a genuine `WeakSet`; otherwise `false`. |
+| [`isMap(value)`](#ismapvalue) | Checks whether a value is a genuine `Map`. | **`boolean`**<br><br>`true` if the value is a genuine `Map`; otherwise `false`. |
+| [`isMapOf(value, keyType?, valueType?)`](#ismapofvalue-keytype-valuetype) | Checks whether every Map key and value matches its respective specification. | **`boolean`**<br><br>`true` if the value is a `Map` whose keys and values match their respective specifications, including an empty `Map`; otherwise `false`. |
+| [`isSet(value)`](#issetvalue) | Checks whether a value is a genuine `Set`. | **`boolean`**<br><br>`true` if the value is a genuine `Set`; otherwise `false`. |
+| [`isSetOf(value, type?)`](#issetofvalue-type) | Checks whether a Set contains only values matching a type specification. | **`boolean`**<br><br>`true` if the value is a `Set` whose items all match the specification, including an empty `Set`; otherwise `false`. |
+| [`isWeakMap(value)`](#isweakmapvalue) | Checks whether a value is a genuine `WeakMap`. | **`boolean`**<br><br>`true` if the value is a genuine `WeakMap`; otherwise `false`. |
+| [`isWeakSet(value)`](#isweaksetvalue) | Checks whether a value is a genuine `WeakSet`. | **`boolean`**<br><br>`true` if the value is a genuine `WeakSet`; otherwise `false`. |
 
 **DOM**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isNode(value)`](#isnodevalue) | Determines whether a value is an instance of the local DOM `Node` constructor. | **`boolean`**<br><br>`true` if a local `Node` constructor is available and the value passes its instance check; otherwise `false`. |
-| [`isElement(value)`](#iselementvalue) | Determines whether a value is an instance of the local DOM `Element` constructor. | **`boolean`**<br><br>`true` if a local `Element` constructor is available and the value passes its instance check; otherwise `false`. |
-| [`isFragment(value)`](#isfragmentvalue) | Determines whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
+| [`isNode(value)`](#isnodevalue) | Checks whether a value is an instance of the local DOM `Node` constructor. | **`boolean`**<br><br>`true` if a local `Node` constructor is available and the value passes its instance check; otherwise `false`. |
+| [`isElement(value)`](#iselementvalue) | Checks whether a value is an instance of the local DOM `Element` constructor. | **`boolean`**<br><br>`true` if a local `Element` constructor is available and the value passes its instance check; otherwise `false`. |
+| [`isFragment(value)`](#isfragmentvalue) | Checks whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
 
 **Binary**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`isArrayBuffer(value)`](#isarraybuffervalue) | Determines whether a value is a genuine `ArrayBuffer`. | **`boolean`**<br><br>`true` if the value is a genuine `ArrayBuffer`; otherwise `false`. |
-| [`isSharedArrayBuffer(value)`](#issharedarraybuffervalue) | Determines whether a value is a genuine `SharedArrayBuffer`. | **`boolean`**<br><br>`true` if native shared buffers are available and the value is a genuine `SharedArrayBuffer`; otherwise `false`. |
-| [`isArrayBufferView(value)`](#isarraybufferviewvalue) | Determines whether a value is a native typed array or `DataView`. | **`boolean`**<br><br>`true` if the value is a native typed array or `DataView`; otherwise `false`. |
-| [`isTypedArray(value)`](#istypedarrayvalue) | Determines whether a value is a native typed array, including a Node.js `Buffer`. | **`boolean`**<br><br>`true` if the value is a native typed array, including a Node.js `Buffer`; otherwise `false`. |
-| [`isDataView(value)`](#isdataviewvalue) | Determines whether a value is a genuine `DataView`. | **`boolean`**<br><br>`true` if the value is a genuine `DataView`; otherwise `false`. |
+| [`isArrayBuffer(value)`](#isarraybuffervalue) | Checks whether a value is a genuine `ArrayBuffer`. | **`boolean`**<br><br>`true` if the value is a genuine `ArrayBuffer`; otherwise `false`. |
+| [`isSharedArrayBuffer(value)`](#issharedarraybuffervalue) | Checks whether a value is a genuine `SharedArrayBuffer`. | **`boolean`**<br><br>`true` if native shared buffers are available and the value is a genuine `SharedArrayBuffer`; otherwise `false`. |
+| [`isArrayBufferView(value)`](#isarraybufferviewvalue) | Checks whether a value is a native typed array or `DataView`. | **`boolean`**<br><br>`true` if the value is a native typed array or `DataView`; otherwise `false`. |
+| [`isTypedArray(value)`](#istypedarrayvalue) | Checks whether a value is a native typed array, including a Node.js `Buffer`. | **`boolean`**<br><br>`true` if the value is a native typed array, including a Node.js `Buffer`; otherwise `false`. |
+| [`isDataView(value)`](#isdataviewvalue) | Checks whether a value is a genuine `DataView`. | **`boolean`**<br><br>`true` if the value is a genuine `DataView`; otherwise `false`. |
 
 **Conversion**
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`toArray(value)`](#toarrayvalue) | Converts iterable or array-like input to a new shallow array. | **`ArrayElement<T>[]`**<br><br>A new shallow array containing the input items. |
+| [`box(value?)`](#boxvalue) | Wraps non-nullish primitives in their native wrapper objects, preserving objects and nullish values. | **`Boxed<T>`**<br><br>A native wrapper for a non-nullish primitive; otherwise the original object, function or nullish input. |
+| [`unbox(value?)`](#unboxvalue) | Extracts the primitive payload of a genuine wrapper, leaving other values unchanged. | **`Unboxed<T>`**<br><br>The genuine wrapper’s primitive payload when its native unboxing operation is available; otherwise the original input. |
+| [`toRegExp(value?, flags?)`](#toregexpvalue-flags) | Converts a native pattern and optional `flags` to a genuine `RegExp`. | **`RegExp`**<br><br>A genuine `RegExp`, which may retain input identity under native rules. |
+| [`toPromise(value?)`](#topromisevalue) | Converts a value to a native `Promise`, adopting thenables and preserving ordinary local promises. | **`Promise<Awaited<T>>`**<br><br>A native `Promise` that adopts the input; ordinary local promises retain identity. |
+| [`toArray(value)`](#toarrayvalue) | Converts a synchronous iterable, plain record or supported array-like input to a new shallow array. | **`ArrayElement<T>[]`**<br><br>A new shallow array containing iterable items, own enumerable record values or indexed array-like values. |
 | [`toBigInt(value?)`](#tobigintvalue) | Converts a value to a primitive bigint using native conversion. | **`bigint`**<br><br>The converted primitive bigint. |
 | [`toBoolean(value?)`](#tobooleanvalue) | Converts a value to a boolean using JavaScript truthiness. | **`boolean`**<br><br>`true` if the input is truthy under JavaScript boolean coercion; otherwise `false`. |
 | [`toDate(value?)`](#todatevalue) | Converts a value to a `Date`, returning genuine `Date` objects unchanged. The result can be invalid. | **`Date`**<br><br>The original genuine `Date`, or a new `Date` constructed from the input; it may be invalid. |
 | [`toInteger(value?)`](#tointegervalue) | Converts a value to a number and truncates it towards zero. | **`number`**<br><br>The numeric conversion truncated towards zero; it may be `NaN` or infinite. |
-| [`toMap(value?)`](#tomapvalue) | Converts an iterable of key/value entries to a new shallow Map. | **`ConvertedMap<T>`**<br><br>A new Map containing the input entries, or an empty Map for omitted or nullish input. |
+| [`toJson(value?, replacer?, space?)`](#tojsonvalue-replacer-space) | Serialises a value to JSON text using native `JSON.stringify` behaviour. | **`string \| undefined`**<br><br>JSON text, or `undefined` when native serialisation produces no text, including omitted input without a replacer. |
+| [`fromJson(value, reviver?)`](#fromjsonvalue-reviver) | Parses JSON text into a JavaScript value using native `JSON.parse` behaviour. | **`unknown`**<br><br>The parsed value, or any root value returned by the reviver, including `undefined`. TypeScript returns unknown until the caller validates it. |
+| [`toMap(value?)`](#tomapvalue) | Converts a plain record or synchronous iterable of strict key/value pairs to a new shallow Map. | **`ConvertedMap<T>`**<br><br>A new Map containing own enumerable string and symbol record entries or strict iterable pairs, or an empty Map for omitted or nullish input. |
 | [`toNumber(value?)`](#tonumbervalue) | Converts a value to a primitive number using JavaScript’s `Number` conversion. | **`number`**<br><br>The converted primitive number; it may be `NaN` or infinite. |
-| [`toObject(value?)`](#toobjectvalue) | Converts a value to an object, preserving existing objects and functions. | **`ConvertedObject<T>`**<br><br>The original object or function, a boxed primitive, or a fresh empty object for nullish input. |
-| [`toSet(value?)`](#tosetvalue) | Converts an iterable of values to a new shallow Set. | **`ConvertedSet<T>`**<br><br>A new Set of the input values in first-insertion order, or an empty Set for omitted or nullish input. |
+| [`toPlainObject(value)`](#toplainobjectvalue) | Converts JSON object text, a plain object, or entry pairs into a fresh plain object. | **`ConvertedPlainObject<T>`**<br><br>A fresh ordinary object containing the parsed properties, copied enumerable properties, or supplied entries. |
+| [`toSet(value?)`](#tosetvalue) | Converts a synchronous iterable, plain record or supported array-like input to a new shallow Set. | **`ConvertedSet<T>`**<br><br>A new Set of iterable items, own enumerable record values or indexed array-like values, or an empty Set for omitted or nullish input. |
 | [`toString(value?)`](#tostringvalue) | Converts a value to a primitive string using JavaScript’s `String` conversion. | **`string`**<br><br>The converted primitive string; nullish inputs become their literal text. |
 | [`toSymbol(value?)`](#tosymbolvalue) | Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol wrappers. | **`symbol`**<br><br>The original or unboxed symbol, or a new symbol created from the description. |
 
@@ -156,25 +163,31 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 
 | API | Description | Returns |
 | --- | --- | --- |
-| [`toArrayIf(value, condition?)`](#toarrayifvalue-condition) | Converts iterable or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ArrayElement<T>[]`**<br><br>A new shallow array when conversion is requested; otherwise the original input, unchanged. |
+| [`boxIf(value, condition?)`](#boxifvalue-condition) | Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| Boxed<T>`**<br><br>The `box` result when requested; otherwise the exact original input. |
+| [`unboxIf(value, condition?)`](#unboxifvalue-condition) | Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native unboxing is available. Otherwise, returns the original input unchanged. | **`T \| Unboxed<T>`**<br><br>The `unbox` result when requested; otherwise the exact original input. |
+| [`toRegExpIf(value, condition?, flags?)`](#toregexpifvalue-condition-flags) | Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| RegExp`**<br><br>The `toRegExp` result when requested; otherwise the exact original input. |
+| [`toPromiseIf(value, condition?)`](#topromiseifvalue-condition) | Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| Promise<Awaited<T>>`**<br><br>The `toPromise` result when requested; otherwise the exact original input. |
+| [`toArrayIf(value, condition?)`](#toarrayifvalue-condition) | Converts supported iterable, record or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ArrayElement<T>[]`**<br><br>A new shallow array when conversion is requested; otherwise the original input, unchanged. |
 | [`toBigIntIf(value, condition?)`](#tobigintifvalue-condition) | Converts a value to a primitive bigint when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| bigint`**<br><br>The converted primitive bigint when conversion is requested; otherwise the original input, unchanged. |
 | [`toBooleanIf(value, condition?)`](#tobooleanifvalue-condition) | Converts a value to its JavaScript boolean truthiness when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| boolean`**<br><br>The input’s boolean truthiness when conversion is requested; otherwise the original input, unchanged. |
 | [`toDateIf(value, condition?)`](#todateifvalue-condition) | Converts a value to a `Date` when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| Date`**<br><br>The original genuine `Date` or a new `Date`, possibly invalid, when conversion is requested; otherwise the original input, unchanged. |
 | [`toIntegerIf(value, condition?)`](#tointegerifvalue-condition) | Converts a value to a number and truncates it towards zero when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| number`**<br><br>The numeric conversion truncated towards zero, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged. |
-| [`toMapIf(value, condition?)`](#tomapifvalue-condition) | Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedMap<T>`**<br><br>A new Map when conversion is requested; otherwise the original input, unchanged. |
+| [`toJsonIf(value, condition?, replacer?, space?)`](#tojsonifvalue-condition-replacer-space) | Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| string \| undefined`**<br><br>JSON text or `undefined` when conversion is requested; otherwise the original input, unchanged. |
+| [`fromJsonIf(value, condition?, reviver?)`](#fromjsonifvalue-condition-reviver) | Parses JSON when the condition evaluates to `true`; otherwise returns the original input unchanged. | **`T \| unknown`**<br><br>The parsed or revived value when requested; otherwise the original input unchanged. |
+| [`toMapIf(value, condition?)`](#tomapifvalue-condition) | Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedMap<T>`**<br><br>A new Map when conversion is requested; otherwise the original input, unchanged. |
 | [`toNumberIf(value, condition?)`](#tonumberifvalue-condition) | Converts a value to a primitive number when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| number`**<br><br>The converted primitive number, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged. |
-| [`toObjectIf(value, condition?)`](#toobjectifvalue-condition) | Converts a value to an object when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedObject<T>`**<br><br>The original object or function, a boxed primitive, or a new object for nullish input when conversion is requested; otherwise the original input, unchanged. |
-| [`toSetIf(value, condition?)`](#tosetifvalue-condition) | Converts an iterable of values to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedSet<T>`**<br><br>A new Set when conversion is requested; otherwise the original input, unchanged. |
+| [`toPlainObjectIf(value, condition?)`](#toplainobjectifvalue-condition) | Converts a supported value to a fresh plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedPlainObject<T>`**<br><br>A fresh plain object when conversion is requested; otherwise the exact original input. |
+| [`toSetIf(value, condition?)`](#tosetifvalue-condition) | Converts supported iterable, record or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedSet<T>`**<br><br>A new Set when conversion is requested; otherwise the original input, unchanged. |
 | [`toStringIf(value, condition?)`](#tostringifvalue-condition) | Converts a value to a primitive string when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| string`**<br><br>The converted primitive string when conversion is requested; otherwise the original input, unchanged. |
 | [`toSymbolIf(value, condition?)`](#tosymbolifvalue-condition) | Converts a value to a primitive symbol when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| symbol`**<br><br>The original or unboxed symbol, or a new symbol from the description, when conversion is requested; otherwise the original input, unchanged. |
 
-`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable/array-like element types, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedObject<T>` preserves objects or describes the native boxed result. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).
+`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).
 
 ## Primitive
 
 ### `isUndefined(value)`
 
-Determines whether a value is exactly `undefined`.
+Checks whether a value is exactly `undefined`.
 
 Use this check to distinguish `undefined` from `null` and other empty-looking values. It does not convert the input.
 
@@ -197,7 +210,7 @@ isUndefined("x");              // => false
 
 ### `isNull(value)`
 
-Determines whether a value is exactly `null`.
+Checks whether a value is exactly `null`.
 
 Use this check when `null` has a different meaning from `undefined`. To accept both, use `isNullish`.
 
@@ -220,7 +233,7 @@ isNull("x");                   // => false
 
 ### `isBoolean(value)`
 
-Determines whether a value is a primitive boolean or a genuine boxed `Boolean`.
+Checks whether a value is a primitive boolean or a genuine boxed `Boolean`.
 
 Accepts both primitive boolean values and wrapper objects such as `new Boolean(false)`, including wrappers from another realm. It checks the stored native value without converting other inputs.
 
@@ -250,7 +263,7 @@ The TypeScript result is `boolean`: a structural wrapper interface does not prov
 
 ### `isNumber(value)`
 
-Determines whether a value is a primitive number or a genuine boxed `Number`.
+Checks whether a value is a primitive number or a genuine boxed `Number`.
 
 Accepts both primitive number values and wrapper objects such as `new Number(42)`, including wrappers from another realm. It checks the stored native value without converting other inputs. `NaN` and positive or negative infinity are numbers for this check.
 
@@ -280,7 +293,7 @@ The TypeScript result is `boolean`: a structural wrapper interface does not prov
 
 ### `isString(value)`
 
-Determines whether a value is a primitive string or a genuine boxed `String`.
+Checks whether a value is a primitive string or a genuine boxed `String`.
 
 Accepts both primitive string values and wrapper objects such as `new String('hello')`, including wrappers from another realm. It checks the stored native value without converting other inputs.
 
@@ -310,7 +323,7 @@ The TypeScript result is `boolean`: a structural wrapper interface does not prov
 
 ### `isSymbol(value)`
 
-Determines whether a value is a primitive symbol.
+Checks whether a value is a primitive symbol.
 
 Accepts symbols such as `Symbol("key")`. A boxed symbol, created with `Object(symbol)`, returns `false`.
 
@@ -337,7 +350,7 @@ Unlike `isBoolean`, `isNumber` and `isString`, this check does not accept a wrap
 
 ### `isBigInt(value)`
 
-Determines whether a value is a primitive bigint.
+Checks whether a value is a primitive bigint.
 
 Accepts primitive bigint values without converting strings or numbers. A boxed bigint returns `false`.
 
@@ -366,7 +379,7 @@ Unlike `isBoolean`, `isNumber` and `isString`, this check does not accept a wrap
 
 ### `isPrimitive(value)`
 
-Determines whether a value is a primitive rather than an object or function.
+Checks whether a value is a primitive rather than an object or function.
 
 Accepts `null`, `undefined`, booleans, numbers, strings, bigints and symbols. Wrapper objects and functions return `false`. This is the complement of `isObject`, including for the browser object `document.all`.
 
@@ -396,7 +409,7 @@ The browser object `document.all` returns `false`, even though its historical `t
 
 ### `isNullish(value)`
 
-Determines whether a value is `null` or `undefined`.
+Checks whether a value is `null` or `undefined`.
 
 Use this check for absent values while retaining `0`, `false` and the empty string. Unlike loose comparison with `null`, it does not treat the browser object `document.all` as absent.
 
@@ -424,7 +437,7 @@ Uses strict comparisons with `null` and `undefined`. The browser object `documen
 
 ### `isNonNullish(value)`
 
-Determines whether a value is neither `null` nor `undefined`.
+Checks whether a value is neither `null` nor `undefined`.
 
 Use this check to retain present values, including `0`, `false` and the empty string. It can be passed to `Array.filter` and narrows the TypeScript result to `NonNullable<T>`.
 
@@ -452,7 +465,7 @@ The generic declaration narrows to `NonNullable<T>`. Values such as `0`, `false`
 
 ### `isEmpty(value)`
 
-Determines whether a value is nullish or a supported string or container has no items.
+Checks whether a value is nullish or a supported string or container has no items.
 
 Checks strings, arrays, array-like values, native Maps and Sets, and plain dictionaries without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption.
 
@@ -464,7 +477,11 @@ Checks strings, arrays, array-like values, native Maps and Sets, and plain dicti
 
 **Returns:** `boolean` — `true` if the value is nullish or a supported string or container with no items; otherwise `false`.
 
-**Errors:** `TypeError` for unsized iterators or iterables. Property getters and proxy traps may throw. See [Empty and blank values](#empty-and-blank-values).
+**Errors**
+
+- `TypeError` for unsized iterators or iterables.
+- Property getters and proxy traps may throw.
+- See [Empty and blank values](#empty-and-blank-values).
 
 **Examples**
 
@@ -488,7 +505,7 @@ Use `isEmptyIterable` to consume a synchronous iterable. A `next`-only iterator 
 
 ### `isBlank(value)`
 
-Determines whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values.
+Checks whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values.
 
 Accepts nullish values, empty or whitespace-only strings, and supported containers whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[""]` is not. Unsized iterators and iterables throw instead of being consumed.
 
@@ -500,7 +517,11 @@ Accepts nullish values, empty or whitespace-only strings, and supported containe
 
 **Returns:** `boolean` — `true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`.
 
-**Errors:** `TypeError` for unsized iterators or iterables. Property getters and proxy traps may throw. See [Empty and blank values](#empty-and-blank-values).
+**Errors**
+
+- `TypeError` for unsized iterators or iterables.
+- Property getters and proxy traps may throw.
+- See [Empty and blank values](#empty-and-blank-values).
 
 **Examples**
 
@@ -522,7 +543,7 @@ The check is shallow: every inspected value must be `null` or `undefined`. Empty
 
 ### `isTruthy(value)`
 
-Determines whether JavaScript treats a value as `true` in a condition.
+Checks whether JavaScript treats a value as `true` in a condition.
 
 Uses ordinary boolean coercion: non-empty strings and objects are truthy, including `"false"`, `[]` and `new Boolean(false)`. It does not parse boolean text.
 
@@ -546,7 +567,7 @@ isTruthy(0n);                  // => false
 
 ### `isFalsy(value)`
 
-Determines whether JavaScript treats a value as `false` in a condition.
+Checks whether JavaScript treats a value as `false` in a condition.
 
 Returns the opposite of `isTruthy`. This includes values such as `false`, `0`, `""`, `null`, `undefined` and `NaN`; it does not mean only absent values.
 
@@ -570,9 +591,9 @@ isFalsy([]);                   // => false
 
 ### `isTypeOf(value, type?)`
 
-Determines whether a value matches a type name, instance target, predicate or union of matchers.
+Checks whether a value matches a type name, instance target, predicate or union of matchers.
 
-Matches one value immediately, without converting it or invoking constructor bodies. Use a string such as `"number"` for a native `typeof` check, `{ predicate: fn }` for a custom check, or an array for alternatives. Use `createTypeChecker` when the same specification will be reused.
+Matches one value immediately, without converting it or invoking constructor bodies. Use a string such as `"number"` for a native `typeof` check, `{ predicate: fn }` for a custom check, or an array for alternatives.
 
 **Parameters**
 
@@ -583,7 +604,10 @@ Matches one value immediately, without converting it or invoking constructor bod
 
 **Returns:** `boolean` — `true` if the value matches the type specification (omission matches `undefined`); otherwise `false`.
 
-**Errors:** Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
+**Errors**
+
+- Invalid matcher configuration throws `TypeError`.
+- Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
 
 **Examples**
 
@@ -615,60 +639,11 @@ Callable instance targets use native `instanceof`; an invalid target prototype c
 
 ---
 
-### `createTypeChecker(type?)`
-
-Creates a reusable function that checks values against a type specification.
-
-Validates and snapshots the matcher structure once, then returns a synchronous checker. Calling that checker evaluates the stored rules against the supplied value; it does not cache previous results. Use it when filtering or repeatedly validating values with the same specification.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `type?` | [`TypeMatcher`](#type-specifications) | `undefined` | The matcher for values passed to the returned checker. An omitted matcher matches `undefined`. |
-
-**Returns:** `(value: unknown) => boolean` — A reusable checker that returns `true` if its input matches the compiled specification; otherwise `false`.
-
-**Errors:** Invalid matcher configuration throws `TypeError` during creation; configuration access can also trigger proxy traps. The returned checker can throw for invalid predicate results or native instance checks. Callback and property-access errors propagate.
-
-**Examples**
-
-```javascript
-const isNumberOrNull = createTypeChecker(['number', null]);
-
-isNumberOrNull(42);                          // => true
-isNumberOrNull(null);                        // => true
-isNumberOrNull('42');                        // => false
-
-const isText = createTypeChecker('string');
-[1, 'hello', null, 'world'].filter(isText);  // => ['hello', 'world']
-
-createTypeChecker([])(undefined);            // => false
-```
-
-**Additional examples**
-
-```javascript
-createTypeChecker(["number",null])(1);       // => true
-createTypeChecker(["number",null])("1");     // => false
-createTypeChecker([])(undefined);            // => false
-```
-
-**Notes**
-
-Each distinct union array is validated and snapshotted once per compilation. Repeated references share compiled structure rather than expanding into a large tree. Only built-in checks without application callbacks are deduplicated; predicates and instance hooks retain their order, repeat count and live state.
-
-Compilation and matching are iterative, without `eval` or generated source. Separate factory calls do not share a configuration cache. Prepare a checker outside a loop when its specification can be reused.
-
-An omitted `type` matches `undefined`. Callable instance targets are not tested for constructibility during creation; invalid prototype errors occur later under native `instanceof` rules. Internal reference tracking falls back to local arrays when weak collections are unavailable; no platform globals are changed.
-
----
-
 ### `isJson(value)`
 
-Determines whether primitive or boxed string text is valid JSON.
+Checks whether primitive or boxed string text is valid JSON.
 
-Accepts JSON objects, arrays and scalar values such as `"42"` and `"null"`. It does not return the parsed value, check a schema, or test whether an arbitrary object can be serialised. If the parsed result is needed, call `JSON.parse` directly.
+Accepts text representing JSON objects, arrays or scalar values such as `"42"` and `"null"`. It does not return the parsed value, check a schema, or test whether an arbitrary object can be serialised. Use `fromJson` when you need the parsed result.
 
 **Parameters**
 
@@ -695,7 +670,7 @@ Uses the captured `JSON.parse` function and ignores boxed-string conversion over
 
 ### `isInteger(value)`
 
-Determines whether a primitive or boxed number is an integer.
+Checks whether a primitive or boxed number is an integer.
 
 Finite whole numbers pass; fractional values, `NaN` and infinities do not. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -725,7 +700,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isSafeInteger(value)`
 
-Determines whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
+Checks whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
 
 Accepts integers from `-9007199254740991` through `9007199254740991`, inclusive. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -755,7 +730,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isFloat(value)`
 
-Determines whether a primitive or boxed number is a finite number with a fractional part.
+Checks whether a primitive or boxed number is a finite number with a fractional part.
 
 A number such as `1.5` passes; whole numbers, `NaN` and infinities do not. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -785,7 +760,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isFinite(value)`
 
-Determines whether a primitive or boxed number is a finite number.
+Checks whether a primitive or boxed number is a finite number.
 
 Rejects `NaN` and positive or negative infinity. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -815,7 +790,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isInfinite(value)`
 
-Determines whether a primitive or boxed number is positive or negative infinity.
+Checks whether a primitive or boxed number is positive or negative infinity.
 
 Accepts `Infinity` and `-Infinity`; finite numbers and `NaN` do not pass. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -845,7 +820,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isNaN(value)`
 
-Determines whether a primitive or boxed number is `NaN`.
+Checks whether a primitive or boxed number is `NaN`.
 
 Detects the not-a-number value without converting strings or other inputs. Genuine `Number` wrappers are inspected without calling overridden conversion methods. Numeric strings and other coercible values return `false`.
 
@@ -875,7 +850,7 @@ The TypeScript result is `boolean`. A failed numeric refinement must not imply t
 
 ### `isNumeric(value)`
 
-Determines whether a value is a finite number, a bigint, or non-blank numeric text.
+Checks whether a value is a finite number, a bigint, or non-blank numeric text.
 
 Use this check when numeric strings should be accepted without converting the caller’s value. Primitive and boxed finite numbers, primitive bigints, and primitive or boxed strings that convert to finite numbers pass. Empty or whitespace-only strings do not.
 
@@ -905,7 +880,7 @@ Uses standard numeric conversion syntax, not a decimal-only grammar. It rejects 
 
 ### `isObject(value)`
 
-Determines whether a value is a non-null object or function.
+Checks whether a value is a non-null object or function.
 
 Accepts objects of any supported shape, including arrays, dates, wrapper objects and functions. It does not require a plain dictionary or a particular prototype. `null` returns `false`.
 
@@ -933,7 +908,7 @@ Uses the JavaScript object/function boundary, so objects from another realm pass
 
 ### `isObjectLike(value)`
 
-Determines whether a value is a non-null object, excluding functions.
+Checks whether a value is a non-null object, excluding functions.
 
 Use this check when functions should be excluded from the object category. Arrays, dates and wrapper objects still pass; use `isPlainObject` for plain dictionaries.
 
@@ -961,7 +936,7 @@ Includes browser `document.all`, but does not require a plain dictionary. The de
 
 ### `isPlainObject(value)`
 
-Determines whether a value has a null or ordinary `Object` prototype.
+Checks whether a value has a null or ordinary `Object` prototype.
 
 Recognises ordinary object literals and null-prototype dictionaries, including from another realm. Arrays and class instances with their usual prototypes do not pass. This classifies the current prototype; it does not prove how the value was created or validate its fields.
 
@@ -973,7 +948,9 @@ Recognises ordinary object literals and null-prototype dictionaries, including f
 
 **Returns:** `boolean` — `true` if the value has a null or ordinary `Object` prototype; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -991,7 +968,7 @@ An own `constructor` field is ordinary data and is not read. Assigning `null` or
 
 ### `isCyclic(value)`
 
-Determines whether following enumerable string-keyed properties leads back to an ancestor.
+Checks whether following enumerable string-keyed properties leads back to an ancestor.
 
 Detects a cycle in an object graph, including through inherited enumerable properties. Two properties sharing the same acyclic child do not form a cycle. Getters and proxy traps may run as properties are inspected.
 
@@ -1003,7 +980,9 @@ Detects a cycle in an object graph, including through inherited enumerable prope
 
 **Returns:** `boolean` — `true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1035,7 +1014,7 @@ The graph is expected to remain stable during the check. Getters and proxy traps
 
 ### `isIterable(value)`
 
-Determines whether a value exposes a synchronous iterator method.
+Checks whether a value exposes a synchronous iterator method.
 
 Returns `true` when `Symbol.iterator` is callable. The method is not invoked, so this detects the capability without consuming the value or proving that iteration will work.
 
@@ -1047,7 +1026,9 @@ Returns `true` when `Symbol.iterator` is callable. The method is not invoked, so
 
 **Returns:** `boolean` — `true` if the value has a callable `Symbol.iterator` method; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1065,7 +1046,7 @@ The `Symbol.iterator` property is read, but its method is not called. A getter o
 
 ### `isAsyncIterable(value)`
 
-Determines whether a value exposes an asynchronous iterator method.
+Checks whether a value exposes an asynchronous iterator method.
 
 Returns `true` when `Symbol.asyncIterator` is available and callable on the value. It does not invoke the method, and a synchronous-only iterable does not pass just because `for await...of` could adapt it.
 
@@ -1077,7 +1058,9 @@ Returns `true` when `Symbol.asyncIterator` is available and callable on the valu
 
 **Returns:** `boolean` — `true` if the async-iterator symbol is available and the value has a callable `Symbol.asyncIterator` method; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1109,7 +1092,7 @@ When `Symbol.asyncIterator` is unavailable, the result is `false` and the input 
 
 ### `isIteratorLike(value)`
 
-Determines whether a value is an object or function with a callable `next` method.
+Checks whether a value is an object or function with a callable `next` method.
 
 Detects the shape of an iterator without advancing it. The method may be synchronous or asynchronous; this check does not validate the values returned by `next`.
 
@@ -1121,7 +1104,9 @@ Detects the shape of an iterator without advancing it. The method may be synchro
 
 **Returns:** `boolean` — `true` if the value is a non-null object or function with a callable `next` method; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1150,7 +1135,7 @@ Reads `next` without calling it. This cannot distinguish synchronous from asynch
 
 ### `isEmptyIterable(value)`
 
-Determines whether a synchronous iterable is empty by advancing its iterator.
+Checks whether a synchronous iterable is empty by advancing its iterator.
 
 Advances the iterable until the first item or completion. An item produces `false` and closes the iterator early; completion without an item produces `true`. This can consume or close a one-shot iterator, so do not reuse it after inspection.
 
@@ -1162,7 +1147,10 @@ Advances the iterable until the first item or completion. An item produces `fals
 
 **Returns:** `boolean` — `true` if the synchronous iterable yields no items; otherwise `false`.
 
-**Errors:** `TypeError` for non-iterable input. Iterator and iterator-closing errors propagate.
+**Errors**
+
+- `TypeError` for non-iterable input.
+- Iterator and iterator-closing errors propagate.
 
 **Examples**
 
@@ -1191,7 +1179,7 @@ A non-iterable input throws `TypeError`. Finding an item produces an early `fals
 
 ### `isBlankIterable(value)`
 
-Determines whether every item yielded by a synchronous iterable is nullish by advancing its iterator.
+Checks whether every item yielded by a synchronous iterable is nullish by advancing its iterator.
 
 Returns `true` for an empty iterable or one yielding only `null` and `undefined`. Stops and closes the iterator at the first other item. The check is shallow and can consume or close one-shot input.
 
@@ -1203,7 +1191,10 @@ Returns `true` for an empty iterable or one yielding only `null` and `undefined`
 
 **Returns:** `boolean` — `true` if the synchronous iterable yields no items or only nullish items; otherwise `false`.
 
-**Errors:** `TypeError` for non-iterable input. Iterator and iterator-closing errors propagate.
+**Errors**
+
+- `TypeError` for non-iterable input.
+- Iterator and iterator-closing errors propagate.
 
 **Examples**
 
@@ -1235,7 +1226,7 @@ Finding a non-nullish item closes the iterator early, which can run cleanup code
 
 ### `isFunction(value)`
 
-Determines whether JavaScript reports a value as a function.
+Checks whether JavaScript reports a value as a function.
 
 Uses `typeof value === "function"`, which includes ordinary functions, classes, generators and callable proxies. Passing does not mean the value can be invoked without `new` or without throwing.
 
@@ -1263,7 +1254,7 @@ Classes, generators and callable proxies pass the native `typeof` check. A class
 
 ### `isDate(value)`
 
-Determines whether a value is a genuine `Date`, valid or invalid.
+Checks whether a value is a genuine `Date`, valid or invalid.
 
 Recognises native Date objects, including from another realm, without relying on their exposed `getTime` method. Use `isValidDate` when a usable timestamp is required.
 
@@ -1290,7 +1281,7 @@ Uses a captured native Date operation across realms. Overridden instance `getTim
 
 ### `isValidDate(value)`
 
-Determines whether a genuine `Date` contains a finite timestamp.
+Checks whether a genuine `Date` contains a finite timestamp.
 
 Use this after constructing or converting a date when invalid dates must be rejected. Non-Date inputs return `false`; native Date objects from another realm are supported.
 
@@ -1318,7 +1309,7 @@ Reads the timestamp through a captured native Date operation, ignoring overridde
 
 ### `isInvalidDate(value)`
 
-Determines whether a genuine `Date` contains a `NaN` timestamp.
+Checks whether a genuine `Date` contains a `NaN` timestamp.
 
 Detects an invalid Date object, such as `new Date("not a date")`. It does not classify non-Date values as invalid dates; those return `false`.
 
@@ -1346,7 +1337,7 @@ Reads the timestamp through a captured native Date operation, ignoring overridde
 
 ### `isRegExp(value)`
 
-Determines whether a value is a genuine regular-expression object.
+Checks whether a value is a genuine regular-expression object.
 
 Recognises `RegExp` instances, including from another realm, without executing the expression or changing `lastIndex`. Prototype or tag imitations do not pass.
 
@@ -1374,7 +1365,7 @@ The browser fallback reads the native regular-expression source getter without e
 
 ### `isPromise(value)`
 
-Determines whether a value passes the local native `Promise` instance check.
+Checks whether a value passes the local native `Promise` instance check.
 
 Use this for `instanceof Promise` behaviour in the current realm. A promise from another realm can return `false`, while an object inheriting `Promise.prototype` can return `true`. The check does not call `then` or subscribe to the promise.
 
@@ -1386,7 +1377,9 @@ Use this for `instanceof Promise` behaviour in the current realm. A promise from
 
 **Returns:** `boolean` — `true` if the value passes the local native `Promise` instance check; otherwise `false`.
 
-**Errors:** Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
+**Errors**
+
+- Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
 
 **Examples**
 
@@ -1403,7 +1396,7 @@ The local `Promise` constructor is checked at call time. A promise from another 
 
 ### `isPromiseLike(value)`
 
-Determines whether a value is an object or function with callable `then` and `catch` methods.
+Checks whether a value is an object or function with callable `then` and `catch` methods.
 
 Use this for the library’s two-method Promise-like convention. Unlike `isThenable`, it requires both methods; unlike `isPromise`, it does not require a local native instance. Neither method is called.
 
@@ -1415,7 +1408,9 @@ Use this for the library’s two-method Promise-like convention. Unlike `isThena
 
 **Returns:** `boolean` — `true` if the value is a non-null object or function with callable `then` and `catch` methods; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1432,7 +1427,7 @@ The library requires both `then` and `catch`. This is stricter than `isThenable`
 
 ### `isThenable(value)`
 
-Determines whether a value is an object or function with a callable `then` method.
+Checks whether a value is an object or function with a callable `then` method.
 
 Detects the shape used by promise resolution, without invoking `then` or requiring a `catch` method. A passing result does not prove that the object follows Promise behaviour.
 
@@ -1444,7 +1439,9 @@ Detects the shape used by promise resolution, without invoking `then` or requiri
 
 **Returns:** `boolean` — `true` if the value is a non-null object or function with a callable `then` method; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1461,7 +1458,7 @@ Objects from another realm and null-prototype objects can pass. The `then` metho
 
 ### `isError(value)`
 
-Determines whether a value is recognised as an error by the available native check or fallback.
+Checks whether a value is recognised as an error by the available native check or fallback.
 
 Uses the captured `Error.isError` function when the host provides it. Otherwise, it recognises ordinary untagged Error objects conservatively and rejects custom tags without reading the tag getter. The fallback returns `false` if `Symbol.toStringTag` is unavailable, including for genuine errors.
 
@@ -1473,7 +1470,9 @@ Uses the captured `Error.isError` function when the host provides it. Otherwise,
 
 **Returns:** `boolean` — `true` if the captured native error check, or its conservative fallback, recognises the value as an error; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1491,7 +1490,7 @@ When `Error.isError` is unavailable, the fallback refuses an own or inherited `S
 
 ### `isArray(value)`
 
-Determines whether a value is an array, including from another realm.
+Checks whether a value is an array, including from another realm.
 
 Uses native `Array.isArray` behaviour. Arrays and non-revoked proxies around arrays pass; array-like objects do not. A revoked proxy throws.
 
@@ -1503,7 +1502,9 @@ Uses native `Array.isArray` behaviour. Arrays and non-revoked proxies around arr
 
 **Returns:** `boolean` — `true` if the value passes native `Array.isArray`; otherwise `false`.
 
-**Errors:** `TypeError` for a revoked proxy, following native `Array.isArray` behaviour.
+**Errors**
+
+- `TypeError` for a revoked proxy, following native `Array.isArray` behaviour.
 
 **Examples**
 
@@ -1521,7 +1522,7 @@ Uses the `Array.isArray` function captured when the module loads. This retains n
 
 ### `isNonEmptyArray(value)`
 
-Determines whether a value is an array with a valid length greater than zero.
+Checks whether a value is an array with a valid length greater than zero.
 
 Checks array identity and length without validating the elements. A hole contributes to length, so `Array(1)` is non-empty even though it has no stored element.
 
@@ -1533,7 +1534,10 @@ Checks array identity and length without validating the elements. A hole contrib
 
 **Returns:** `boolean` — `true` if the value is an array with a valid length greater than zero; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate. Native `Array.isArray` also throws `TypeError` for a revoked proxy.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
+- Native `Array.isArray` also throws `TypeError` for a revoked proxy.
 
 **Examples**
 
@@ -1551,7 +1555,7 @@ A hole contributes to array length without storing a value. Element types are no
 
 ### `isArrayOf(value, type?)`
 
-Determines whether an array contains only values matching a type specification.
+Checks whether an array contains only values matching a type specification.
 
 Validates the entire matcher before checking the container, then checks each element until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.
 
@@ -1564,7 +1568,10 @@ Validates the entire matcher before checking the container, then checks each ele
 
 **Returns:** `boolean` — `true` if the value is an array and every element matches the specification, including an empty array; otherwise `false`.
 
-**Errors:** Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
+**Errors**
+
+- Invalid matcher configuration throws `TypeError`.
+- Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
 
 **Examples**
 
@@ -1593,7 +1600,7 @@ Matcher validation happens before any container check. Invalid configuration thr
 
 ### `isArrayLike(value)`
 
-Determines whether a non-function value has a valid numeric length.
+Checks whether a non-function value has a valid numeric length.
 
 Accepts lengths that are integers from `0` through `Number.MAX_SAFE_INTEGER`. It does not require an iterator or stored values at every index. The length is read once; getters and proxy traps may run.
 
@@ -1605,7 +1612,9 @@ Accepts lengths that are integers from `0` through `Number.MAX_SAFE_INTEGER`. It
 
 **Returns:** `boolean` — `true` if the value is not a function and has a numeric integer length from `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
 
 **Examples**
 
@@ -1624,7 +1633,7 @@ The `length` must already be a primitive number in the accepted range; boxed len
 
 ### `isArrayLikeOf(value, type?)`
 
-Determines whether an array-like value contains only values matching a type specification.
+Checks whether an array-like value contains only values matching a type specification.
 
 Validates the entire matcher before checking the container, then checks each indexed value until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.
 
@@ -1637,7 +1646,10 @@ Validates the entire matcher before checking the container, then checks each ind
 
 **Returns:** `boolean` — `true` if the value is array-like and every indexed value matches the specification, including an empty input; otherwise `false`.
 
-**Errors:** Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
+**Errors**
+
+- Invalid matcher configuration throws `TypeError`.
+- Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
 
 **Examples**
 
@@ -1666,7 +1678,7 @@ Matcher validation happens before any container check. Invalid configuration thr
 
 ### `isPair(value)`
 
-Determines whether a value is an array of length two.
+Checks whether a value is an array of length two.
 
 Checks the array’s length rather than whether both positions contain values. Sparse arrays of length two pass; array-like objects do not.
 
@@ -1678,7 +1690,10 @@ Checks the array’s length rather than whether both positions contain values. S
 
 **Returns:** `boolean` — `true` if the value is an array of length `2`; otherwise `false`.
 
-**Errors:** Property getters or proxy traps may throw; their errors propagate. Native `Array.isArray` also throws `TypeError` for a revoked proxy.
+**Errors**
+
+- Property getters or proxy traps may throw; their errors propagate.
+- Native `Array.isArray` also throws `TypeError` for a revoked proxy.
 
 **Examples**
 
@@ -1692,7 +1707,7 @@ isPair([1]);                   // => false
 
 ### `isMap(value)`
 
-Determines whether a value is a genuine `Map`.
+Checks whether a value is a genuine `Map`.
 
 Recognises native `Map` instances, including from another realm. It does not enumerate or modify the collection. Proxies, prototype imitations and matching tags do not establish native identity.
 
@@ -1719,7 +1734,7 @@ Uses native collection identity across realms without enumerating or changing th
 
 ### `isMapOf(value, keyType?, valueType?)`
 
-Determines whether every Map key and value matches its respective specification.
+Checks whether every Map key and value matches its respective specification.
 
 Validates both matchers before inspecting the input, then checks each key before its associated value. An empty Map passes valid matchers. Native Map iteration is live, so predicates must not mutate the Map.
 
@@ -1733,7 +1748,10 @@ Validates both matchers before inspecting the input, then checks each key before
 
 **Returns:** `boolean` — `true` if the value is a `Map` whose keys and values match their respective specifications, including an empty `Map`; otherwise `false`.
 
-**Errors:** Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
+**Errors**
+
+- Invalid matcher configuration throws `TypeError`.
+- Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
 
 **Examples**
 
@@ -1753,7 +1771,7 @@ Both matchers are validated even for an empty or non-Map input. An empty Map pas
 
 ### `isSet(value)`
 
-Determines whether a value is a genuine `Set`.
+Checks whether a value is a genuine `Set`.
 
 Recognises native `Set` instances, including from another realm. It does not enumerate or modify the collection. Proxies, prototype imitations and matching tags do not establish native identity.
 
@@ -1780,7 +1798,7 @@ Uses native collection identity across realms without enumerating or changing th
 
 ### `isSetOf(value, type?)`
 
-Determines whether a Set contains only values matching a type specification.
+Checks whether a Set contains only values matching a type specification.
 
 Validates the entire matcher before checking the container, then checks each item until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.
 
@@ -1793,7 +1811,10 @@ Validates the entire matcher before checking the container, then checks each ite
 
 **Returns:** `boolean` — `true` if the value is a `Set` whose items all match the specification, including an empty `Set`; otherwise `false`.
 
-**Errors:** Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
+**Errors**
+
+- Invalid matcher configuration throws `TypeError`.
+- Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications).
 
 **Examples**
 
@@ -1822,7 +1843,7 @@ The matcher is validated even for an empty or non-Set input. An empty Set passes
 
 ### `isWeakMap(value)`
 
-Determines whether a value is a genuine `WeakMap`.
+Checks whether a value is a genuine `WeakMap`.
 
 Recognises native `WeakMap` instances, including from another realm. It does not enumerate or modify the collection. Proxies, prototype imitations and matching tags do not establish native identity.
 
@@ -1849,7 +1870,7 @@ Uses native collection identity across realms without enumerating or changing th
 
 ### `isWeakSet(value)`
 
-Determines whether a value is a genuine `WeakSet`.
+Checks whether a value is a genuine `WeakSet`.
 
 Recognises native `WeakSet` instances, including from another realm. It does not enumerate or modify the collection. Proxies, prototype imitations and matching tags do not establish native identity.
 
@@ -1878,7 +1899,7 @@ Run the positive examples in a web browser. Without the corresponding DOM constr
 
 ### `isNode(value)`
 
-Determines whether a value is an instance of the local DOM `Node` constructor.
+Checks whether a value is an instance of the local DOM `Node` constructor.
 
 Use this for DOM objects from the current browser realm. Returns `false` when the constructor is unavailable; objects from an iframe or another realm may fail the local instance check.
 
@@ -1890,7 +1911,9 @@ Use this for DOM objects from the current browser realm. Returns `false` when th
 
 **Returns:** `boolean` — `true` if a local `Node` constructor is available and the value passes its instance check; otherwise `false`.
 
-**Errors:** Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
+**Errors**
+
+- Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
 
 **Examples**
 
@@ -1907,7 +1930,7 @@ Positive examples require a browser with the corresponding DOM constructor. The 
 
 ### `isElement(value)`
 
-Determines whether a value is an instance of the local DOM `Element` constructor.
+Checks whether a value is an instance of the local DOM `Element` constructor.
 
 Use this for DOM objects from the current browser realm. Returns `false` when the constructor is unavailable; objects from an iframe or another realm may fail the local instance check.
 
@@ -1919,7 +1942,9 @@ Use this for DOM objects from the current browser realm. Returns `false` when th
 
 **Returns:** `boolean` — `true` if a local `Element` constructor is available and the value passes its instance check; otherwise `false`.
 
-**Errors:** Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
+**Errors**
+
+- Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
 
 **Examples**
 
@@ -1936,7 +1961,7 @@ Positive examples require a browser with the corresponding DOM constructor. The 
 
 ### `isFragment(value)`
 
-Determines whether a value is an instance of the local DOM `DocumentFragment` constructor.
+Checks whether a value is an instance of the local DOM `DocumentFragment` constructor.
 
 Use this for DOM objects from the current browser realm. Returns `false` when the constructor is unavailable; objects from an iframe or another realm may fail the local instance check.
 
@@ -1948,7 +1973,9 @@ Use this for DOM objects from the current browser realm. Returns `false` when th
 
 **Returns:** `boolean` — `true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`.
 
-**Errors:** Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
+**Errors**
+
+- Native `instanceof` errors propagate, including errors from proxy prototype access or a custom `Symbol.hasInstance` method.
 
 **Examples**
 
@@ -1965,7 +1992,7 @@ Positive examples require a browser with the corresponding DOM constructor. The 
 
 ### `isArrayBuffer(value)`
 
-Determines whether a value is a genuine `ArrayBuffer`.
+Checks whether a value is a genuine `ArrayBuffer`.
 
 Recognises native ArrayBuffer objects, including from another realm. Proxies and prototype or tag imitations do not pass. A detached buffer still passes: this check does not establish that its memory can be used.
 
@@ -1992,7 +2019,7 @@ Custom tags are ignored. A detached ArrayBuffer retains its native identity; use
 
 ### `isSharedArrayBuffer(value)`
 
-Determines whether a value is a genuine `SharedArrayBuffer`.
+Checks whether a value is a genuine `SharedArrayBuffer`.
 
 Recognises native shared buffers, including from another realm, without accepting proxies or prototype or tag imitations. Returns `false` when the host does not provide `SharedArrayBuffer`.
 
@@ -2021,7 +2048,7 @@ Custom tags are ignored. This identifies a shared buffer; it does not validate t
 
 ### `isArrayBufferView(value)`
 
-Determines whether a value is a native typed array or `DataView`.
+Checks whether a value is a native typed array or `DataView`.
 
 Uses native `ArrayBuffer.isView` to recognise views, including detached views and views from another realm. Ordinary arrays, proxies and prototype imitations return `false`.
 
@@ -2049,7 +2076,7 @@ Native view identity survives detachment. Proxies and objects that merely inheri
 
 ### `isTypedArray(value)`
 
-Determines whether a value is a native typed array, including a Node.js `Buffer`.
+Checks whether a value is a native typed array, including a Node.js `Buffer`.
 
 Accepts number and bigint typed arrays, subclasses and foreign instances. Ordinary arrays and `DataView` objects are excluded. Detached or out-of-bounds views still pass because this checks identity, not memory usability.
 
@@ -2079,7 +2106,7 @@ The declaration describes the common typed-array surface; it does not identify t
 
 ### `isDataView(value)`
 
-Determines whether a value is a genuine `DataView`.
+Checks whether a value is a genuine `DataView`.
 
 Recognises native `DataView` identity, including from another realm, without accepting proxies or prototype/tag imitations. Identity does not guarantee usable memory: detached or out-of-bounds objects retain their identity.
 
@@ -2106,11 +2133,138 @@ Custom tags are ignored; proxies and prototype imitations return `false`. Detach
 
 These functions explicitly convert values. Native coercion rules, exceptions, and observable side effects are part of their documented contracts.
 
+### `box(value?)`
+
+Wraps non-nullish primitives in their native wrapper objects, preserving objects and nullish values.
+
+Creates native wrappers for primitive values without invoking conversion hooks. Existing objects, functions, `null` and `undefined` retain their identity; this is a shallow operation.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value?` | `T` | `undefined` | The value to convert. |
+
+**Returns:** `Boxed<T>` — A native wrapper for a non-nullish primitive; otherwise the original object, function or nullish input.
+
+**Examples**
+
+```javascript
+box(3).valueOf();                                              // => 3
+box(false).valueOf();                                          // => false
+box(null) === null;                                            // => true
+box() === undefined;                                           // => true
+(() => { const value = {}; return box(value) === value; })();  // => true
+```
+
+**Notes**
+
+No input coercion hooks are called. Uses captured native `Object` boxing. Strings, numbers, booleans, symbols and bigints become genuine wrappers. Omitted input returns `undefined`. Held symbol and bigint primitives can still be boxed when their public constructors are unavailable. No recursive transformation is performed.
+
+---
+
+### `unbox(value?)`
+
+Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+
+Reads the stored primitive value of native wrappers without calling overridden conversion hooks. Other values retain their identity; missing native `Symbol`/`BigInt` unboxing support leaves those wrappers unchanged.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value?` | `T` | `undefined` | The value to convert. |
+
+**Returns:** `Unboxed<T>` — The genuine wrapper’s primitive payload when its native unboxing operation is available; otherwise the original input.
+
+**Examples**
+
+```javascript
+unbox(new Number(3));                                                                  // => 3
+unbox(new Boolean(false));                                                             // => false
+unbox(new String("text"));                                                             // => "text"
+unbox(null) === null;                                                                  // => true
+(() => { const value = {valueOf() {return 1;}}; return unbox(value) === value; })();   // => true
+```
+
+**Notes**
+
+No input coercion hooks are called. Supports genuine `Boolean`, `Number`, `String`, `Symbol` and `BigInt` wrappers from any realm, including subclasses. Does not call arbitrary `valueOf`, `toString` or `Symbol.toPrimitive` methods, read custom tags, or traverse proxies. Dates, ordinary objects, functions, prototype imitations and proxies around wrappers are returned unchanged. Omitted input remains `undefined`. If a corresponding native unboxing intrinsic was unavailable during module initialisation, that wrapper remains unchanged. TypeScript retains the original object type and all possible primitive payload types: structural properties cannot prove a wrapper brand, even when an object is typed as `Number` or has custom properties.
+
+---
+
+### `toRegExp(value?, flags?)`
+
+Converts a native pattern and optional `flags` to a genuine `RegExp`.
+
+Uses native pattern syntax without escaping text or parsing slash-delimited strings as regex literals. Genuine local RegExps can retain identity when `flags` are omitted or `undefined`; copied expressions start with `lastIndex` zero.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value?` | `unknown` | `undefined` | The value to convert. |
+| `flags?` | `string` | `undefined` | Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags; explicit flags replace them. |
+
+**Returns:** `RegExp` — A genuine `RegExp`, which may retain input identity under native rules.
+
+**Errors**
+
+- Invalid patterns or `flags` throw `SyntaxError`.
+- Native coercion, getters and proxy errors propagate unchanged.
+
+**Examples**
+
+```javascript
+toRegExp('a.b', 'i').test('AxB');                                      // => true
+toRegExp().source;                                                     // => "(?:)"
+toRegExp('/a/i').test('a');                                            // => false
+(() => { const value = /a/g; return toRegExp(value) === value; })();   // => true
+```
+
+**Notes**
+
+Uses native `RegExp` function-call semantics for genuine expressions and construction for other input. A genuine local `RegExp` with its ordinary constructor and omitted or `undefined` `flags` retains identity and `lastIndex`. Foreign expressions, subclasses with their ordinary constructors, and inputs with explicit `flags` produce a new expression. Regex-shaped ordinary objects never receive the native identity shortcut. Native `Symbol.match`, `source`, `flags` and coercion rules still apply, including observable getters. Pattern text is not escaped, and slash-delimited text is not parsed as a JavaScript regex literal. Omitted or `undefined` input creates an empty expression. Supported syntax and `flags` depend on the host; this function does not execute or bound the cost of matching.
+
+---
+
+### `toPromise(value?)`
+
+Converts a value to a native `Promise`, adopting thenables and preserving ordinary local promises.
+
+Uses captured native `Promise.resolve` semantics to adopt a promise or thenable, or fulfil with another value. Functions remain values; they are not callbacks to invoke.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value?` | `T` | `undefined` | The value to convert. |
+
+**Returns:** `Promise<Awaited<T>>` — A native `Promise` that adopts the input; ordinary local promises retain identity.
+
+**Errors**
+
+- Missing `Promise.resolve` support throws `TypeError` before input inspection.
+- Native synchronous errors propagate; native resolution failures produce rejected promises.
+
+**Examples**
+
+```javascript
+isPromise(toPromise(3));                                                             // => true
+(() => { const value = Promise.resolve(3); return toPromise(value) === value; })();  // => true
+```
+
+**Notes**
+
+Omitted input fulfils with `undefined`. Foreign promises and thenables are adopted with native resolution timing and receiver rules. Then getter or method errors become rejections; native `Promise` constructor lookup can throw synchronously. Rejections are not swallowed. Functions are not called, callbacks are not promisified, and errors thrown while evaluating arguments occur before conversion. TypeScript returns `Promise<Awaited<T>>`. If `Promise` or its resolve operation was unavailable at module initialisation, requested conversion throws before reading the input. No polyfill is installed.
+
+---
+
 ### `toArray(value)`
 
-Converts iterable or array-like input to a new shallow array.
+Converts a synchronous iterable, plain record or supported array-like input to a new shallow array.
 
-Uses `Array.from`: an iterator takes precedence over a length, strings are read as Unicode code points, and sparse arrays become dense. Nested values are shared. `null` and `undefined` throw; this does not wrap a scalar or turn object properties into entries.
+Consumes synchronous iterables first, copies plain-record values second, and reads supported non-plain array-like inputs third. Record values include own enumerable string and symbol properties, including a property named length. Nullish input and unsupported values throw instead of producing an empty array.
 
 **Parameters**
 
@@ -2118,26 +2272,36 @@ Uses `Array.from`: an iterator takes precedence over a length, strings are read 
 | --- | --- | --- |
 | `value` | `T` | The value to convert. |
 
-**Returns:** `ArrayElement<T>[]` — A new shallow array containing the input items.
+**Returns:** `ArrayElement<T>[]` — A new shallow array containing iterable items, own enumerable record values or indexed array-like values.
 
-**Errors:** `TypeError` for `null`, `undefined`, malformed iterators or incompatible length conversion. Oversized lengths can throw `RangeError`. Property-access and iteration errors propagate. Unavailable native `Array.from` support throws `TypeError` before conversion.
+**Errors**
+
+- TypeError for nullish or unsupported input, malformed iterators or invalid array-like lengths.
+- Oversized array results can throw RangeError.
+- Getter, proxy and iterator errors propagate.
+- Missing native Array.from throws before conversion; record copying requires symbol-enumeration support.
 
 **Examples**
 
 ```javascript
-toArray(new Set([1, 2]));      // => [1,2]
-toArray('A😀B');               // => ["A","😀","B"]
-toArray({0: 'x', length: 1});  // => ["x"]
-toArray(42);                   // => []
+toArray(new Set([1, 2]));                                                    // => [1,2]
+toArray('A😀B');                                                             // => ["A","😀","B"]
+toArray({0: 'x', length: 1});                                                // => ["x",1]
+toArray({a: 1, b: 2});                                                       // => [1,2]
+(() => { const key = Symbol('key'); return toArray({a: 1, [key]: 2}); })();  // => [1,2]
 ```
 
 **Notes**
 
-An iterator takes precedence over an array-like `length`. Without an iterator, native length conversion applies; a missing length or a length converted to zero produces an empty array. Unlike `isArrayLike`, this operation converts the length instead of requiring a numeric safe integer. Oversized lengths can throw `RangeError`.
+Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties. Other non-string primitives are unsupported. On eligible inputs a synchronous iterator takes precedence over record properties and indexed values. The iterator method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.
 
-Strings are read as Unicode code points. Indexed reads fill sparse positions, including inherited numeric values. The new ordinary array shares nested values with the input. It does not extract object entries or wrap scalars.
+Plain records include null-prototype and foreign-realm records. Own string and symbol keys are snapshotted in property order; each current enumerable descriptor is checked and each included value is read once. Inherited and non-enumerable properties are excluded, newly added keys are not copied, and deleted or newly hidden keys are skipped. A length property is ordinary record data.
 
-Iteration and property reads can run application code. Infinite iterables do not finish, and very large inputs can exhaust memory; there is no built-in work limit. Requires native `Array.from`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Only non-plain array-like inputs use indexed fallback. Their length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike; strings, fractions and coercible objects are rejected. Length is read once and indexed values are read live. Missing slots become explicit undefined and inherited numeric values are included. Strings iterate by Unicode code point. Nested values retain identity.
+
+Ordinary promises and native async-only containers without a supported synchronous source are rejected. No input is awaited. A plain async-only record is copied as data, including an enumerable async-iterator symbol and its value. Finite one-shot iterators are consumed; infinite iterables do not finish and very large inputs can exhaust memory. Requires native Array.from. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; if both are missing it throws instead of silently discarding possible symbol keys.
+
+If a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
 
 ---
 
@@ -2155,7 +2319,10 @@ Accepts booleans, integral numbers and integer text, including hexadecimal, bina
 
 **Returns:** `bigint` — The converted primitive bigint.
 
-**Errors:** `RangeError` for fractional or non-finite numbers; `SyntaxError` for invalid integer text; `TypeError` for nullish values, symbols, or unavailable native BigInt support. Object-coercion errors propagate.
+**Errors**
+
+- `RangeError` for fractional or non-finite numbers; `SyntaxError` for invalid integer text; `TypeError` for nullish values, symbols, or unavailable native BigInt support.
+- Object-coercion errors propagate.
 
 **Examples**
 
@@ -2210,6 +2377,8 @@ toBoolean(new Boolean(false));   // => true
 
 Non-empty strings such as `"false"` and `"0"`, arrays and boxed `false` values are truthy. Objects are not unboxed and their conversion hooks are not called. The browser object `document.all` retains its platform-defined falsy behaviour.
 
+For deliberate text parsing, use a separate parser such as go-booleans parseBool. Boolean parsing is not part of this helper and go-types does not add a runtime dependency on that package.
+
 ---
 
 ### `toDate(value?)`
@@ -2226,7 +2395,10 @@ Genuine Date objects retain their identity, including invalid dates and dates fr
 
 **Returns:** `Date` — The original genuine `Date`, or a new `Date` constructed from the input; it may be invalid.
 
-**Errors:** Symbols, bigints and failed object coercion can throw. Invalid date text can instead produce an invalid `Date`; check with [`isValidDate`](#isvaliddatevalue).
+**Errors**
+
+- Symbols, bigints and failed object coercion can throw.
+- Invalid date text can instead produce an invalid `Date`; check with [`isValidDate`](#isvaliddatevalue).
 
 **Examples**
 
@@ -2253,7 +2425,7 @@ isInvalidDate(toDate('not a date'));                                     // => t
 
 Genuine Dates from any realm, subclasses and invalid Dates are returned unchanged. For other inputs, `new Date(value)` treats numbers as millisecond timestamps and strings as date text. Invalid text can produce an invalid Date; symbols, bigints and failed coercions can throw. Omitted or `undefined` input produces an invalid Date rather than the current time.
 
-Prefer ISO date-time strings with an explicit timezone for portable string input. Validate with `isValidDate` when needed. The TypeScript result is `Date`, not the input subtype: a structurally compatible input can require a new Date that lacks the input’s extra properties.
+Prefer ISO date-time strings with an explicit timezone for portable string input. Standard date-only strings use UTC, while date-time strings without a timezone use local time; non-ISO parsing is runtime-dependent. Validate with `isValidDate` when needed. The TypeScript result is `Date`, not the input subtype: a structurally compatible input can require a new Date that lacks the input’s extra properties.
 
 ---
 
@@ -2271,7 +2443,10 @@ Uses `Number` followed by `Math.trunc`, so `"12px"` becomes `NaN` rather than `1
 
 **Returns:** `number` — The numeric conversion truncated towards zero; it may be `NaN` or infinite.
 
-**Errors:** Symbols and failed object conversions can throw. `NaN` and infinity are returned rather than rejected.
+**Errors**
+
+- Symbols and failed object conversions can throw.
+- `NaN` and infinity are returned rather than rejected.
 
 **Examples**
 
@@ -2287,15 +2462,99 @@ toInteger('1e3');                  // => 1000
 
 Converts the whole value, so `"12px"` becomes `NaN` rather than `12`. Negative fractions truncate towards zero, unlike `Math.floor`. `NaN`, infinities and signed zero follow `Math.trunc` behaviour.
 
-The operation does not clamp values or substitute defaults. Use `isInteger` or `isSafeInteger` to validate the result. Symbols and failing object conversions can throw.
+Number rounding, overflow and underflow happen before truncation. The operation does not clamp values or substitute defaults. Use `isInteger` or `isSafeInteger` to validate the result. Symbols and failing object conversions can throw.
+
+---
+
+### `toJson(value?, replacer?, space?)`
+
+Serialises a value to JSON text using native `JSON.stringify` behaviour.
+
+Produces JSON text from objects, arrays and scalar values. Strings are encoded as JSON strings, even when they already contain JSON text. Accepts a native replacer callback or property-name list and optional indentation.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value?` | `unknown` | `undefined` | The value to convert. |
+| `replacer?` | `((this: unknown, key: string, value: unknown) => unknown) \| readonly (string \| number)[] \| null` | `undefined` | A native JSON replacer callback or property-name list. Callbacks receive the containing object as `this`; omitted or `null` uses ordinary serialisation. |
+| `space?` | `string \| number` | `undefined` | Native JSON indentation, capped at ten spaces or ten string code units. |
+
+**Returns:** `string | undefined` — JSON text, or `undefined` when native serialisation produces no text, including omitted input without a replacer.
+
+**Errors**
+
+- Cycles and unhandled bigints throw `TypeError`.
+- Getter, proxy, `toJSON` and replacer exceptions propagate unchanged.
+
+**Examples**
+
+```javascript
+toJson({a: 1});                                                                    // => "{\"a\":1}"
+toJson([1, 2]);                                                                    // => "[1,2]"
+toJson('hello');                                                                   // => "\"hello\""
+toJson(undefined) === undefined;                                                   // => true
+toJson({a: 1, b: 2}, ['a'], 2);                                                    // => "{\n  \"a\": 1\n}"
+toJson({a: 1, secret: 2}, (key, value) => key === 'secret' ? undefined : value);   // => "{\"a\":1}"
+```
+
+**Notes**
+
+Without a replacer, top-level `undefined`, functions and symbols produce `undefined`; corresponding object properties are omitted and array positions become `null`. Non-finite numbers become `null`. Native `toJSON` methods apply, including Date serialisation. Ordinary Maps and Sets produce `{}` unless their own properties or custom hooks provide content.
+
+A replacer callback receives `(key, value)` with the containing object as `this`, including a root call with key `""`. It runs after `toJSON` and may replace the root, omit properties or handle bigints. A replacer array selects string/number property names, including at nested object levels; duplicates are ignored. Other replacer-array elements are ignored except boxed strings/numbers, which native serialisation accepts. The `space` argument controls indentation, capped at ten spaces or ten string code units; non-whitespace indentation can produce text that is not valid JSON.
+
+Native errors propagate unchanged. Shared references are allowed; circular traversal throws. Hooks may mutate input or throw, and no input or hook result is awaited. No cycle marker, Map/Set encoding, bigint representation or global polyfill is introduced. Exact escaping follows the host JSON implementation; output is not an HTML-safe escaping or canonicalisation service.
+
+---
+
+### `fromJson(value, reviver?)`
+
+Parses JSON text into a JavaScript value using native `JSON.parse` behaviour.
+
+Parses JSON text representing objects, arrays or scalar values. An optional native reviver can transform or delete parsed values, including replacing the root.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `unknown` | — | The value to convert. |
+| `reviver?` | `((this: unknown, key: string, value: unknown, context?: { source?: string }) => unknown) \| null` | `undefined` | A native JSON reviver, called for children before parents and finally for the root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer hosts may supply optional source context. |
+
+**Returns:** `unknown` — The parsed value, or any root value returned by the reviver, including `undefined`. TypeScript returns unknown until the caller validates it.
+
+**Errors**
+
+- Invalid JSON, omitted input and `undefined` throw `SyntaxError`.
+- Symbols throw `TypeError`.
+- Input coercion and reviver errors propagate unchanged.
+
+**Examples**
+
+```javascript
+fromJson('{"a":1}');                                                           // => {"a":1}
+fromJson('[1,2]');                                                             // => [1,2]
+fromJson('false');                                                             // => false
+fromJson('null');                                                              // => null
+fromJson('1', (key, value) => typeof value === 'number' ? value + 1 : value);  // => 2
+fromJson('1', () => undefined) === undefined;                                  // => true
+```
+
+**Notes**
+
+Native input coercion happens once before parsing; non-string inputs such as numbers, booleans and `null` follow `JSON.parse` rules. Omitted or `undefined` input and invalid JSON throw `SyntaxError`; symbol input throws `TypeError`. Nested strings that contain JSON text remain strings. Duplicate object names use the last value, and JSON numbers follow native `Number` precision and range.
+
+A reviver is called for children before parents, then for the root with key "". Its this value is the containing object. Returning `undefined` deletes an object property, leaves an array hole or replaces the root with `undefined`. Other return values are retained as-is, including promises. Non-callable revivers are ignored by the native parser. Newer hosts may pass `source` context as a third argument; older supported runtimes do not. Both the context and its `source` property are optional in the declarations.
+
+Native parsing creates own data properties for names such as `__proto__`; no property-copying or prototype assignment is added. Revivers may deliberately mutate their holder, return arbitrary objects or throw. JSON input coercion and reviver errors propagate unchanged. No automatic `Date`/`Map`/`Set` revival, JSON5 parsing, fallback value or generic type assertion is introduced.
 
 ---
 
 ### `toMap(value?)`
 
-Converts an iterable of key/value entries to a new shallow Map.
+Converts a plain record or synchronous iterable of strict key/value pairs to a new shallow Map.
 
-Uses the captured native Map constructor. Iterates entry objects and reads their properties 0 and 1 as keys and values. Omitted, null or undefined input creates an empty Map. Existing Maps are copied; keys and values keep their identity.
+Copies own enumerable string and symbol properties of plain records, or consumes synchronous iterables of exact two-element array pairs. Synchronous iteration takes precedence on eligible inputs. Keys may have any type and are never coerced. Omitted, null or undefined input creates an empty Map.
 
 **Parameters**
 
@@ -2303,25 +2562,39 @@ Uses the captured native Map constructor. Iterates entry objects and reads their
 | --- | --- | --- | --- |
 | `value?` | `T` | `undefined` | The value to convert. |
 
-**Returns:** `ConvertedMap<T>` — A new Map containing the input entries, or an empty Map for omitted or nullish input.
+**Returns:** `ConvertedMap<T>` — A new Map containing own enumerable string and symbol record entries or strict iterable pairs, or an empty Map for omitted or nullish input.
 
-**Errors:** TypeError for non-nullish non-iterable input, malformed iterators or primitive entries. Iterator and entry-property errors propagate according to native Map construction, including iterator closing when an entry cannot be processed. Unavailable native `Map` support throws `TypeError` before conversion.
+**Errors**
+
+- TypeError for unsupported input, malformed iterators or entry pairs that are not exact two-element arrays with both own indices.
+- Getter, proxy and iterator errors propagate.
+- Entry validation errors close the outer iterator.
+- Missing native Map throws before conversion; record copying requires symbol-enumeration support.
 
 **Examples**
 
 ```javascript
-Array.from(toMap([['a', 1], ['b', 2], ['a', 3]]));   // => [["a",3],["b",2]]
-toMap().size;                                        // => 0
-toMap(null).size;                                    // => 0
+Array.from(toMap({a: 1, b: 2}));                                               // => [["a",1],["b",2]]
+Array.from(toMap([['a', 1], ['b', 2], ['a', 3]]));                             // => [["a",3],["b",2]]
+(() => { const key = Symbol('key'); return toMap({[key]: 2}).get(key); })();   // => 2
+toMap([[undefined, undefined]]).has(undefined);                                // => true
+toMap().size;                                                                  // => 0
+toMap(null).size;                                                              // => 0
 ```
 
 **Notes**
 
-Native SameValueZero key equality merges repeated NaN keys and treats negative and positive zero as the same key. The last value for a repeated key wins without moving its insertion position. The result is a new ordinary local Map and shares object keys and values with the input.
+Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. Plain records include null-prototype and foreign-realm records. Own string and symbol keys are captured once in property order; each current descriptor is checked before its enumerable value is read once. Inherited and non-enumerable properties are excluded, deleted or newly hidden keys are skipped, newly added keys are excluded, and nested values retain identity. Numeric property names become string keys; symbol keys stay symbols. An own constructor or length field is ordinary data.
 
-Entries need not be arrays or exactly two items: native construction reads properties 0 and 1 from each entry object, including inherited properties and getters. Missing properties yield undefined; extra properties are ignored. Non-empty strings yield primitive entries and throw; an empty string yields no entries. A non-iterable plain object throws; use Object.entries explicitly when own enumerable string-keyed properties are intended.
+A synchronous iterator takes precedence over record properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits record conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only containers without a supported synchronous source are rejected.
 
-Consumes the synchronous iterator once. Async-only and non-iterable array-like inputs are unsupported. Application callbacks and getters may run or throw; infinite iterables do not finish and there is no built-in work limit. Requires native `Map`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Each iterable entry must be an actual array of length exactly two, with own properties at both indices 0 and 1. Explicit undefined keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Any key type is allowed, without string coercion. Non-empty strings yield primitive entries and throw; an empty string yields no entries. There is no array-like source fallback.
+
+Native SameValueZero key equality merges repeated NaN keys and treats negative and positive zero as the same key. The last value for a repeated key wins without moving its insertion position. Entry validation and property-access errors inside the loop close the outer iterator; the original error wins over a cleanup error. Native for-of failures while reading next, done or value propagate without an additional close attempt.
+
+Finite one-shot iterators are consumed once; infinite inputs do not finish and no work limit is imposed. Requires native Map. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of dropping possible symbol keys.
+
+If a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
 
 ---
 
@@ -2329,7 +2602,7 @@ Consumes the synchronous iterator once. Async-only and non-iterable array-like i
 
 Converts a value to a primitive number using JavaScript’s `Number` conversion.
 
-Converts the entire input: `null`, `false` and blank strings become `0`; `true` becomes `1`; `undefined` and invalid numeric text become `NaN`. Bigints may lose precision or overflow. This does not parse locale-specific numbers or guarantee a finite or safe result.
+Converts the entire input: `null`, `false` and blank strings become `0`; `true` becomes `1`; `undefined` and invalid numeric text become `NaN`. Text and bigints may lose precision; large magnitudes may overflow and tiny magnitudes may underflow to zero. This does not parse locale-specific numbers or guarantee a finite or safe result.
 
 **Parameters**
 
@@ -2339,7 +2612,10 @@ Converts the entire input: `null`, `false` and blank strings become `0`; `true` 
 
 **Returns:** `number` — The converted primitive number; it may be `NaN` or infinite.
 
-**Errors:** Symbols throw `TypeError`. Object-coercion errors propagate; invalid numeric text returns `NaN`.
+**Errors**
+
+- Symbols throw `TypeError`.
+- Object-coercion errors propagate; invalid numeric text returns `NaN`.
 
 **Examples**
 
@@ -2352,59 +2628,69 @@ Number.isNaN(toNumber('12px'));  // => true
 
 **Notes**
 
-Native conversion accepts whitespace, unlike `isNumeric`. It does not parse locale-specific formats or enforce a safe numeric range. Bigints can lose precision or overflow to infinity.
+Native conversion accepts whitespace, unlike `isNumeric`. It does not parse locale-specific formats or enforce a safe numeric range. Decimal text and bigints can round to the nearest representable number. Large magnitudes can overflow to infinity and tiny magnitudes can underflow to zero; no exact-decimal or safe-integer guarantee is made.
 
 Symbols throw `TypeError`. Object conversion hooks may run and throw. Omitting the argument passes `undefined` to native conversion and produces `NaN`, unlike a zero-argument call to `Number()`.
 
 ---
 
-### `toObject(value?)`
+### `toPlainObject(value)`
 
-Converts a value to an object, preserving existing objects and functions.
+Converts JSON object text, a plain object, or entry pairs into a fresh plain object.
 
-Uses native `Object` conversion. Existing objects and functions retain identity; primitive values receive their native wrappers. Each `null` or `undefined` input creates a fresh empty object. This is neither cloning nor JSON parsing.
+Parses primitive JSON object strings, shallow-copies plain records, or consumes synchronous entries. Every result has the local Object.prototype. Nullish input and unsupported values throw instead of being boxed.
 
 **Parameters**
 
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value?` | `T` | `undefined` | The value to convert. |
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `value` | `T` | The value to convert. |
 
-**Returns:** `ConvertedObject<T>` — The original object or function, a boxed primitive, or a fresh empty object for nullish input.
+**Returns:** `ConvertedPlainObject<T>` — A fresh ordinary object containing the parsed properties, copied enumerable properties, or supplied entries.
+
+**Errors**
+
+- Malformed JSON throws SyntaxError.
+- Unsupported inputs, non-object JSON, malformed entry pairs and unsupported keys throw TypeError.
+- Getter, proxy and iterator errors propagate without replacement.
 
 **Examples**
 
 ```javascript
-toObject(42).valueOf();                                                    // => 42
-typeof toObject(42);                                                       // => 'object'
-toObject(null);                                                            // => ({})
+toPlainObject('{"a":1}');                                                        // => ({ a: 1 })
+toPlainObject([['a', 1]]);                                                       // => ({ a: 1 })
 
 const object = { x: 1 };
-toObject(object) === object;                                               // => true
+toPlainObject(object) === object;                                                // => false
 ```
 
 **Additional examples**
 
 ```javascript
-toObject(42).valueOf();                                                    // => 42
-typeof toObject(42);                                                       // => "object"
-toObject(null);                                                            // => {}
-(() => { const object = {x: 1}; return toObject(object) === object; })();  // => true
+toPlainObject('{"a":1}');                                                        // => {"a":1}
+toPlainObject([['a', 1], ['a', 2]]);                                             // => {"a":2}
+(() => { const object = {x: 1}; return toPlainObject(object) === object; })();   // => false
 ```
 
 **Notes**
 
-Existing objects, arrays, functions and even revoked proxies keep their identity. Non-nullish primitives become native wrapper objects. Each `null` or `undefined` conversion creates a new ordinary object. Input conversion hooks are not called. No cloning, sanitisation or JSON parsing is performed.
+Primitive JSON text must contain a non-null, non-array object; nested arrays are allowed. Boxed strings are not parsed. Other primitives, functions, Dates, RegExps and non-iterable class instances are unsupported. No primitive boxing, repairs or schema validation is performed.
 
-TypeScript primitive intersections still produce their wrapper type, even when an input type also satisfies an object-shaped constraint. Existing object and function input types are preserved; boxing does not retain a primitive type or its branded refinements.
+A synchronous iterator takes precedence over copying record properties. Each entry must be an actual two-element array with both own slots present; an explicit undefined value is allowed. Extra or missing elements, strings and array-like entry objects are rejected. Duplicate keys use the last value. Keys are primitive strings or symbols and are never coerced. Special names such as __proto__, constructor, prototype and toString become ordinary own data properties.
+
+Record copying snapshots own keys, checks each current enumerable descriptor and reads each included value once. Inherited and non-enumerable properties are omitted. Getters may mutate the source or throw. Results have writable, enumerable, configurable data properties and preserve nested references. TypeScript makes inferred properties optional because enumerability and presence cannot be proved structurally; JSON results contain unknown values. Prototype-name properties and broad string-key records also have unknown values because an omitted own key can expose an inherited property.
+
+Consumes a synchronous iterable once; infinite inputs do not finish. Entry validation or property access in the loop closes the outer iterator, running return/finally cleanup. The original conversion error takes precedence over a cleanup error. Native for-of protocol failures in next, done or value propagate without an additional close attempt. Async iteration is never consumed or awaited. Async generators are unsupported; a plain async-only object is copied as a record, including enumerable symbol properties. Symbol enumeration requires Reflect.ownKeys or Object.getOwnPropertySymbols when copying records; missing both throws rather than silently discarding symbol keys. JSON and array-entry conversion remain available.
+
+If a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
 
 ---
 
 ### `toSet(value?)`
 
-Converts an iterable of values to a new shallow Set.
+Converts a synchronous iterable, plain record or supported array-like input to a new shallow Set.
 
-Uses the captured native Set constructor. Consumes synchronous iterable values and removes duplicates using native Set equality. Omitted, null or undefined input creates an empty Set. Existing Sets are copied and object values keep their identity.
+Uses the same source order as toArray: synchronous iterable values, then own enumerable string and symbol values from plain records, then supported non-plain array-like indices. Native Set equality removes duplicates while preserving first-insertion order. Omitted, null or undefined input creates an empty Set.
 
 **Parameters**
 
@@ -2412,26 +2698,38 @@ Uses the captured native Set constructor. Consumes synchronous iterable values a
 | --- | --- | --- | --- |
 | `value?` | `T` | `undefined` | The value to convert. |
 
-**Returns:** `ConvertedSet<T>` — A new Set of the input values in first-insertion order, or an empty Set for omitted or nullish input.
+**Returns:** `ConvertedSet<T>` — A new Set of iterable items, own enumerable record values or indexed array-like values, or an empty Set for omitted or nullish input.
 
-**Errors:** TypeError for non-nullish non-iterable input or malformed iterators. Property-access and iterator errors propagate according to native Set construction. Unavailable native `Set` support throws `TypeError` before conversion.
+**Errors**
+
+- TypeError for unsupported input, malformed iterators or invalid array-like lengths.
+- Getter, proxy and iterator errors propagate.
+- Missing native Set throws before conversion; record copying requires symbol-enumeration support.
 
 **Examples**
 
 ```javascript
-Array.from(toSet([3, 1, 3]));  // => [3,1]
-Array.from(toSet('A😀A'));     // => ["A","😀"]
-toSet().size;                  // => 0
-toSet(null).size;              // => 0
+Array.from(toSet([3, 1, 3]));            // => [3,1]
+Array.from(toSet('A😀A'));               // => ["A","😀"]
+Array.from(toSet({a: 1, b: 2, c: 1}));   // => [1,2]
+Array.from(toSet({0: 'x', length: 1}));  // => ["x",1]
+toSet().size;                            // => 0
+toSet(null).size;                        // => 0
 ```
 
 **Notes**
 
-Native SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a new ordinary local Set with shallowly shared values.
+Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties; non-string primitives other than nullish input are also unsupported. A synchronous iterator takes precedence over record and indexed data. Its method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.
 
-Strings are iterated by Unicode code point, sparse array slots yield undefined, and Maps yield entry arrays rather than just their keys or values. Unlike Array.from, the Set constructor does not fall back to an array-like length.
+Plain records include null-prototype and foreign-realm records. Own string and symbol keys are snapshotted in property order, current enumerability is checked, and each included value is read once. Inherited and non-enumerable properties are excluded. A length property is copied as ordinary data. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of omitting possible symbol keys.
 
-Consumes the synchronous iterator once. Async-only iterables are unsupported. Application callbacks and getters may run or throw; infinite iterables do not finish and there is no built-in work limit. Requires native `Set`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Only non-plain array-like inputs use indexed fallback. Length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike. Length is read once and values are read live; missing slots yield undefined and inherited indices can supply values. Strings yield Unicode code points and Maps yield entry arrays. Values retain their identities.
+
+Native SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a fresh local Set.
+
+Ordinary promises and native async-only containers without a supported synchronous source are rejected. Plain async-only records are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.
+
+If a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
 
 ---
 
@@ -2449,7 +2747,9 @@ Uses ordinary string conversion rather than JSON serialisation. `null` becomes `
 
 **Returns:** `string` — The converted primitive string; nullish inputs become their literal text.
 
-**Errors:** Native conversion errors propagate, including boxed symbols and objects that cannot produce a primitive.
+**Errors**
+
+- Native conversion errors propagate, including boxed symbols and objects that cannot produce a primitive.
 
 **Examples**
 
@@ -2482,12 +2782,15 @@ Primitive symbols retain identity, and genuine wrappers are unboxed without invo
 
 **Returns:** `symbol` — The original or unboxed symbol, or a new symbol created from the description.
 
-**Errors:** Native description-conversion errors propagate. Unavailable native `Symbol` support throws `TypeError` before conversion.
+**Errors**
+
+- Native description-conversion errors propagate.
+- Unavailable native `Symbol` support throws `TypeError` before conversion.
 
 **Examples**
 
 ```javascript
-toSymbol('key').description;                                                               // => 'key'
+toSymbol('key').toString();                                                                // => 'Symbol(key)'
 toSymbol('key') !== toSymbol('key');                                                       // => true
 
 const symbol = Symbol('key');
@@ -2513,13 +2816,154 @@ Each description creates a fresh symbol; `Symbol.for` is never called implicitly
 
 Each `If` function accepts a boolean or synchronous boolean-returning predicate. A `false`, omitted, or `undefined` condition returns the input unchanged without converting or inspecting it.
 
+### `boxIf(value, condition?)`
+
+Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
+
+Applies the full `box` contract only when a primitive boolean condition or synchronous predicate requests conversion.
+
+Requested conversion uses `box`. Does not call conversion hooks. Existing objects and functions, `null` and `undefined` are returned unchanged.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+
+**Returns:** `T | Boxed<T>` — The `box` result when requested; otherwise the exact original input.
+
+**Errors**
+
+- Invalid conditions and non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate; requested conversion follows `box` error behaviour.
+
+**Examples**
+
+```javascript
+boxIf(3, false);               // => 3
+boxIf(3) === 3;                // => true
+```
+
+**Notes**
+
+A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
+
+---
+
+### `unboxIf(value, condition?)`
+
+Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native unboxing is available. Otherwise, returns the original input unchanged.
+
+Applies the full `unbox` contract only when a primitive boolean condition or synchronous predicate requests conversion.
+
+Requested conversion uses `unbox`. Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+
+**Returns:** `T | Unboxed<T>` — The `unbox` result when requested; otherwise the exact original input.
+
+**Errors**
+
+- Invalid conditions and non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate; requested conversion follows `unbox` error behaviour.
+
+**Examples**
+
+```javascript
+unboxIf(3, false);             // => 3
+unboxIf(3) === 3;              // => true
+```
+
+**Notes**
+
+A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
+
+---
+
+### `toRegExpIf(value, condition?, flags?)`
+
+Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
+
+Applies the full `toRegExp` contract only when a primitive boolean condition or synchronous predicate requests conversion.
+
+Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+| `flags?` | `string` | `undefined` | Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags; explicit flags replace them. |
+
+**Returns:** `T | RegExp` — The `toRegExp` result when requested; otherwise the exact original input.
+
+**Errors**
+
+- Invalid conditions and non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate; requested conversion follows `toRegExp` error behaviour.
+
+**Examples**
+
+```javascript
+toRegExpIf(3, false);          // => 3
+toRegExpIf(3) === 3;           // => true
+```
+
+**Notes**
+
+A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
+
+---
+
+### `toPromiseIf(value, condition?)`
+
+Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
+
+Applies the full `toPromise` contract only when a primitive boolean condition or synchronous predicate requests conversion.
+
+Requested conversion uses `toPromise`. Preserves ordinary local `Promise` identity, assimilates thenables and wraps other values. Requires native `Promise.resolve`; functions are values, not callbacks.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+
+**Returns:** `T | Promise<Awaited<T>>` — The `toPromise` result when requested; otherwise the exact original input.
+
+**Errors**
+
+- Invalid conditions and non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate; requested conversion follows `toPromise` error behaviour.
+
+**Examples**
+
+```javascript
+toPromiseIf(3, false);         // => 3
+toPromiseIf(3) === 3;          // => true
+```
+
+**Notes**
+
+A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options. The skipped result is the input itself, not a `Promise` wrapper.
+
+---
+
 ### `toArrayIf(value, condition?)`
 
-Converts iterable or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
+Converts supported iterable, record or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
 
 Uses the same conversion as `toArray` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
 
-Requested conversion uses `toArray`. Consumes iterable input and may invoke getters or iterator methods. Infinite iterables do not finish; nullish input throws. Requires native `Array.from`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Requested conversion uses `toArray`. Consumes iterable input, copies own enumerable string and symbol record values, or reads supported array-like indices. Array-like lengths must already be numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native `Array.from`; missing support throws `TypeError` before inspecting the input.
 
 **Parameters**
 
@@ -2530,7 +2974,11 @@ Requested conversion uses `toArray`. Consumes iterable input and may invoke gett
 
 **Returns:** `T | ArrayElement<T>[]` — A new shallow array when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toArray`](#toarrayvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toArray`](#toarrayvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2564,7 +3012,11 @@ Requested conversion uses `toBigInt`. Requires native BigInt. Fractional numbers
 
 **Returns:** `T | bigint` — The converted primitive bigint when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toBigInt`](#tobigintvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toBigInt`](#tobigintvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2609,7 +3061,11 @@ Requested conversion uses `toBoolean`. Uses truthiness rather than parsing boole
 
 **Returns:** `T | boolean` — The input’s boolean truthiness when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toBoolean`](#tobooleanvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toBoolean`](#tobooleanvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2643,7 +3099,11 @@ Requested conversion uses `toDate`. Preserves genuine Date identity. May return 
 
 **Returns:** `T | Date` — The original genuine `Date` or a new `Date`, possibly invalid, when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toDate`](#todatevalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toDate`](#todatevalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2677,7 +3137,11 @@ Requested conversion uses `toInteger`. Does not guarantee a finite or safe integ
 
 **Returns:** `T | number` — The numeric conversion truncated towards zero, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toInteger`](#tointegervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toInteger`](#tointegervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2694,13 +3158,92 @@ Predicate errors propagate. A predicate can mutate its input; a requested conver
 
 ---
 
+### `toJsonIf(value, condition?, replacer?, space?)`
+
+Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
+
+Uses the same conversion as `toJson` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
+
+Requested conversion uses `toJson`. May return `undefined`. Does not transform Maps, Sets or bigints automatically. Cycles and unhandled bigints throw; getters, `toJSON` methods and replacer callbacks can run.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+| `replacer?` | `((this: unknown, key: string, value: unknown) => unknown) \| readonly (string \| number)[] \| null` | `undefined` | A native JSON replacer callback or property-name list. Callbacks receive the containing object as `this`; omitted or `null` uses ordinary serialisation. |
+| `space?` | `string \| number` | `undefined` | Native JSON indentation, capped at ten spaces or ten string code units. |
+
+**Returns:** `T | string | undefined` — JSON text or `undefined` when conversion is requested; otherwise the original input, unchanged.
+
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toJson`](#tojsonvalue-replacer-space) error behaviour; a skipped conversion does not inspect or coerce the value.
+
+**Examples**
+
+```javascript
+toJsonIf({a: 1}, true);                                  // => "{\"a\":1}"
+toJsonIf({a: 1}, false);                                 // => {"a":1}
+toJsonIf({a: 1, b: 2}, value => value.a === 1, ['a']);   // => "{\"a\":1}"
+```
+
+**Notes**
+
+A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
+
+Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toJson` contract. The condition is the second argument; replacer and indentation follow it. Skipping does not inspect the value, replacer or indentation. Replacer callbacks retain native JSON receiver and return-value rules; only the condition uses the strict boolean predicate contract.
+
+---
+
+### `fromJsonIf(value, condition?, reviver?)`
+
+Parses JSON when the condition evaluates to `true`; otherwise returns the original input unchanged.
+
+Uses the full `fromJson` contract when a primitive boolean condition or synchronous predicate requests conversion.
+
+Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input coercion, reviver order and errors. Parsing does not validate an application schema; reviver results are not awaited.
+
+**Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `T` | — | The value to convert. |
+| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
+| `reviver?` | `((this: unknown, key: string, value: unknown, context?: { source?: string }) => unknown) \| null` | `undefined` | A native JSON reviver, called for children before parents and finally for the root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer hosts may supply optional source context. |
+
+**Returns:** `T | unknown` — The parsed or revived value when requested; otherwise the original input unchanged.
+
+**Errors**
+
+- Invalid conditions and non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate; requested conversion follows `fromJson` error behaviour.
+
+**Examples**
+
+```javascript
+fromJsonIf('{"a":1}', true);                                                                                         // => {"a":1}
+fromJsonIf('{"a":1}', false);                                                                                        // => "{\"a\":1}"
+fromJsonIf('invalid');                                                                                               // => "invalid"
+fromJsonIf('2', value => typeof value === 'string', (key, value) => typeof value === 'number' ? value * 2 : value);  // => 4
+```
+
+**Notes**
+
+The condition is the second argument and the optional reviver follows it. A predicate receives the original input once without an explicit receiver. Deliberate predicate mutation is visible to requested parsing; predicate errors propagate. Skipping inspects neither the input nor the reviver. A requested parse follows native `fromJson` input coercion and reviver behaviour. Only the condition requires a synchronous primitive boolean result; the reviver may return any value without awaiting.
+
+---
+
 ### `toMapIf(value, condition?)`
 
-Converts an iterable of key/value entries to a new shallow Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
+Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
 
 Uses the same conversion as `toMap` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
 
-Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys keep their first position and take the last value. Nullish input creates an empty Map. Non-iterable objects are not converted into entries. Requires native `Map`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol entries. Iterable pairs must be exact two-element arrays with both own indices present. Duplicate keys keep their first position and take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support throws before inspecting the input.
 
 **Parameters**
 
@@ -2711,13 +3254,18 @@ Requested conversion uses `toMap`. Consumes synchronous entries; duplicate keys 
 
 **Returns:** `T | ConvertedMap<T>` — A new Map when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toMap`](#tomapvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toMap`](#tomapvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
 ```javascript
 Array.from(toMapIf([['key', 1]], true));   // => [["key",1]]
 toMapIf(42, false);                        // => 42
+toMapIf({ a: 1 }, true).get('a');          // => 1
 ```
 
 **Notes**
@@ -2734,7 +3282,7 @@ Converts a value to a primitive number when the condition evaluates to `true`. O
 
 Uses the same conversion as `toNumber` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
 
-Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, or invoke object conversion hooks. Symbols throw.
+Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
 
 **Parameters**
 
@@ -2745,7 +3293,11 @@ Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint 
 
 **Returns:** `T | number` — The converted primitive number, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toNumber`](#tonumbervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toNumber`](#tonumbervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2762,13 +3314,13 @@ Predicate errors propagate. A predicate can mutate its input; a requested conver
 
 ---
 
-### `toObjectIf(value, condition?)`
+### `toPlainObjectIf(value, condition?)`
 
-Converts a value to an object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
+Converts a supported value to a fresh plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
 
-Uses the same conversion as `toObject` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
+Uses the same conversion as `toPlainObject` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
 
-Requested conversion uses `toObject`. Preserves existing object/function identity. Nullish input creates a fresh empty object; conversion hooks are not invoked.
+Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving nested references. Entry pairs must be two-element arrays with string or symbol keys. Nullish input throws.
 
 **Parameters**
 
@@ -2777,32 +3329,36 @@ Requested conversion uses `toObject`. Preserves existing object/function identit
 | `value` | `T` | — | The value to convert. |
 | `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
 
-**Returns:** `T | ConvertedObject<T>` — The original object or function, a boxed primitive, or a new object for nullish input when conversion is requested; otherwise the original input, unchanged.
+**Returns:** `T | ConvertedPlainObject<T>` — A fresh plain object when conversion is requested; otherwise the exact original input.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toObject`](#toobjectvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toPlainObject`](#toplainobjectvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
 ```javascript
-typeof toObjectIf(42, true);   // => "object"
-toObjectIf(42, false);         // => 42
+toPlainObjectIf('{"a":1}', true);  // => {"a":1}
+toPlainObjectIf(null, false);      // => null
 ```
 
 **Notes**
 
 A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
 
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toObject` contract.
+Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toPlainObject` contract.
 
 ---
 
 ### `toSetIf(value, condition?)`
 
-Converts an iterable of values to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
+Converts supported iterable, record or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
 
 Uses the same conversion as `toSet` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
 
-Requested conversion uses `toSet`. Consumes synchronous values and removes duplicates without coercion. Strings yield Unicode code points. Nullish input creates an empty Set; non-iterable scalars and array-like objects throw. Requires native `Set`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
+Requested conversion uses `toSet`. Copies iterable values, own enumerable string and symbol record values, or supported array-like indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing support throws before inspecting the input.
 
 **Parameters**
 
@@ -2813,7 +3369,11 @@ Requested conversion uses `toSet`. Consumes synchronous values and removes dupli
 
 **Returns:** `T | ConvertedSet<T>` — A new Set when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toSet`](#tosetvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toSet`](#tosetvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2847,7 +3407,11 @@ Requested conversion uses `toString`. May invoke conversion hooks and throw, inc
 
 **Returns:** `T | string` — The converted primitive string when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toString`](#tostringvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toString`](#tostringvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2881,7 +3445,11 @@ Requested conversion uses `toSymbol`. Preserves primitive symbol identity and un
 
 **Returns:** `T | symbol` — The original or unboxed symbol, or a new symbol from the description, when conversion is requested; otherwise the original input, unchanged.
 
-**Errors:** Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toSymbol`](#tosymbolvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
+**Errors**
+
+- Invalid conditions or non-boolean predicate results throw `TypeError`.
+- Predicate errors propagate.
+- A requested conversion also follows [`toSymbol`](#tosymbolvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
 
 **Examples**
 
@@ -2900,7 +3468,11 @@ Predicate errors propagate. A predicate can mutate its input; a requested conver
 
 ### Checks and conversions
 
-Type checks do not convert values. For example, `isNumber('42')` returns `false`, while `toNumber('42')` returns `42`. Conversions follow native coercion rules: they may invoke object hooks, lose numeric precision, or return `NaN`, infinity or an invalid `Date`.
+Type checks do not convert values. For example, `isNumber('42')` returns `false`, while `toNumber('42')` returns `42`. Scalar conversions follow native coercion rules: they may invoke object hooks, lose numeric precision, underflow to zero, or return `NaN`, infinity or an invalid `Date`. `toBoolean` uses truthiness rather than parsing text, and `toString` does not perform JSON serialisation. Use `fromJson` to parse any JSON value with native `JSON.parse` semantics and an optional reviver; its result is `unknown` until validated. Use `toJson` to serialise with native `JSON.stringify` semantics, including replacer/indentation options and a possible `undefined` result.
+
+`toArray` and `toSet` consume synchronous iterable values first, copy own enumerable string and symbol record values second, and read supported non-plain array-like indices third. Array-like lengths must already be numeric safe integers at least zero; a record length is ordinary data. `toMap` copies record entries including symbols or consumes exact two-element array pairs with both own indices. `toPlainObject` creates a fresh object from JSON object text, records or the same strict pairs with primitive string/symbol keys. Unsupported inputs throw instead of being boxed or silently converted to empty collections.
+
+`box` preserves nullish input and existing objects; `unbox` extracts genuine native wrapper payloads without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
 
 Conditional converters evaluate a boolean condition or synchronous predicate once. A `false`, omitted or `undefined` condition returns the original input without inspecting or converting it. See the [conversion guide](conversions.md) for identity, coercion and precision details.
 
@@ -2943,7 +3515,7 @@ isTypeOf('42', Number);                      // => false
 
 The complete specification is validated before matching, including alternatives that evaluation would otherwise skip. Invalid names, cyclic unions, ambiguous descriptors, and non-boolean predicate results throw `TypeError`. Use `{ predicate: fn }` for predicates, not bare functions.
 
-`createTypeChecker()` snapshots each distinct union array once per compilation and reuses that structure. Application predicates still run in order on each check; their results are never cached. Later changes to constructors and callback state still affect matching.
+Each matching operation snapshots each distinct union array once and reuses that structure within the operation. Application predicates still run in order on each check; their results are never cached. Later changes to constructors and callback state still affect matching.
 
 Instance checks use native realm and prototype rules. For example, a Date from another realm may fail a local `instanceof Date` check. Use `{ predicate: isDate }` to recognise dates across realms.
 
@@ -2953,24 +3525,26 @@ See [Matcher specification contract](#matcher-specification-contract) for descri
 
 ## TypeScript
 
-Declarations are included; no separate `@types` package is needed. They support root and per-function imports. Default imports compiled to CommonJS require `esModuleInterop`; Node16 and NodeNext consumers use the package's conditional export map.
+TypeScript declarations are included; no separate `@types` package is required. They support root and per-function imports. Default imports compiled to CommonJS require `esModuleInterop`; Node16 and NodeNext consumers use the package's conditional export map.
 
 <!-- prettier-ignore -->
 ```typescript
-import Types from 'go-types';
+import { isTypeOf } from 'go-types';
 
 const value: unknown = 'hello';
 
-if (Types.isTypeOf(value, 'string')) {
+if (isTypeOf(value, 'string')) {
   value.toUpperCase();         // => 'HELLO'
 }
 ```
 
 TypeScript narrows values for fixed exact primitive names and strict `null`/`undefined` matchers. The generic `isNonNullish` helper also narrows filtered values. Native identity checks, dynamic specifications, unions, predicate descriptors, and collection-content validators return `boolean`. A failed check cannot safely exclude a structural TypeScript type: an object can have a Date-shaped interface without being a native Date.
 
-`toDate()` returns `Date`; it does not promise to preserve extra input properties during conversion. See the [migration guide](migration.md#typescript-safety) for examples.
+`unbox` retains the original object type plus possible primitive payloads because structural properties cannot prove a native wrapper brand. `box` uses `Boxed<T>`; `toPromise` uses `Promise<Awaited<T>>`.
 
-`toArray()` and requested `toArrayIf()` conversions infer elements from a definite iterable before array-like indices. If an array-like input type visibly declares an optional or nullable iterator that may be callable, the result is conservatively `unknown[]`: that method can override the indexed values. An iterator declared only as `null`/`undefined` preserves indexed-element inference. Skipped conversions still preserve the original input type.
+`toDate()` returns `Date`; it does not promise to preserve extra input properties during conversion. See the [runtime guide](runtime.md#typescript-boundaries) for declaration boundaries.
+
+`toArray()`, `toSet()` and `toMap()` infer definite iterable contents before record or indexed contents. Known record symbols contribute to inferred values and Map keys. A visibly optional or nullable iterator that may be callable keeps inferred contents conservative because it can override the fallback source; an iterator declared only as `null`/`undefined` permits fallback inference. Structural types cannot prove a plain prototype, enumerability or complete pair indices. Skipped conversions preserve the original input type.
 
 Root and focused CommonJS declarations support strict consumers targeting ES2017 with ES2017 libraries and `skipLibCheck: false`. Runtime support for optional native features remains separate: selecting a newer compiler library does not add BigInt to Node 8. See the [runtime guide](runtime.md#typescript-boundaries) for declaration details.
 
@@ -2980,11 +3554,11 @@ These checks classify values; they do not validate an application schema or prov
 
 Application callback, getter, proxy and iterator errors propagate. Native identity checks deliberately catch incompatible-receiver errors when probing a value with a built-in operation; this turns a normal type mismatch into `false`. See [Errors and side effects](#errors-and-side-effects).
 
-TypeScript interfaces describe structure, which does not always prove native identity. Similarly, a failed refinement such as `isInteger` does not rule out every number, and a failed collection check can still leave a typed sparse array. Declarations therefore return `boolean` where narrowing either branch would be unsafe. See [TypeScript](#typescript) and the [migration examples](migration.md#typescript-safety).
+TypeScript interfaces describe structure, which does not always prove native identity. Similarly, a failed refinement such as `isInteger` does not rule out every number, and a failed collection check can still leave a typed sparse array. Declarations therefore return `boolean` where narrowing either branch would be unsafe. See [TypeScript](#typescript) and the [runtime guide](runtime.md#typescript-boundaries).
 
 ## Matcher specification contract
 
-The following forms define the rules used by `isTypeOf`, `createTypeChecker` and the collection-content checks. Validation happens before matching, even when a branch would otherwise be skipped.
+The following forms define the rules used by `isTypeOf` and the collection-content checks. Validation happens before matching, even when a branch would otherwise be skipped.
 
 | Specification                          | Meaning                                                                                                          |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -2996,7 +3570,7 @@ The following forms define the rules used by `isTypeOf`, `createTypeChecker` and
 | Nested arrays                          | Ordered alternatives, evaluated until one matches after the entire configuration has been validated.             |
 | An empty array `[]`                    | Matches no value. Empty collections still pass valid element constraints.                                        |
 
-Predicate callbacks receive one argument, the value being checked, without a supplied `this` receiver. Bind receiver-dependent functions before placing them in a descriptor, or use an arrow adapter. This applies equally to direct, reusable and collection-content checks. The declarations reject explicit receiver requirements incompatible with `undefined`; they cannot recover a receiver requirement erased from a function type.
+Predicate callbacks receive one argument, the value being checked, without a supplied `this` receiver. Bind receiver-dependent functions before placing them in a descriptor, or use an arrow adapter. This applies equally to direct and collection-content checks. The declarations reject explicit receiver requirements incompatible with `undefined`; they cannot recover a receiver requirement erased from a function type.
 
 Descriptor selectors must be own data properties. Inherited selectors, accessors, ambiguous descriptors, unsupported leaves, unknown type names, cyclic unions and non-callable instance hooks throw `TypeError`. Unrelated descriptor fields are ignored. Descriptor containers need not be plain objects. After the bare-function and boxed-type-name forms are handled, other objects (including `document.all`) may supply valid own selectors; an object without a selector is still invalid.
 

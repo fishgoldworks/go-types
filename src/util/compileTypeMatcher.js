@@ -1,10 +1,10 @@
-const isArray = require('./isArray');
-const isCallable = require('./util/isCallable');
-const createReferenceSet = require('./util/createReferenceSet');
-const createReferenceMap = require('./util/createReferenceMap');
-const isObjectLike = require('./isObjectLike');
-const isValidArrayLength = require('./util/isValidArrayLength');
-const isString = require('./isString');
+const isArray = require('../isArray');
+const isCallable = require('./isCallable');
+const createReferenceSet = require('./createReferenceSet');
+const createReferenceMap = require('./createReferenceMap');
+const isObjectLike = require('../isObjectLike');
+const isValidArrayLength = require('./isValidArrayLength');
+const isString = require('../isString');
 const getDescriptor = Object.getOwnPropertyDescriptor;
 const hasOwn = Object.prototype.hasOwnProperty;
 const stringValueOf = String.prototype.valueOf;
@@ -142,26 +142,8 @@ function evaluator(root) {
   };
 }
 
-/**
- * Creates a reusable function that checks values against a type specification.
- *
- * Snapshots matcher arrays now; application predicates and instance hooks run during later checks
- * and retain live state. An omitted type matches `undefined`. Internal reference tracking falls
- * back to local arrays when weak collections are unavailable; no platform globals are changed.
- *
- * @param {*} [type] The matcher for values passed to the returned checker. An omitted matcher
- * matches `undefined`.
- * @returns {function(*): boolean} A reusable checker that returns `true` if its input matches the
- * compiled specification; otherwise `false`.
- * @throws {*} Invalid matcher configuration throws `TypeError` during creation; configuration
- * access can also trigger proxy traps. The returned checker can throw for invalid predicate
- * results or native instance checks. Callback and property-access errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#createtypecheckertype
- * @example createTypeChecker(["number",null])(1);     // => true
- * @example createTypeChecker(["number",null])("1");   // => false
- * @example createTypeChecker([])(undefined);          // => false
- */
-function createTypeChecker(type) {
+// Compile once per public operation; collection checks reuse the matcher for their items.
+function compileTypeMatcher(type) {
   if (!isArray(type)) return leafNode(type).check;
   // Flat unions need neither graph maps nor a traversal stack. Allocate graph
   // bookkeeping lazily on the first nested array, which can also be a cycle.
@@ -214,4 +196,4 @@ function createTypeChecker(type) {
   }
   return evaluator(root);
 }
-module.exports = createTypeChecker;
+module.exports = compileTypeMatcher;

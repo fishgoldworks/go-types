@@ -1,8 +1,8 @@
 const isMap = require('./isMap');
-const createTypeChecker = require('./createTypeChecker');
+const compileTypeMatcher = require('./util/compileTypeMatcher');
 const entries = typeof Map === 'function' ? Map.prototype.entries : undefined;
 /**
- * Determines whether every Map key and value matches its respective specification.
+ * Checks whether every Map key and value matches its respective specification.
  *
  * Validates both matchers first; empty Maps pass. Checks each key before its value. Predicates
  * must not mutate the Map. Unavailable native collection types do not prevent loading or checks of
@@ -22,8 +22,8 @@ const entries = typeof Map === 'function' ? Map.prototype.entries : undefined;
  * @example isMapOf(new Map([[1,1]]), "string", "number");     // => false
  */
 function isMapOf(value, keyType, valueType) {
-  const checkKey = createTypeChecker(keyType);
-  const checkValue = createTypeChecker(valueType);
+  const checkKey = compileTypeMatcher(keyType);
+  const checkValue = compileTypeMatcher(valueType);
   if (!isMap(value)) return false;
   if (typeof entries !== 'function') throw new TypeError('Native Map iteration is unavailable in this runtime.');
   // Native Map iteration is live. Predicates must not mutate the collection.

@@ -11,8 +11,8 @@ const mapValues = typeof Map === 'function' ? Map.prototype.values : undefined;
 const setValues = typeof Set === 'function' ? Set.prototype.values : undefined;
 const nonSpace = /\S/;
 /**
- * Determines whether a value is nullish, an empty or whitespace-only string, or a supported
- * container containing only nullish values.
+ * Checks whether a value is nullish, an empty or whitespace-only string, or a supported container
+ * containing only nullish values.
  *
  * Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw
  * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
