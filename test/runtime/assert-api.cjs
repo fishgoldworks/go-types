@@ -51,8 +51,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     ['isInvalidDate', new Date(NaN), new Date(0)],
     ['isRegExp', /x/, {}],
     ['isPromise', LocalPromise.resolve(1), {}],
-    ['isPromiseLike', { then() {}, catch() {} }, { then() {} }],
-    ['isThenable', { then() {} }, {}],
+    ['isPromiseLike', { then() {} }, { then: true }],
     ['isError', new Error('x'), Object.create(Error.prototype)],
     ['isArrayBuffer', data, {}],
     ['isArrayBufferView', new Uint8Array(data), data],
@@ -70,6 +69,29 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     result(entry[0], [entry[1]], true);
     result(entry[0], [entry[2]], false);
   }
+  // Protocol detection must not subscribe or inspect optional convenience methods.
+  let thenReads = 0;
+  result(
+    'isPromiseLike',
+    [
+      {
+        get then() {
+          thenReads++;
+          return function () {
+            throw Error('Do not invoke then');
+          };
+        },
+        get catch() {
+          throw Error('Do not read catch');
+        },
+        get finally() {
+          throw Error('Do not read finally');
+        }
+      }
+    ],
+    true
+  );
+  assert.strictEqual(thenReads, 1);
   // Node 8 can enumerate a hidden own property when a dictionary object shadows
   // an enumerable inherited key. Hidden getters must remain unread as well.
   for (const nullPrototype of [true, false]) {
@@ -126,29 +148,81 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     ['isArrayLikeOf', { 0: 1, 1: 2, length: 2 }],
     ['isSetOf', new Set([1, 2])]
   ]) {
-    result(pair[0], [pair[1], [['number', null], 'string']], true);
+    result(
+      pair[0],
+      [pair[1], (value) => typeof value === 'number' || value === null || typeof value === 'string'],
+      true
+    );
     result(pair[0], [pair[1], 'boolean'], false);
   }
   result('isMapOf', [new Map([['x', 1]]), 'string', 'number'], true);
   result('isMapOf', [new Map([['x', '1']]), 'string', 'number'], false);
-  result('isTypeOf', [1, [['number', 'string'], null]], true);
-  result('isTypeOf', [false, [['number', 'string'], null]], false);
-  const shared = ['number', 'string'];
-  const check = (value) => T.isTypeOf(value, [shared, [shared, null]]);
-  for (const value of [1, 'x', null]) assert.strictEqual(check(value), true);
-  assert.strictEqual(check(false), false);
-  let calls = 0;
-  const predicate = {
-    predicate() {
-      calls++;
-      return false;
+  const matcherChecks = [
+    (matcher) => T.isArrayOf([1], matcher),
+    (matcher) => T.isArrayLikeOf({ 0: 1, length: 1 }, matcher),
+    (matcher) => T.isSetOf(new Set([1]), matcher),
+    (matcher) => T.isMapOf(new Map([[1, 1]]), matcher, 'number'),
+    (matcher) => T.isMapOf(new Map([[1, 1]]), 'number', matcher)
+  ];
+  for (const check of matcherChecks) {
+    let calls = 0;
+    assert.strictEqual(
+      check(function (value) {
+        calls++;
+        assert.strictEqual(this, undefined);
+        assert.strictEqual(arguments.length, 1);
+        return value === 1;
+      }),
+      true
+    );
+    assert.strictEqual(calls, 1);
+    assert.strictEqual(
+      check(() => false),
+      false
+    );
+    for (const matcher of [undefined, null, new String('number'), ['number'], { predicate: T.isNumber }]) {
+      assert.throws(
+        () => check(matcher),
+        (error) => error.name === 'TypeError'
+      );
     }
-  };
-  assert.strictEqual(T.isTypeOf(1, [[predicate], [predicate], 'number']), true);
-  assert.strictEqual(calls, 2);
-  const recursive = [];
-  recursive.push(recursive);
-  assert.throws(() => T.isTypeOf(undefined, recursive), /cycles/);
+    for (const result of [1, new Boolean(true), Promise.resolve(true)]) {
+      assert.throws(
+        () => check(() => result),
+        (error) => error.name === 'TypeError'
+      );
+    }
+    const failure = {};
+    assert.throws(
+      () =>
+        check(() => {
+          throw failure;
+        }),
+      (error) => error === failure
+    );
+  }
+  assert.throws(
+    () => T.isMapOf(new Map(), 'number'),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.isArrayOf([]),
+    (error) => error.name === 'TypeError'
+  );
+  assert.strictEqual(T.isTypeOf, undefined);
+  assert.strictEqual(T.isInstanceOf, undefined);
+  assert.strictEqual(
+    T.isArrayOf([1, null], (value) => typeof value === 'number' || value === null),
+    true
+  );
+  assert.throws(
+    () => T.isArrayOf([], ['number']),
+    (error) => error.name === 'TypeError'
+  );
+  assert.throws(
+    () => T.isMapOf(new Map(), 'string'),
+    (error) => error.name === 'TypeError'
+  );
 
   const plainSymbol = Symbol('plain');
   const plainNested = { value: 1 };
@@ -184,8 +258,26 @@ module.exports = function assertAPI(T, PromiseConstructor) {
   );
   assert.throws(
     () => T.toPlainObject('{'),
-    (error) => error.name === 'SyntaxError'
+    (error) => error.name === 'TypeError'
   );
+  for (const text of ['{"a":1}', '[["a",1]]', 'ordinary text', '']) {
+    assert.throws(
+      () => T.toPlainObject(text),
+      (error) => error.name === 'TypeError'
+    );
+    assert.throws(
+      () => T.toPlainObjectIf(text, true),
+      (error) => error.name === 'TypeError'
+    );
+    assert.strictEqual(T.toPlainObjectIf(text, false), text);
+    assert.strictEqual(T.toPlainObjectIf(text), text);
+    assert.strictEqual(
+      T.toPlainObjectIf(text, function () {
+        return false;
+      }),
+      text
+    );
+  }
   assert.strictEqual(T.toPlainObjectIf(null, false), null);
   let plainClosed = false;
   assert.throws(
@@ -269,7 +361,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     ['toMap', { a: 1, b: 2 }, (value) => value.get('a') + value.get('b'), 3],
     ['toSet', [2, 1, 2], (value) => Array.from(value).join(','), '2,1'],
     ['toNumber', '12.5', (value) => value, 12.5],
-    ['toPlainObject', '{"a":12}', (value) => value.a, 12],
+    ['toPlainObject', { a: 12 }, (value) => value.a, 12],
     ['toString', null, (value) => value, 'null'],
     ['toSymbol', 'key', (value) => value.toString(), 'Symbol(key)']
   ];

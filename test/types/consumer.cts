@@ -1,5 +1,5 @@
 import Types = require('go-types');
-const check = (value: unknown): value is number => Types.isTypeOf(value, 'number');
+const check = (value: unknown): value is number => typeof value === 'number';
 const result: number[] = [1, 'x', null].filter(check);
 const present: (number | string)[] = [1, '', null, undefined].filter(Types.isNonNullish);
 const valid: boolean = Types.isMapOf(new Map([['x', 1]]), 'string', 'number');

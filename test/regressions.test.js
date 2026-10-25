@@ -6,8 +6,7 @@ const vm = require('node:vm');
 const { test } = require('node:test');
 const T = require('../');
 const foreign = (source) => vm.runInNewContext(source);
-const predicate = (fn) => ({ predicate: fn });
-
+const predicate = (fn) => fn;
 // Foundational identity and documented compatibility controls.
 for (const [name, value] of [
   ['null-prototype dictionary', Object.create(null)],
@@ -44,7 +43,7 @@ test('arrays: prototype inheritance is not array identity', () => {
 test('arrays: empty Of inputs are accepted and sparse slots mean undefined', () => {
   assert.equal(T.isArrayOf([], 'number'), true);
   assert.equal(T.isArrayLikeOf({ length: 0 }, 'number'), true);
-  assert.equal(T.isArrayOf(new Array(2), undefined), true);
+  assert.equal(T.isArrayOf(new Array(2), 'undefined'), true);
   assert.equal(T.isArrayOf(new Array(2), 'number'), false);
 });
 for (const length of [-1, 0.5, 1.5, NaN, Infinity, -Infinity, 9007199254740992, '2', new Number(2)]) {
@@ -67,7 +66,10 @@ for (const fn of ['isArrayLike', 'isArrayLikeOf', 'isEmpty', 'isBlank']) {
       }
     };
     const expected = fn === 'isEmpty' ? false : true;
-    assert.equal(T[fn](object, null), expected);
+    assert.equal(
+      T[fn](object, (value) => value === null),
+      expected
+    );
     assert.equal(reads, 1);
   });
 }
@@ -107,7 +109,6 @@ test('array-like: functions do not have their length getter inspected', () => {
   });
   assert.equal(T.isArrayLike(fn), false);
 });
-
 // Plainness is deliberately narrower than isObject: null-prototype dictionaries are included.
 for (const [name, value, expected] of [
   ['literal', {}, true],
@@ -130,121 +131,6 @@ test('plain object: own constructor getter is not invoked', () => {
   assert.equal(T.isPlainObject(value), true);
 });
 test('blank object: constructor is ordinary nullish data', () => assert.equal(T.isBlank({ constructor: null }), true));
-
-// Explicit matcher modes replace ambiguous predicate/constructor guessing.
-test('matching: class mismatch returns false without executing it', () => {
-  class Account {
-    constructor() {
-      throw Error('must not construct');
-    }
-  }
-  assert.equal(T.isTypeOf({}, Account), false);
-});
-test('matching: function constructors are never invoked', () => {
-  let calls = 0;
-  function Account() {
-    calls++;
-    return true;
-  }
-  assert.equal(T.isTypeOf({}, Account), false);
-  assert.equal(calls, 0);
-  assert.equal(T.isTypeOf(Object.create(Account.prototype), Account), true);
-  assert.equal(calls, 0);
-});
-test('matching: bound class is supported as an instance matcher', () => {
-  class Account {}
-  const Bound = Account.bind(null);
-  assert.equal(T.isTypeOf(new Account(), Bound), true);
-  assert.equal(T.isTypeOf({}, Bound), false);
-});
-test('matching: constructors no longer act as coercion predicates', () => {
-  assert.equal(T.isTypeOf(null, Object), false);
-  assert.equal(T.isTypeOf('12', Number), false);
-  assert.equal(T.isTypeOf(0, Number), false); // primitive matching uses "number"
-  assert.equal(T.isTypeOf(new Number(0), Number), true);
-  assert.equal(T.isTypeOf(null, ['string', String]), false);
-});
-test('matching: arrow predicate on an object is explicit', () =>
-  assert.equal(
-    T.isTypeOf(
-      {},
-      predicate((v) => typeof v === 'object')
-    ),
-    true
-  ));
-test('matching: native Array.isArray works as explicit predicate', () =>
-  assert.equal(T.isTypeOf([], predicate(Array.isArray)), true));
-test('matching: ordinary predicates with prototypes work explicitly', () => {
-  assert.equal(T.isTypeOf('abc', predicate(T.isString)), true);
-  assert.equal(T.isTypeOf(1, predicate(T.isString)), false);
-});
-test('matching: explicit instanceOf descriptor', () => {
-  class Account {}
-  assert.equal(T.isTypeOf(new Account(), { instanceOf: Account }), true);
-  assert.equal(T.isTypeOf({}, { instanceOf: Account }), false);
-});
-test('matching: Symbol.hasInstance is honoured', () => {
-  function Matcher() {}
-  Object.defineProperty(Matcher, Symbol.hasInstance, { value: (value) => value === 42 });
-  assert.equal(T.isTypeOf(42, Matcher), true);
-});
-test('matching: foreign union and boxed type names', () => {
-  assert.equal(T.isTypeOf(1, foreign('["number", "boolean"]')), true);
-  assert.equal(T.isTypeOf(1, new String('number')), true);
-  assert.equal(T.isTypeOf(1, foreign('new String("number")')), true);
-});
-test('matching: null/undefined and nested union retain meaning', () => {
-  assert.equal(T.isTypeOf(null, null), true);
-  assert.equal(T.isTypeOf(undefined, undefined), true);
-  assert.equal(T.isTypeOf(null, 'object'), true); // literal typeof contract
-  assert.equal(T.isTypeOf('yes', [null, ['number', predicate(T.isString)]]), true);
-  assert.equal(T.isTypeOf('yes', []), false);
-});
-test('matching: Of helpers accept explicit predicates', () => {
-  assert.equal(T.isArrayOf([{}, {}], predicate(T.isObject)), true);
-  assert.equal(T.isArrayLikeOf({ 0: [], length: 1 }, predicate(Array.isArray)), true);
-});
-for (const matcher of [
-  { predicate: 1 },
-  { predicate: () => true, instanceOf: Object },
-  { instanceOf: 1 },
-  {},
-  1,
-  true,
-  Symbol('bad'),
-  Object.create(null)
-]) {
-  test('matching: invalid matcher fails without coercion', () =>
-    assert.throws(() => T.isTypeOf({}, matcher), TypeError));
-}
-test('matching: inherited descriptor fields are rejected', () =>
-  assert.throws(() => T.isTypeOf({}, Object.create({ predicate: () => true })), TypeError));
-test('matching: predicate must produce a boolean, not a truthy object or promise', () => {
-  for (const result of [1, 'yes', {}, Promise.resolve(true)]) {
-    assert.throws(
-      () =>
-        T.isTypeOf(
-          1,
-          predicate(() => result)
-        ),
-      TypeError
-    );
-  }
-});
-test('matching: predicate exceptions propagate unchanged', () => {
-  const error = Error('validation failed');
-  assert.throws(
-    () =>
-      T.isTypeOf(
-        1,
-        predicate(() => {
-          throw error;
-        })
-      ),
-    (value) => value === error
-  );
-});
-
 // Cycle identity and active-path traversal.
 test('cycles: repeated primitive is not a cycle', () => assert.equal(T.isCyclic({ a: 1, b: { c: 1 } }), false));
 test('cycles: nested shared descendants are not cycles', () => {
@@ -339,7 +225,6 @@ test('cycles: deterministic random graphs match an independent active-path oracl
     assert.equal(T.isCyclic(nodes[0]), oracle(nodes[0], []), 'graph ' + run);
   }
 });
-
 // Iteration: no double peek; native iterator completion and closing semantics.
 test('iterable: disabled array iterator is not iterable', () => {
   const x = [];
@@ -488,7 +373,6 @@ test('blankness: an unsized iterable plain object is rejected without inspection
   assert.throws(() => T.isEmpty(value), TypeError);
   assert.throws(() => T.isBlank(value), TypeError);
 });
-
 // Intrinsic brand checks: foreign values accepted; prototype/tag imitations rejected.
 for (const [name, create, type] of [
   ['isNumber', 'new Number(3)', Number],
@@ -590,22 +474,18 @@ test('errors: fallback does not read a custom toStringTag getter', () => {
   assert.equal(T.isError(value), false);
   assert.equal(reads, 0);
 });
-test('protocol checks: null-prototype thenables and promise-like objects', () => {
-  const value = Object.assign(Object.create(null), { then() {}, catch() {} });
-  assert.equal(T.isThenable(value), true);
+test('protocol checks: null-prototype promise-like objects', () => {
+  const value = Object.assign(Object.create(null), { then() {} });
   assert.equal(T.isPromiseLike(value), true);
 });
 test('protocol checks: foreign thenables are accepted', () => {
-  const value = foreign('({then: function () {}, catch: function () {}})');
-  assert.equal(T.isThenable(value), true);
+  const value = foreign('({then: function () {}})');
   assert.equal(T.isPromiseLike(value), true);
 });
-test('protocol checks: then and catch requirement is preserved', () => {
-  assert.equal(T.isThenable({ then() {} }), true);
-  assert.equal(T.isPromiseLike({ then() {} }), false);
-  assert.equal(T.isThenable({ then: true }), false);
+test('protocol checks: only a callable then is required', () => {
+  assert.equal(T.isPromiseLike({ then() {} }), true);
+  assert.equal(T.isPromiseLike({ then: true }), false);
 });
-
 // JSON validation is now a supported public root export.
 for (const text of [
   'null',
@@ -630,13 +510,12 @@ test('JSON: boxed string parser ignores a custom toString', () => {
   };
   assert.equal(T.isJson(text), true);
 });
-
 //  Receiver binding and native special cases.
 test('matching: explicit predicates are invoked without a descriptor receiver', () => {
   let receiver;
   assert.equal(
-    T.isTypeOf(
-      1,
+    T.isArrayOf(
+      [1],
       predicate(function (value) {
         receiver = this;
         return value === 1;
@@ -653,7 +532,7 @@ test('matching: accessor descriptor fields are not executed', () => {
       throw Error('must not invoke');
     }
   });
-  assert.throws(() => T.isTypeOf(1, type), TypeError);
+  assert.throws(() => T.isArrayOf([1], type), TypeError);
 });
 test('regexp: prototypes are not RegExp instances', () => {
   assert.equal(T.isRegExp(RegExp.prototype), false);

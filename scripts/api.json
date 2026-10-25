@@ -60,7 +60,7 @@
         "expected": false
       }
     ],
-    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use an exact name such as `\"boolean\"`, `\"number\"` or `\"string\"` with `isTypeOf`.",
+    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use native `typeof` checks.",
     "summaryReturn": "`true` if the value is a primitive boolean or genuine boxed `Boolean`; otherwise `false`.",
     "description": "Accepts both primitive boolean values and wrapper objects such as `new Boolean(false)`, including wrappers from another realm. It checks the stored native value without converting other inputs.",
     "tooltip": "Accepts wrappers from another realm, but rejects prototype imitations and proxies around wrappers. Does not invoke overridden conversion methods.",
@@ -85,7 +85,7 @@
         "expected": false
       }
     ],
-    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use an exact name such as `\"boolean\"`, `\"number\"` or `\"string\"` with `isTypeOf`.",
+    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use native `typeof` checks.",
     "summaryReturn": "`true` if the value is a primitive number or genuine boxed `Number`, including `NaN` and infinities; otherwise `false`.",
     "description": "Accepts both primitive number values and wrapper objects such as `new Number(42)`, including wrappers from another realm. It checks the stored native value without converting other inputs. `NaN` and positive or negative infinity are numbers for this check.",
     "tooltip": "Accepts wrappers from another realm, but rejects prototype imitations and proxies around wrappers. Does not invoke overridden conversion methods. Includes `NaN` and infinities.",
@@ -110,7 +110,7 @@
         "expected": false
       }
     ],
-    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use an exact name such as `\"boolean\"`, `\"number\"` or `\"string\"` with `isTypeOf`.",
+    "notes": "Uses the built-in wrapper operation to read the stored value. Overridden `valueOf` methods and `Symbol.toStringTag` properties are ignored; prototype imitations and proxies around wrappers return `false`.\n\nThe TypeScript result is `boolean`: a structural wrapper interface does not prove native identity. For primitive-only narrowing, use native `typeof` checks.",
     "summaryReturn": "`true` if the value is a primitive string or genuine boxed `String`; otherwise `false`.",
     "description": "Accepts both primitive string values and wrapper objects such as `new String('hello')`, including wrappers from another realm. It checks the stored native value without converting other inputs.",
     "tooltip": "Accepts wrappers from another realm, but rejects prototype imitations and proxies around wrappers. Does not invoke overridden conversion methods.",
@@ -508,35 +508,6 @@
     "errors": ""
   },
   {
-    "name": "isTypeOf",
-    "group": "Matching",
-    "summary": "Checks whether a value matches a type name, instance target, predicate or union of matchers.",
-    "params": "value, type",
-    "examples": [
-      {
-        "expression": "isTypeOf(1,\"number\")",
-        "expected": true
-      },
-      {
-        "expression": "isTypeOf(null,\"object\")",
-        "expected": true
-      },
-      {
-        "expression": "isTypeOf(\"12\",Number)",
-        "expected": false
-      },
-      {
-        "expression": "isTypeOf([], {predicate:Array.isArray})",
-        "expected": true
-      }
-    ],
-    "notes": "The whole specification is validated before matching, including branches that evaluation would skip. Invalid names, descriptors, unions and non-callable instance hooks throw `TypeError`. No constructor body is invoked and no input conversion occurs.\n\nCallable instance targets use native `instanceof`; an invalid target prototype can therefore throw during matching. An omitted `type` matches only `undefined`. By contrast, the string matcher `\"undefined\"` follows native `typeof` and also matches browser `document.all`. See [Type specifications](#type-specifications).",
-    "summaryReturn": "`true` if the value matches the type specification (omission matches `undefined`); otherwise `false`.",
-    "description": "Matches one value immediately, without converting it or invoking constructor bodies. Use a string such as `\"number\"` for a native `typeof` check, `{ predicate: fn }` for a custom check, or an array for alternatives.",
-    "tooltip": "Validates the entire specification before matching. An omitted type matches `undefined`. Predicates must return a synchronous primitive boolean.",
-    "errors": "Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications)."
-  },
-  {
     "name": "isObject",
     "group": "Object",
     "summary": "Checks whether a value is a non-null object or function.",
@@ -660,8 +631,8 @@
   {
     "name": "isArrayOf",
     "group": "Collection",
-    "summary": "Checks whether an array contains only values matching a type specification.",
-    "params": "value, type",
+    "summary": "Checks whether a value is an array whose items match a type-name string or predicate.",
+    "params": "value, matcher",
     "examples": [
       {
         "expression": "isArrayOf([1,2], \"number\")",
@@ -676,11 +647,11 @@
         "expected": true
       }
     ],
-    "notes": "The length is read once; indexed values are read as matching proceeds. Missing positions read as `undefined` unless an inherited numeric property supplies a value. Appends beyond the original length are ignored.\n\nMatcher validation happens before any container check. Invalid configuration throws for empty and non-collection inputs too; a valid empty container passes. An array exposing an invalid length, for example through a proxy, returns `false`.",
-    "summaryReturn": "`true` if the value is an array and every element matches the specification, including an empty array; otherwise `false`.",
-    "description": "Validates the entire matcher before checking the container, then checks each element until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.",
-    "tooltip": "Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at the first mismatch. Missing array positions read as `undefined` unless inherited numeric properties supply values.",
-    "errors": "Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications)."
+    "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Length is read once. Empty slots use ordinary indexed reads, including inherited values; a missing value is `undefined`. Matching stops at the first failure.",
+    "summaryReturn": "`true` if the value is an array and every element matches the matcher, including an empty array; otherwise `false`.",
+    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates.",
+    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isArrayLike",
@@ -714,8 +685,8 @@
   {
     "name": "isArrayLikeOf",
     "group": "Collection",
-    "summary": "Checks whether an array-like value contains only values matching a type specification.",
-    "params": "value, type",
+    "summary": "Checks whether an array-like value contains only items matching a type-name string or predicate.",
+    "params": "value, matcher",
     "examples": [
       {
         "expression": "isArrayLikeOf({0:1,length:1}, \"number\")",
@@ -730,11 +701,11 @@
         "expected": true
       }
     ],
-    "notes": "The length is read once; indexed values are read as matching proceeds. Missing positions read as `undefined` unless an inherited numeric property supplies a value. Appends beyond the original length are ignored.\n\nMatcher validation happens before any container check. Invalid configuration throws for empty and non-collection inputs too; a valid empty container passes.",
-    "summaryReturn": "`true` if the value is array-like and every indexed value matches the specification, including an empty input; otherwise `false`.",
-    "description": "Validates the entire matcher before checking the container, then checks each indexed value until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.",
-    "tooltip": "Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at the first mismatch. Missing array positions read as `undefined` unless inherited numeric properties supply values.",
-    "errors": "Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications)."
+    "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Length is read once. Empty slots use ordinary indexed reads, including inherited values; a missing value is `undefined`. Matching stops at the first failure.",
+    "summaryReturn": "`true` if the value is array-like and every indexed value matches the matcher, including an empty input; otherwise `false`.",
+    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates.",
+    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isPair",
@@ -757,7 +728,7 @@
     ],
     "notes": "",
     "summaryReturn": "`true` if the value is an array of length `2`; otherwise `false`.",
-    "description": "Checks the array’s length rather than whether both positions contain values. Sparse arrays of length two pass; array-like objects do not.",
+    "description": "Checks the array’s length rather than whether both positions contain values. Sparse arrays of length two pass; array-like objects do not. See [`toMap`](#tomapvalue) and [`toPlainObject`](#toplainobjectvalue) for stricter entry requirements.",
     "tooltip": "",
     "errors": "Property getters or proxy traps may throw; their errors propagate. Native `Array.isArray` also throws `TypeError` for a revoked proxy."
   },
@@ -990,43 +961,26 @@
   {
     "name": "isPromiseLike",
     "group": "Protocol",
-    "summary": "Checks whether a value is an object or function with callable `then` and `catch` methods.",
-    "params": "value",
-    "examples": [
-      {
-        "expression": "isPromiseLike({then(){},catch(){}})",
-        "expected": true
-      },
-      {
-        "expression": "isPromiseLike({then(){}})",
-        "expected": false
-      }
-    ],
-    "notes": "The library requires both `then` and `catch`. This is stricter than `isThenable` and differs from TypeScript’s `PromiseLike` interface. Neither method is invoked, but reading the properties can execute getters or proxy traps.",
-    "summaryReturn": "`true` if the value is a non-null object or function with callable `then` and `catch` methods; otherwise `false`.",
-    "description": "Use this for the library’s two-method Promise-like convention. Unlike `isThenable`, it requires both methods; unlike `isPromise`, it does not require a local native instance. Neither method is called.",
-    "tooltip": "Requires both `then` and `catch`, unlike TypeScript `PromiseLike`. Does not invoke them; getters or proxy traps may run.",
-    "errors": "Property getters or proxy traps may throw; their errors propagate."
-  },
-  {
-    "name": "isThenable",
-    "group": "Protocol",
     "summary": "Checks whether a value is an object or function with a callable `then` method.",
     "params": "value",
     "examples": [
       {
-        "expression": "isThenable({then(){}})",
+        "expression": "isPromiseLike(Promise.resolve(1))",
         "expected": true
       },
       {
-        "expression": "isThenable({then:1})",
+        "expression": "isPromiseLike({then(){}})",
+        "expected": true
+      },
+      {
+        "expression": "isPromiseLike({then:1})",
         "expected": false
       }
     ],
-    "notes": "Objects from another realm and null-prototype objects can pass. The `then` method is read but not invoked. Its presence does not prove compliance with the Promises/A+ rules.",
+    "notes": "Inherited methods, objects from another realm and null-prototype objects can pass. The `then` property is read once; getters or proxy traps may run and throw. The return type is `boolean`: a callable method alone cannot establish TypeScript’s full `PromiseLike<T>` contract.",
     "summaryReturn": "`true` if the value is a non-null object or function with a callable `then` method; otherwise `false`.",
-    "description": "Detects the shape used by promise resolution, without invoking `then` or requiring a `catch` method. A passing result does not prove that the object follows Promise behaviour.",
-    "tooltip": "Does not invoke `then` or prove Promise behaviour. Getters and proxy traps may run.",
+    "description": "Recognises promise-like values without requiring a native Promise instance, `catch` or `finally`. It does not invoke `then` or verify promise behaviour.",
+    "tooltip": "Reads `then` without invoking it or checking `catch` or `finally`. Does not verify promise behaviour; getters and proxy traps may run.",
     "errors": "Property getters or proxy traps may throw; their errors propagate."
   },
   {
@@ -1384,8 +1338,8 @@
   {
     "name": "isSetOf",
     "group": "Collection",
-    "summary": "Checks whether a Set contains only values matching a type specification.",
-    "params": "value, type",
+    "summary": "Checks whether a value is a native Set whose items match a type-name string or predicate.",
+    "params": "value, matcher",
     "examples": [
       {
         "expression": "isSetOf(new Set([1,2]), \"number\")",
@@ -1400,17 +1354,17 @@
         "expected": true
       }
     ],
-    "notes": "Uses captured native Set iteration, ignoring an overridden iterator method. Iteration is live: predicates must not mutate the Set because mutation can change the result or prevent termination.\n\nThe matcher is validated even for an empty or non-Set input. An empty Set passes a valid matcher. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
-    "summaryReturn": "`true` if the value is a `Set` whose items all match the specification, including an empty `Set`; otherwise `false`.",
-    "description": "Validates the entire matcher before checking the container, then checks each item until a mismatch is found. An empty container passes a valid matcher. Invalid configuration throws even when the input is empty or is not the expected container type.",
-    "tooltip": "Validates the matcher before inspecting the input. Empty containers pass; evaluation stops at the first mismatch. Predicates must not mutate the Set. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
-    "errors": "Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications)."
+    "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Uses captured native iteration and ignores overridden instance iterators. Iteration is live; predicates must not mutate the collection. Matching stops at the first failure.",
+    "summaryReturn": "`true` if the value is a `Set` whose items all match the matcher, including an empty `Set`; otherwise `false`.",
+    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`.",
+    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isMapOf",
     "group": "Collection",
-    "summary": "Checks whether every Map key and value matches its respective specification.",
-    "params": "value, keyType, valueType",
+    "summary": "Checks whether a value is a native Map whose keys and values match their type-name strings or predicates.",
+    "params": "value, keyMatcher, valueMatcher",
     "examples": [
       {
         "expression": "isMapOf(new Map([[\"x\",1]]), \"string\", \"number\")",
@@ -1425,11 +1379,11 @@
         "expected": false
       }
     ],
-    "notes": "Uses captured native Map entry iteration, ignoring an overridden iterator method and supporting Maps from another realm. Evaluation stops at the first failed key or value. Iteration is live: predicates must not mutate the Map.\n\nBoth matchers are validated even for an empty or non-Map input. An empty Map passes valid matchers. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
-    "summaryReturn": "`true` if the value is a `Map` whose keys and values match their respective specifications, including an empty `Map`; otherwise `false`.",
-    "description": "Validates both matchers before inspecting the input, then checks each key before its associated value. An empty Map passes valid matchers. Native Map iteration is live, so predicates must not mutate the Map.",
-    "tooltip": "Validates both matchers first; empty Maps pass. Checks each key before its value. Predicates must not mutate the Map. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
-    "errors": "Invalid matcher configuration throws `TypeError`. Callback, property-access and native instance-matching errors propagate; see [Type specifications](#type-specifications)."
+    "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Uses captured native iteration and ignores overridden instance iterators. Iteration is live; predicates must not mutate the collection. Matching stops at the first failure. Both matchers are validated in key/value order before inspection; each key is checked before its associated value.",
+    "summaryReturn": "`true` if the value is a `Map` whose keys and values match their respective matchers, including an empty `Map`; otherwise `false`.",
+    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`.",
+    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isEmptyIterable",
@@ -1477,9 +1431,9 @@
     "name": "toArray",
     "group": "Conversion",
     "params": "value",
-    "summary": "Converts a synchronous iterable, plain record or supported array-like input to a new shallow array.",
+    "summary": "Converts a synchronous iterable, plain object or supported array-like input to a new shallow array.",
     "returns": "Array",
-    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties. Other non-string primitives are unsupported. On eligible inputs a synchronous iterator takes precedence over record properties and indexed values. The iterator method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.\n\nPlain records include null-prototype and foreign-realm records. Own string and symbol keys are snapshotted in property order; each current enumerable descriptor is checked and each included value is read once. Inherited and non-enumerable properties are excluded, newly added keys are not copied, and deleted or newly hidden keys are skipped. A length property is ordinary record data.\n\nOnly non-plain array-like inputs use indexed fallback. Their length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike; strings, fractions and coercible objects are rejected. Length is read once and indexed values are read live. Missing slots become explicit undefined and inherited numeric values are included. Strings iterate by Unicode code point. Nested values retain identity.\n\nOrdinary promises and native async-only containers without a supported synchronous source are rejected. No input is awaited. A plain async-only record is copied as data, including an enumerable async-iterator symbol and its value. Finite one-shot iterators are consumed; infinite iterables do not finish and very large inputs can exhaust memory. Requires native Array.from. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; if both are missing it throws instead of silently discarding possible symbol keys.\n\nIf a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
+    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties. Other non-string primitives are unsupported. On eligible inputs a synchronous iterator takes precedence over object properties and indexed values. The iterator method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.\n\nPlain objects include null-prototype and foreign-realm objects. Own string and symbol keys are snapshotted in property order; each current enumerable descriptor is checked and each included value is read once. Inherited and non-enumerable properties are excluded, newly added keys are not copied, and deleted or newly hidden keys are skipped. A length property is ordinary property data.\n\nOnly non-plain array-like inputs use indexed fallback. Their length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike; strings, fractions and coercible objects are rejected. Length is read once and indexed values are read live. Missing slots become explicit undefined and inherited numeric values are included. Strings iterate by Unicode code point. Nested values retain identity.\n\nOrdinary promises and native async-only containers without a supported synchronous source are rejected. No input is awaited. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value. Finite one-shot iterators are consumed; infinite iterables do not finish and very large inputs can exhaust memory. Requires native Array.from. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; if both are missing it throws instead of silently discarding possible symbol keys.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
         "expression": "toArray(new Set([1, 2]))",
@@ -1502,16 +1456,16 @@
         "expected": [1, 2]
       }
     ],
-    "summaryReturn": "A new shallow array containing iterable items, own enumerable record values or indexed array-like values.",
-    "description": "Consumes synchronous iterables first, copies plain-record values second, and reads supported non-plain array-like inputs third. Record values include own enumerable string and symbol properties, including a property named length. Nullish input and unsupported values throw instead of producing an empty array.",
-    "tooltip": "Consumes iterable input, copies own enumerable string and symbol record values, or reads supported array-like indices. Array-like lengths must already be numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native `Array.from`; missing support throws `TypeError` before inspecting the input.",
-    "errors": "TypeError for nullish or unsupported input, malformed iterators or invalid array-like lengths. Oversized array results can throw RangeError. Getter, proxy and iterator errors propagate. Missing native Array.from throws before conversion; record copying requires symbol-enumeration support."
+    "summaryReturn": "A new shallow array containing iterable items, plain object property values or indexed array-like values.",
+    "description": "Consumes synchronous iterables first, copies plain object property values second, and reads supported non-plain array-like inputs third. Plain object copying includes own enumerable string and symbol properties, including a property named length. Nullish input and unsupported values throw instead of producing an empty array.",
+    "tooltip": "Consumes iterable input, copies values from own enumerable string and symbol properties, or reads supported array-like indices. Array-like lengths must already be numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native `Array.from`; missing support throws `TypeError` before inspecting the input.",
+    "errors": "TypeError for nullish or unsupported input, malformed iterators or invalid array-like lengths. Oversized array results can throw RangeError. Getter, proxy and iterator errors propagate. Missing native Array.from throws before conversion; object copying requires symbol-enumeration support."
   },
   {
     "name": "toArrayIf",
     "group": "Conditional conversion",
     "params": "value, condition",
-    "summary": "Converts supported iterable, record or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
+    "summary": "Converts supported iterable, plain object or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
     "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toArray` contract.",
     "returns": "Array|*",
     "examples": [
@@ -1775,13 +1729,13 @@
     "name": "toMap",
     "group": "Conversion",
     "params": "value",
-    "summary": "Converts a plain record or synchronous iterable of strict key/value pairs to a new shallow Map.",
+    "summary": "Converts a plain object or iterable of key/value pairs to a new Map.",
     "returns": "Map",
-    "summaryReturn": "A new Map containing own enumerable string and symbol record entries or strict iterable pairs, or an empty Map for omitted or nullish input.",
-    "description": "Copies own enumerable string and symbol properties of plain records, or consumes synchronous iterables of exact two-element array pairs. Synchronous iteration takes precedence on eligible inputs. Keys may have any type and are never coerced. Omitted, null or undefined input creates an empty Map.",
-    "tooltip": "Plain records supply own enumerable string and symbol entries. Iterable pairs must be exact two-element arrays with both own indices present. Duplicate keys keep their first position and take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support throws before inspecting the input.",
-    "errors": "TypeError for unsupported input, malformed iterators or entry pairs that are not exact two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry validation errors close the outer iterator. Missing native Map throws before conversion; record copying requires symbol-enumeration support.",
-    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. Plain records include null-prototype and foreign-realm records. Own string and symbol keys are captured once in property order; each current descriptor is checked before its enumerable value is read once. Inherited and non-enumerable properties are excluded, deleted or newly hidden keys are skipped, newly added keys are excluded, and nested values retain identity. Numeric property names become string keys; symbol keys stay symbols. An own constructor or length field is ordinary data.\n\nA synchronous iterator takes precedence over record properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits record conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only containers without a supported synchronous source are rejected.\n\nEach iterable entry must be an actual array of length exactly two, with own properties at both indices 0 and 1. Explicit undefined keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Any key type is allowed, without string coercion. Non-empty strings yield primitive entries and throw; an empty string yields no entries. There is no array-like source fallback.\n\nNative SameValueZero key equality merges repeated NaN keys and treats negative and positive zero as the same key. The last value for a repeated key wins without moving its insertion position. Entry validation and property-access errors inside the loop close the outer iterator; the original error wins over a cleanup error. Native for-of failures while reading next, done or value propagate without an additional close attempt.\n\nFinite one-shot iterators are consumed once; infinite inputs do not finish and no work limit is imposed. Requires native Map. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of dropping possible symbol keys.\n\nIf a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
+    "summaryReturn": "A new Map containing a plain object's own enumerable properties as entries, or the supplied key/value pairs. Omitted or nullish input produces an empty Map.",
+    "description": "Copies own enumerable string and symbol properties of plain objects, or consumes synchronous iterables of exact two-element array pairs. Synchronous iteration takes precedence on eligible inputs. Keys may have any type and are never coerced. Omitted, null or undefined input creates an empty Map.",
+    "tooltip": "Plain object entries come from own enumerable properties with string or symbol keys. Iterable pairs must be exact two-element arrays with both own indices present. Duplicate keys keep their first position and take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support throws before inspecting the input.",
+    "errors": "TypeError for unsupported input, malformed iterators or entry pairs that are not exact two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry validation errors close the outer iterator. Missing native Map throws before conversion; object copying requires symbol-enumeration support.",
+    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. Plain objects include null-prototype and foreign-realm objects. Own string and symbol keys are captured once in property order; each current descriptor is checked before its enumerable value is read once. Inherited and non-enumerable properties are excluded, deleted or newly hidden keys are skipped, newly added keys are excluded, and nested values retain identity. Numeric property names become string keys; symbol keys stay symbols. An own constructor or length field is ordinary data.\n\nA synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits object conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only containers without a supported synchronous source are rejected.\n\nEach iterable entry must be an actual array of length exactly two, with own properties at both indices 0 and 1. Explicit undefined keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Any key type is allowed, without string coercion. Non-empty strings yield primitive entries and throw; an empty string yields no entries. There is no array-like source fallback.\n\nNative SameValueZero key equality merges repeated NaN keys and treats negative and positive zero as the same key. The last value for a repeated key wins without moving its insertion position. Entry validation and property-access errors inside the loop close the outer iterator; the original error wins over a cleanup error. Native for-of failures while reading next, done or value propagate without an additional close attempt.\n\nFinite one-shot iterators are consumed once; infinite inputs do not finish and no work limit is imposed. Requires native Map. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of dropping possible symbol keys.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
         "expression": "Array.from(toMap({a: 1, b: 2}))",
@@ -1847,7 +1801,7 @@
     "name": "toMapIf",
     "group": "Conditional conversion",
     "params": "value, condition",
-    "summary": "Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
+    "summary": "Converts a plain object or iterable of key/value pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
     "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toMap` contract.",
     "returns": "Map|*",
     "examples": [
@@ -1925,12 +1879,12 @@
     "name": "toPlainObject",
     "group": "Conversion",
     "params": "value",
-    "summary": "Converts JSON object text, a plain object, or entry pairs into a fresh plain object.",
+    "summary": "Creates a plain object from key/value pairs, or makes a shallow copy of an existing plain object.",
     "returns": "object",
-    "notes": "Primitive JSON text must contain a non-null, non-array object; nested arrays are allowed. Boxed strings are not parsed. Other primitives, functions, Dates, RegExps and non-iterable class instances are unsupported. No primitive boxing, repairs or schema validation is performed.\n\nA synchronous iterator takes precedence over copying record properties. Each entry must be an actual two-element array with both own slots present; an explicit undefined value is allowed. Extra or missing elements, strings and array-like entry objects are rejected. Duplicate keys use the last value. Keys are primitive strings or symbols and are never coerced. Special names such as __proto__, constructor, prototype and toString become ordinary own data properties.\n\nRecord copying snapshots own keys, checks each current enumerable descriptor and reads each included value once. Inherited and non-enumerable properties are omitted. Getters may mutate the source or throw. Results have writable, enumerable, configurable data properties and preserve nested references. TypeScript makes inferred properties optional because enumerability and presence cannot be proved structurally; JSON results contain unknown values. Prototype-name properties and broad string-key records also have unknown values because an omitted own key can expose an inherited property.\n\nConsumes a synchronous iterable once; infinite inputs do not finish. Entry validation or property access in the loop closes the outer iterator, running return/finally cleanup. The original conversion error takes precedence over a cleanup error. Native for-of protocol failures in next, done or value propagate without an additional close attempt. Async iteration is never consumed or awaited. Async generators are unsupported; a plain async-only object is copied as a record, including enumerable symbol properties. Symbol enumeration requires Reflect.ownKeys or Object.getOwnPropertySymbols when copying records; missing both throws rather than silently discarding symbol keys. JSON and array-entry conversion remain available.\n\nIf a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
+    "notes": "Strings, other primitives, boxed primitives, functions, Dates, RegExps and non-iterable class instances are unsupported. Use `fromJson` to parse JSON text and `isPlainObject` to check the parsed result when an object is required.\n\nA synchronous iterator takes precedence over copying object properties. Each entry must be an actual two-element array with both own slots present; an explicit undefined value is allowed. Extra or missing elements, strings and array-like entry objects are rejected. Duplicate keys use the last value. Keys are primitive strings or symbols and are never coerced. Special names such as __proto__, constructor, prototype and toString become ordinary own data properties.\n\nObject copying snapshots own keys, checks each current enumerable descriptor and reads each included value once. Inherited and non-enumerable properties are omitted. Getters may mutate the source or throw. Results have writable, enumerable, configurable data properties and preserve nested references. TypeScript makes inferred properties optional because enumerability and presence cannot be proved structurally. Prototype-name properties and broad string-keyed objects also have unknown values because an omitted own key can expose an inherited property.\n\nConsumes a synchronous iterable once; infinite inputs do not finish. Entry validation or property access in the loop closes the outer iterator, running return/finally cleanup. The original conversion error takes precedence over a cleanup error. Native for-of protocol failures in next, done or value propagate without an additional close attempt. Async iteration is never consumed or awaited. Async generators are unsupported; a plain async-only object is copied as a record, including enumerable symbol properties. Symbol enumeration requires Reflect.ownKeys or Object.getOwnPropertySymbols when copying records; missing both throws rather than silently discarding symbol keys. Array-entry conversion remains available.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
-        "expression": "toPlainObject('{\"a\":1}')",
+        "expression": "toPlainObject({a:1})",
         "expected": {
           "a": 1
         }
@@ -1946,21 +1900,21 @@
         "expected": false
       }
     ],
-    "summaryReturn": "A fresh ordinary object containing the parsed properties, copied enumerable properties, or supplied entries.",
-    "description": "Parses primitive JSON object strings, shallow-copies plain records, or consumes synchronous entries. Every result has the local Object.prototype. Nullish input and unsupported values throw instead of being boxed.",
-    "tooltip": "Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving nested references. Entry pairs must be two-element arrays with string or symbol keys. Nullish input throws.",
-    "errors": "Malformed JSON throws SyntaxError. Unsupported inputs, non-object JSON, malformed entry pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate without replacement."
+    "summaryReturn": "A fresh ordinary object containing the copied enumerable properties or supplied entries.",
+    "description": "Shallow-copies a plain object or consumes synchronous entry pairs. Every result has the local Object.prototype. Strings, nullish input and other unsupported values throw TypeError.",
+    "tooltip": "Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving nested references. Entry pairs must be two-element arrays with string or symbol keys. Strings and nullish input throw.",
+    "errors": "Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate without replacement."
   },
   {
     "name": "toPlainObjectIf",
     "group": "Conditional conversion",
     "params": "value, condition",
-    "summary": "Converts a supported value to a fresh plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
+    "summary": "Creates a new plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
     "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toPlainObject` contract.",
     "returns": "object|*",
     "examples": [
       {
-        "expression": "toPlainObjectIf('{\"a\":1}', true)",
+        "expression": "toPlainObjectIf({a:1}, true)",
         "expected": {
           "a": 1
         }
@@ -1968,6 +1922,10 @@
       {
         "expression": "toPlainObjectIf(null, false)",
         "expected": null
+      },
+      {
+        "expression": "toPlainObjectIf('{\"a\":1}', false)",
+        "expected": "{\"a\":1}"
       }
     ],
     "summaryReturn": "A fresh plain object when conversion is requested; otherwise the exact original input.",
@@ -1979,13 +1937,13 @@
     "name": "toSet",
     "group": "Conversion",
     "params": "value",
-    "summary": "Converts a synchronous iterable, plain record or supported array-like input to a new shallow Set.",
+    "summary": "Converts a synchronous iterable, plain object or supported array-like input to a new shallow Set.",
     "returns": "Set",
-    "summaryReturn": "A new Set of iterable items, own enumerable record values or indexed array-like values, or an empty Set for omitted or nullish input.",
-    "description": "Uses the same source order as toArray: synchronous iterable values, then own enumerable string and symbol values from plain records, then supported non-plain array-like indices. Native Set equality removes duplicates while preserving first-insertion order. Omitted, null or undefined input creates an empty Set.",
-    "tooltip": "Copies iterable values, own enumerable string and symbol record values, or supported array-like indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing support throws before inspecting the input.",
-    "errors": "TypeError for unsupported input, malformed iterators or invalid array-like lengths. Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; record copying requires symbol-enumeration support.",
-    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties; non-string primitives other than nullish input are also unsupported. A synchronous iterator takes precedence over record and indexed data. Its method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.\n\nPlain records include null-prototype and foreign-realm records. Own string and symbol keys are snapshotted in property order, current enumerability is checked, and each included value is read once. Inherited and non-enumerable properties are excluded. A length property is copied as ordinary data. Record copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of omitting possible symbol keys.\n\nOnly non-plain array-like inputs use indexed fallback. Length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike. Length is read once and values are read live; missing slots yield undefined and inherited indices can supply values. Strings yield Unicode code points and Maps yield entry arrays. Values retain their identities.\n\nNative SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a fresh local Set.\n\nOrdinary promises and native async-only containers without a supported synchronous source are rejected. Plain async-only records are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.\n\nIf a copied record has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
+    "summaryReturn": "A new Set of iterable items, plain object property values or indexed array-like values, or an empty Set for omitted or nullish input.",
+    "description": "Uses the same source order as toArray: synchronous iterable values, then values from a plain object's own enumerable string and symbol properties, then supported non-plain array-like indices. Native Set equality removes duplicates while preserving first-insertion order. Omitted, null or undefined input creates an empty Set.",
+    "tooltip": "Copies iterable values, values from own enumerable string and symbol properties, or supported array-like indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing support throws before inspecting the input.",
+    "errors": "TypeError for unsupported input, malformed iterators or invalid array-like lengths. Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; object copying requires symbol-enumeration support.",
+    "notes": "Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties; non-string primitives other than nullish input are also unsupported. A synchronous iterator takes precedence over object and indexed data. Its method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.\n\nPlain objects include null-prototype and foreign-realm objects. Own string and symbol keys are snapshotted in property order, current enumerability is checked, and each included value is read once. Inherited and non-enumerable properties are excluded. A length property is copied as ordinary data. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of omitting possible symbol keys.\n\nOnly non-plain array-like inputs use indexed fallback. Length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike. Length is read once and values are read live; missing slots yield undefined and inherited indices can supply values. Strings yield Unicode code points and Maps yield entry arrays. Values retain their identities.\n\nNative SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a fresh local Set.\n\nOrdinary promises and native async-only containers without a supported synchronous source are rejected. Plain async-only objects are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
         "expression": "Array.from(toSet([3, 1, 3]))",
@@ -2017,7 +1975,7 @@
     "name": "toSetIf",
     "group": "Conditional conversion",
     "params": "value, condition",
-    "summary": "Converts supported iterable, record or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
+    "summary": "Converts supported iterable, plain object or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
     "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toSet` contract.",
     "returns": "Set|*",
     "examples": [

@@ -1,7 +1,6 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const T = require('..');
 for (const length of [-1, 0.5, NaN, Infinity, '1', 1n, undefined, 2 ** 32]) {
   test(`invalid exposed array length: ${String(length)} (${typeof length})`, () => {
@@ -19,7 +18,6 @@ for (const length of [-1, 0.5, NaN, Infinity, '1', 1n, undefined, 2 ** 32]) {
         return Reflect.getOwnPropertyDescriptor(target, key);
       }
     });
-    assert.throws(() => compileTypeMatcher(value), TypeError);
     assert.equal(memberReads, 0);
     assert.equal(T.isArrayOf(value, 'number'), false);
     assert.equal(T.isNonEmptyArray(value), false);
@@ -28,8 +26,7 @@ for (const length of [-1, 0.5, NaN, Infinity, '1', 1n, undefined, 2 ** 32]) {
 test('valid array proxy length is read once by array and matcher operations', () => {
   for (const [check, values] of [
     [(value) => T.isArrayOf(value, 'number'), [1]],
-    [T.isNonEmptyArray, [1]],
-    [(value) => compileTypeMatcher(value)(1), ['number']]
+    [T.isNonEmptyArray, [1]]
   ]) {
     let reads = 0;
     const value = new Proxy(values, {

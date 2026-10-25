@@ -12,7 +12,7 @@ if (process.argv[2] === '--worker') {
   const arrays = [[], [1, 2, 3], [null, undefined], new Array(5)];
   const values = [1, null, 'x', false, {}, undefined];
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
-  const simple = ['number', null, 'string'];
+  const simple = (value) => typeof value === 'number' || value === null || typeof value === 'string';
   const cases = [
     ['isInteger / number primitives', (i) => T.isInteger(input[i % input.length])],
     ['isSafeInteger / boxed numbers', (i) => T.isSafeInteger(boxes[i % boxes.length])],
@@ -20,8 +20,8 @@ if (process.argv[2] === '--worker') {
     ['isNumeric / numeric strings', (i) => T.isNumeric(['1.5', ' 42 ', '-2', '1e3'][i % 4])],
     ['isEmpty / arrays', (i) => T.isEmpty(arrays[i % arrays.length])],
     ['isBlank / arrays', (i) => T.isBlank(arrays[i % arrays.length])],
-    ['isTypeOf / primitive type name', (i) => T.isTypeOf(values[i % values.length], 'number')],
-    ['isTypeOf / three-way union', (i) => T.isTypeOf(values[i % values.length], simple)],
+    ['isArrayOf / primitive type name', (i) => T.isArrayOf([values[i % values.length]], 'number')],
+    ['isArrayOf / composed predicate', (i) => T.isArrayOf([values[i % values.length]], simple)],
     ['isArrayOf / eight numeric items', () => T.isArrayOf(numbers, 'number')],
     ['isArray / mixed values', (i) => T.isArray(values[i % values.length])],
     ['isMap / ordinary object negative', (i) => T.isMap(values[i % values.length])]

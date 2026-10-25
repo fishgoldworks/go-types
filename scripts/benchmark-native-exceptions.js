@@ -20,7 +20,7 @@ try {
     ['isEmpty dictionary', () => T.isEmpty({})],
     ['isBlank dictionary', () => T.isBlank({ x: null })],
     ['isEmpty Map', () => T.isEmpty(new Map())],
-    ['isTypeOf descriptor', () => T.isTypeOf(1, { predicate: (x) => typeof x === 'number' })],
+    ['isArrayOf predicate', () => T.isArrayOf([1], (x) => typeof x === 'number')],
     ['isMap object rejection', () => T.isMap({})],
     ['isEmpty array', () => T.isEmpty([])],
     ['isFinite object rejection', () => T.isFinite({})],

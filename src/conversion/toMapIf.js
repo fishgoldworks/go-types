@@ -4,16 +4,16 @@ const toMap = require('./toMap');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Converts a plain record or synchronous iterable of strict entry pairs to a new Map when the
- * condition evaluates to `true`. Otherwise, returns the original value unchanged.
+ * Converts a plain object or iterable of key/value pairs to a new Map when the condition evaluates
+ * to `true`. Otherwise, returns the original value unchanged.
  *
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toMap`. Plain records supply own enumerable string and symbol
- * entries. Iterable pairs must be exact two-element arrays with both own indices present.
- * Duplicate keys keep their first position and take the last value. Nullish input creates an empty
- * Map. Requires native `Map`; missing support throws before inspecting the input.
+ * Requested conversion uses `toMap`. Plain object entries come from own enumerable properties with
+ * string or symbol keys. Iterable pairs must be exact two-element arrays with both own indices
+ * present. Duplicate keys keep their first position and take the last value. Nullish input creates
+ * an empty Map. Requires native `Map`; missing support throws before inspecting the input.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.

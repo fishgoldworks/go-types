@@ -11,7 +11,7 @@ const pkg = require('../package.json');
 // extend the related categories; conversions have their own complete sections.
 const categories = [
   ['Primitive', ['isUndefined', 'isNull', 'isBoolean', 'isNumber', 'isString', 'isSymbol', 'isBigInt', 'isPrimitive']],
-  ['Utility', ['isNullish', 'isNonNullish', 'isEmpty', 'isBlank', 'isTruthy', 'isFalsy', 'isTypeOf', 'isJson']],
+  ['Utility', ['isNullish', 'isNonNullish', 'isEmpty', 'isBlank', 'isTruthy', 'isFalsy', 'isJson']],
   ['Number', ['isInteger', 'isSafeInteger', 'isFloat', 'isFinite', 'isInfinite', 'isNaN', 'isNumeric']],
   [
     'Object',
@@ -32,7 +32,6 @@ const categories = [
       'isRegExp',
       'isPromise',
       'isPromiseLike',
-      'isThenable',
       'isError'
     ]
   ],
@@ -97,14 +96,6 @@ isCyclic({ a: 1, b: { c: 1 } }); // => false
 
 const shared = {};
 isCyclic({ a: shared, b: shared }); // => false`,
-  isTypeOf: `class Account {}
-
-isTypeOf(42, 'number'); // => true
-isTypeOf(new Account(), Account); // => true
-isTypeOf('hello', { predicate: isString }); // => true
-isTypeOf(null, ['string', null]); // => true
-isTypeOf('42', Number); // => false
-isTypeOf(42, 'nubmer'); // => throws TypeError`,
   isAsyncIterable: `async function* values() {
   yield 1;
 }
@@ -147,7 +138,7 @@ isInvalidDate(toDate(undefined)); // => true
 
 const date = new Date(0);
 toDate(date) === date; // => true`,
-  toPlainObject: `toPlainObject('{"a":1}'); // => ({ a: 1 })
+  toPlainObject: `toPlainObject({ a: 1 }); // => ({ a: 1 })
 toPlainObject([['a', 1]]); // => ({ a: 1 })
 
 const object = { x: 1 };

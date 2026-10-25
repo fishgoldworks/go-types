@@ -4,7 +4,6 @@ const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-
 function inHost(body) {
   const result = spawnSync(
     process.execPath,
@@ -18,7 +17,6 @@ function inHost(body) {
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stdout + result.stderr);
 }
-
 test('missing BigInt does not prevent importing the API or skipping conversion', () =>
   inHost(() => {
     delete globalThis.BigInt;
@@ -50,30 +48,19 @@ test('missing BigInt does not prevent importing the API or skipping conversion',
     );
     assert.throws(() => T.toBigIntIf(value, () => 1), /boolean/);
   }));
-
-test('nested pure unions work without flatMap and preserve effectful branches', () =>
+test('collection predicates work without optional array flatMap', () =>
   inHost(() => {
     Array.prototype.flatMap = undefined;
     const T = require('./index.js');
-    const shared = ['number', 'string'];
-    const check = (value) => T.isTypeOf(value, [shared, [shared, null]]);
-    for (const value of [1, 'x', null]) assert.equal(check(value), true);
-    assert.equal(check(false), false);
-    assert.equal(T.isArrayOf([1, 'x', null], [shared, null]), true);
     const calls = [];
-    const effect = {
-      predicate(value) {
-        calls.push(value);
-        return false;
-      }
+    const predicate = (value) => {
+      calls.push(value);
+      return typeof value === 'number' || value === null;
     };
-    assert.equal(T.isTypeOf(1, [[effect], [effect], 'number']), true);
-    assert.deepEqual(calls, [1, 1]);
-    const cycle = [];
-    cycle.push(cycle);
-    assert.throws(() => T.isTypeOf(undefined, cycle), /cycles/);
+    assert.equal(T.isArrayOf([1, null], predicate), true);
+    assert.deepEqual(calls, [1, null]);
+    assert.equal(T.isArrayOf([false], predicate), false);
   }));
-
 test('missing async-iterator symbol never reads the string undefined property', () =>
   inHost(() => {
     const NativeSymbol = Symbol;

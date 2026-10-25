@@ -45,7 +45,8 @@ async function imported(specifier) {
   }
   assert.match(specifier, /^go-types(?:\/[A-Za-z]+)?$/);
   const name = specifier.slice('go-types/'.length);
-  if (!manifest.exports) return specifier === 'go-types' ? { default: Types, ...Types } : { default: Types[name] };
+  if (!manifest.exports)
+    return specifier === 'go-types' ? { default: Types, ...Types } : { default: Types[name], [name]: Types[name] };
   const entry = manifest.exports[specifier === 'go-types' ? '.' : './' + name];
   const route = Array.isArray(entry) ? entry[0] : entry;
   const target = typeof route.import === 'string' ? route.import : route.import.default;

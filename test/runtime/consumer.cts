@@ -4,7 +4,8 @@ import { isArrayOf } from 'go-types';
 const value: unknown = '42';
 const converted: number = Types.toNumber(value);
 if (converted !== 42 || toNumber !== Types.toNumber) throw new Error('Compiled default/focused imports differ');
-if (!isArrayOf([1, 'x', null], [['number', 'string'], null])) throw new Error('Compiled nested matcher failed');
+if (!isArrayOf([1, 'x', null], (value) => typeof value === 'number' || typeof value === 'string' || value === null))
+  throw new Error('Compiled collection predicate failed');
 const original = {
   valueOf() {
     throw new Error('Skipped conversion must not coerce');

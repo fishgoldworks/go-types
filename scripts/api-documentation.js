@@ -30,7 +30,10 @@ function signature(item) {
     '(' +
     item.params
       .split(', ')
-      .map((name) => name + (name !== 'value' || optionalValue ? '?' : ''))
+      .map(
+        (name) =>
+          name + ((name !== 'value' && !name.endsWith('Matcher') && name !== 'matcher') || optionalValue ? '?' : '')
+      )
       .join(', ') +
     ')'
   );
@@ -47,7 +50,7 @@ function returnType(item) {
 }
 function parameters(item) {
   return item.params.split(', ').map((name) => {
-    const optional = name !== 'value' || signature(item).includes('value?');
+    const optional = signature(item).includes(name + '?');
     let type, description;
     if (name === 'value') {
       type =
@@ -77,9 +80,8 @@ function parameters(item) {
       description = 'Native JSON indentation, capped at ten spaces or ten string code units.';
     } else {
       type = 'TypeMatcher';
-      const scope =
-        name === 'keyType' ? 'Map keys' : name === 'valueType' ? 'Map values' : 'the value or collection items';
-      description = 'The matcher for ' + scope + '. An omitted matcher matches `undefined`.';
+      const scope = name === 'keyMatcher' ? 'Map keys' : name === 'valueMatcher' ? 'Map values' : 'collection items';
+      description = 'A required native `typeof` name or synchronous boolean predicate for ' + scope + '.';
     }
     return { name, type, description, optional };
   });

@@ -9,7 +9,6 @@ function load(processValue) {
   vm.runInNewContext(source, scope);
   return scope.Types;
 }
-
 for (const [name, create] of [
   [
     'resolver call',
@@ -59,16 +58,13 @@ for (const [name, create] of [
     const error = Error('application callback errors must still propagate');
     assert.throws(
       () =>
-        api.isTypeOf(1, {
-          predicate() {
-            throw error;
-          }
+        api.isArrayOf([1], function () {
+          throw error;
         }),
       (value) => value === error
     );
   });
 }
-
 const refinements = ['isFinite', 'isInfinite', 'isNaN', 'isInteger', 'isFloat', 'isSafeInteger', 'isNumeric'];
 const payloads = [
   0,
@@ -146,7 +142,6 @@ for (const name of refinements) {
     assert.equal(reads, 0);
   });
 }
-
 for (const name of ['isEmpty', 'isBlank']) {
   test(name + ' distinguishes sized containers, synchronous iterables, next-only and async-only inputs', () => {
     let calls = 0;
@@ -193,7 +188,6 @@ for (const name of ['isEmpty', 'isBlank']) {
     assert.equal(calls, 0);
   });
 }
-
 for (const discovery of ['missing', 'throws', 'partial']) {
   test('real source import and numeric outcomes with ' + discovery + ' optional backend', () => {
     const { spawnSync } = require('node:child_process');
@@ -220,7 +214,7 @@ for (const discovery of ['missing', 'throws', 'partial']) {
                 assert.equal(api[name](new Proxy(new Number(1),{})),false);
             }
             const error=Error('callback must propagate');
-            assert.throws(()=>api.isTypeOf(1,{predicate(){throw error;}}),actual=>actual===error);
+            assert.throws(()=>api.isArrayOf([1],()=>{throw error;}),actual=>actual===error);
         `
       ],
       { encoding: 'utf8', timeout: 10000 }

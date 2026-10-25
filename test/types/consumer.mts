@@ -10,7 +10,6 @@ import Types, {
   isPlainObject,
   isArray,
   isNonEmptyArray,
-  isTypeOf,
   isArrayOf,
   isMapOf,
   isSetOf,
@@ -63,43 +62,24 @@ if (isTypedArray(value)) {
   // @ts-expect-error boolean validation does not assert unknown has an index signature.
   expectType<number | bigint>(value[0]);
 }
-if (isTypeOf(value, 'number')) expectType<number>(value);
-// @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
-if (isTypeOf(value, ['number', null] as const)) expectType<number | null>(value);
-// @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
-if (isTypeOf(value, { predicate: (x: unknown): x is string => typeof x === 'string' })) expectType<string>(value);
-const partial = Math.random() ? 1 : 'x';
-if (!isTypeOf(partial, { predicate: (x: unknown): boolean => x === 1 })) {
-  expectType<string | number>(partial);
-  // @ts-expect-error a boolean predicate is not a type predicate.
-  expectType<string>(partial);
-}
-const onlyStrings = (value: unknown): value is string => isTypeOf(value, 'string');
+const onlyStrings = (value: unknown): value is string => typeof value === 'string';
 expectType<string[]>([1, 'a', null].filter(onlyStrings));
-const union = (value: unknown): boolean => isTypeOf(value, ['number', null] as const);
-// @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
-expectType<(number | null)[]>([1, 'a', null].filter(union));
-const callbacks = (value: unknown): boolean => isTypeOf(value, { predicate: (x: unknown): boolean => x === 1 });
-if (!callbacks(partial)) {
-  // @ts-expect-error no negative-branch narrowing for general validation predicates.
-  expectType<string>(partial);
-}
 // @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
 if (isArrayOf(value, 'number')) expectType<number[]>(value);
 // @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
 if (isSetOf(value, 'number')) expectType<Set<number>>(value);
 // @ts-expect-error composite/collection specifications do not imply two-sided type narrowing.
 if (isMapOf(value, 'string', 'number')) expectType<Map<string, number>>(value);
-const config: TypeMatcher = ['number', { predicate: Types.isNumber }, Date];
-Types.isTypeOf(1, config);
+const config: TypeMatcher = Types.isNumber;
+Types.isArrayOf([1], config);
 // @ts-expect-error misspelled typeof name.
-isTypeOf(value, 'nubmer');
-// @ts-expect-error type specifications are not arbitrary numbers.
-isTypeOf(value, 42);
-// @ts-expect-error ambiguous descriptors have no valid mode.
-isTypeOf(1, { predicate: () => true, instanceOf: Object });
-// @ts-expect-error async validators are not accepted.
-isTypeOf(1, { predicate: async () => true });
+isArrayOf(value, 'nubmer');
+// @ts-expect-error matchers are not arbitrary numbers.
+isArrayOf(value, 42);
+// @ts-expect-error descriptor objects are no longer matchers.
+isArrayOf([1], { predicate: () => true });
+// @ts-expect-error async predicates are not supported.
+isArrayOf([1], async () => true);
 if (isIteratorLike(value)) {
   // @ts-expect-error next presence does not prove the full iterator contract.
   expectType<Iterator<unknown>>(value);
@@ -108,12 +88,6 @@ if (isAsyncIterable(value)) {
   // @ts-expect-error method presence does not prove returned iterators are valid.
   expectType<AsyncIterable<unknown>>(value);
 }
-const another = Math.random() ? () => {} : {};
-if (!isTypeOf(another, 'object')) {
-  // @ts-expect-error typeof-object must not erase function alternatives as TS object.
-  expectType<never>(another);
-}
-
 import arrayCheck from 'go-types/isArray';
 import numericCheck from 'go-types/src/isNumeric.js';
 expectType<boolean>(arrayCheck([]));
@@ -121,7 +95,9 @@ expectType<boolean>(numericCheck('1'));
 // @ts-expect-error private helpers are not supported entry points.
 import privateCheck from 'go-types/src/util/hasNativeBrand';
 import legacyObjectConversion from 'go-types/src/conversion/toPlainObject';
-expectType<object>(legacyObjectConversion('{}'));
+expectType<object>(legacyObjectConversion({}));
+// @ts-expect-error Legacy focused imports also reject JSON text.
+legacyObjectConversion('{}');
 
 // Conversion return types retain element types, original identities and conditional branches.
 import {
@@ -153,7 +129,8 @@ expectType<string>(convertToString(Symbol('x')));
 expectType<symbol>(toSymbol('x'));
 const originalObject = { score: 1 };
 expectType<Partial<typeof originalObject>>(toPlainObject(originalObject));
-expectType<Record<string | symbol, unknown>>(toPlainObject('{}'));
+// @ts-expect-error JSON text is not a plain-object conversion source.
+toPlainObject('{}');
 expectType<number>(toNumberIf('1', true));
 expectType<'1'>(toNumberIf('1' as const, false));
 expectType<'1'>(toNumberIf('1' as const));

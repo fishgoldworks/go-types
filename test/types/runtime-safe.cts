@@ -3,11 +3,11 @@ function assert(condition: boolean): void {
   if (!condition) throw new Error('Type/runtime contract regression');
 }
 function scalar(value: number | string, matcher: 'number' | 'boolean'): string {
-  if (T.isTypeOf(value, matcher)) return 'matched';
+  if (T.isArrayOf([value], matcher)) return 'matched';
   return typeof value === 'string' ? value.toUpperCase() : String(value);
 }
 function compiled(value: number | string, matcher: 'number' | 'boolean'): string {
-  if (T.isTypeOf(value, matcher)) return 'matched';
+  if (T.isArrayOf([value], matcher)) return 'matched';
   return typeof value === 'string' ? value.toUpperCase() : String(value);
 }
 function array(value: number[] | string, matcher: 'number' | 'boolean'): string {
@@ -30,9 +30,8 @@ assert(array([42], 'boolean') === '1');
 assert(array(new Array<number>(1), 'number') === '1');
 assert(set(new Set([42]), 'boolean') === '1');
 assert(map(new Map([[42, 42]]), 'boolean') === '1');
-assert(T.isTypeOf(42, 'number'));
-assert(!T.isTypeOf('42', 'number'));
-
+assert(T.isArrayOf([42], 'number'));
+assert(!T.isArrayOf(['42'], 'number'));
 // Structural types and typed proxies can fail native branding; refine explicitly.
 function safeNative(
   value: Boolean | Date | Map<string, number> | Set<number> | RegExp | DataView | ArrayBufferView | string,
@@ -74,7 +73,6 @@ function objectOrText(value: Number | string): string {
 }
 assert(objectOrText(42) === '42');
 assert(objectOrText('x') === 'X');
-
 // Conditional conversions call predicates without a receiver. Explicitly bound
 // methods and arrows retain the documented runtime behaviour and inferred types.
 const policy = { enabled: true };
@@ -98,34 +96,29 @@ assert(
     return this === undefined && value.length === 0;
   }) === inputNumbers
 );
-
 // Collection matchers use the same unbound callback convention as direct checks.
 const matcherPolicy = { allowed: true };
 function allowedItem(this: typeof matcherPolicy, _value: unknown): boolean {
   return this.allowed;
 }
-const boundItem = { predicate: allowedItem.bind(matcherPolicy) };
+const boundItem = allowedItem.bind(matcherPolicy);
 assert(T.isArrayOf([1], boundItem));
 assert(T.isArrayLikeOf({ 0: 1, length: 1 }, boundItem));
 assert(T.isSetOf(new Set([1]), boundItem));
 assert(T.isMapOf(new Map([[1, 1]]), boundItem, boundItem));
 assert(
-  T.isArrayOf([1], {
-    predicate(value) {
-      return this === undefined && value === 1;
-    }
+  T.isArrayOf([1], function (value) {
+    return this === undefined && value === 1;
   })
 );
-
 // Primitive intersections are boxed, even when they satisfy an object-shaped constraint.
-const jsonObject = T.toPlainObject('{"a":1}');
-assert(jsonObject.a === 1 && Object.getPrototypeOf(jsonObject) === Object.prototype);
+const plainObject = T.toPlainObject({ a: 1 });
+assert(plainObject.a === 1 && Object.getPrototypeOf(plainObject) === Object.prototype);
 const recordObject = { a: 1 };
 const copiedObject: Partial<typeof recordObject> = T.toPlainObject(recordObject);
 assert(copiedObject !== recordObject && copiedObject.a === 1);
 assert(T.toPlainObjectIf(null, false) === null);
 assert(T.toPlainObjectIf(recordObject, () => false) === recordObject);
-
 // Optional/nullable iterators can override numeric indexed values at conversion time.
 interface OptionalArrayIterator extends ArrayLike<number> {
   [Symbol.iterator]?: (() => IterableIterator<string>) | null;
@@ -155,6 +148,19 @@ assert(Array.isArray(convertedAfterCondition) && convertedAfterCondition[0] === 
 const definiteArrayLike: ArrayLike<number> = { 0: 7, length: 1 };
 const definiteValues: (number | undefined)[] = T.toArray(definiteArrayLike);
 assert(definiteValues.length === 2 && definiteValues[0] === 7 && definiteValues[1] === 1);
-const definiteAbsent: ArrayLike<number> & { [Symbol.iterator]: null } = { 0: 8, length: 1, [Symbol.iterator]: null };
+const definiteAbsent: ArrayLike<number> & {
+  [Symbol.iterator]: null;
+} = { 0: 8, length: 1, [Symbol.iterator]: null };
 const definiteAbsentValues: (number | null | undefined)[] = T.toArray(definiteAbsent);
 assert(definiteAbsentValues.length === 3 && definiteAbsentValues[0] === 8 && definiteAbsentValues[2] === null);
+
+// Promise protocol detection accepts then-only values without calling their methods.
+let subscriptionCalls = 0;
+const thenOnly = {
+  then() {
+    subscriptionCalls++;
+  }
+};
+assert(T.isPromiseLike(thenOnly));
+assert(subscriptionCalls === 0);
+assert(!T.isPromiseLike({ then: true }));

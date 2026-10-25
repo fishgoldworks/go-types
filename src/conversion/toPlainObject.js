@@ -3,7 +3,6 @@ const isPlainObject = require('../isPlainObject');
 const { ownKeys, iteratorKey, isUnsupportedObject } = require('../util/conversionSupport');
 const isCallable = require('../util/isCallable');
 const isArray = Array.isArray;
-const parse = JSON.parse;
 const defineProperty = Object.defineProperty;
 const getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 const call = Function.prototype.call;
@@ -35,33 +34,26 @@ function fromEntries(value) {
 }
 
 /**
- * Converts JSON object text, a plain object, or entry pairs into a fresh plain object.
+ * Creates a plain object from key/value pairs, or makes a shallow copy of an existing plain
+ * object.
  *
  * Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving
- * nested references. Entry pairs must be two-element arrays with string or symbol keys. Nullish
- * input throws.
+ * nested references. Entry pairs must be two-element arrays with string or symbol keys. Strings
+ * and nullish input throw.
  *
  * @param {*} value The value to convert.
- * @returns {object} A fresh ordinary object containing the parsed properties, copied enumerable
- * properties, or supplied entries.
- * @throws {*} Malformed JSON throws SyntaxError. Unsupported inputs, non-object JSON, malformed
- * entry pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate
- * without replacement.
+ * @returns {object} A fresh ordinary object containing the copied enumerable properties or
+ * supplied entries.
+ * @throws {*} Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError.
+ * Getter, proxy and iterator errors propagate without replacement.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
- * @example toPlainObject('{"a":1}');                                                        // => {"a":1}
+ * @example toPlainObject({a:1});                                                            // => {"a":1}
  * @example toPlainObject([['a', 1], ['a', 2]]);                                             // => {"a":2}
  * @example (() => { const object = {x: 1}; return toPlainObject(object) === object; })();   // => false
  */
 function toPlainObject(value) {
-  if (typeof value === 'string') {
-    const result = parse(value);
-    if (result === null || typeof result !== 'object' || isArray(result)) {
-      throw new TypeError('toPlainObject JSON must contain an object at the top level.');
-    }
-    return result;
-  }
   if (value === null || typeof value !== 'object') {
-    throw new TypeError('toPlainObject requires JSON object text, a plain object, or an iterable of entries.');
+    throw new TypeError('toPlainObject requires a plain object or an iterable of entries.');
   }
   if (isUnsupportedObject(value)) {
     throw new TypeError('toPlainObject does not accept boxed primitives, Dates or RegExps.');

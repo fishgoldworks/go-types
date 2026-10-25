@@ -31,25 +31,25 @@ Conversions propagate application errors. Object conversion methods, getters and
 
 ## API summary
 
-| Conversion                                    | Conditional counterpart                                     | Result                                                       |
-| --------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| [`toArray`](API.md#toarrayvalue)              | [`toArrayIf`](API.md#toarrayifvalue-condition)              | A new shallow ordinary array.                                |
-| [`toBigInt`](API.md#tobigintvalue)            | [`toBigIntIf`](API.md#tobigintifvalue-condition)            | A primitive bigint.                                          |
-| [`toBoolean`](API.md#tobooleanvalue)          | [`toBooleanIf`](API.md#tobooleanifvalue-condition)          | A primitive boolean, using truthiness.                       |
-| [`toDate`](API.md#todatevalue)                | [`toDateIf`](API.md#todateifvalue-condition)                | A `Date`, which may be invalid.                              |
-| [`toInteger`](API.md#tointegervalue)          | [`toIntegerIf`](API.md#tointegerifvalue-condition)          | Number conversion truncated towards zero.                    |
-| [`toJson`](API.md#tojsonvalue-replacer-space) | [`toJsonIf`](API.md#tojsonifvalue-condition-replacer-space) | Native JSON text, or `undefined`.                            |
-| [`fromJson`](API.md#fromjsonvalue-reviver)    | [`fromJsonIf`](API.md#fromjsonifvalue-condition-reviver)    | Parsed or revived value, typed as `unknown`.                 |
-| [`toMap`](API.md#tomapvalue)                  | [`toMapIf`](API.md#tomapifvalue-condition)                  | A new shallow Map from a plain object or iterable entries.   |
-| [`toNumber`](API.md#tonumbervalue)            | [`toNumberIf`](API.md#tonumberifvalue-condition)            | A primitive number, potentially `NaN` or infinite.           |
-| [`toPlainObject`](API.md#toplainobjectvalue)  | [`toPlainObjectIf`](API.md#toplainobjectifvalue-condition)  | A fresh ordinary object from JSON, a record or entry pairs.  |
-| [`toSet`](API.md#tosetvalue)                  | [`toSetIf`](API.md#tosetifvalue-condition)                  | A new shallow Set of iterable, record or indexed values.     |
-| [`toString`](API.md#tostringvalue)            | [`toStringIf`](API.md#tostringifvalue-condition)            | A primitive string.                                          |
-| [`toSymbol`](API.md#tosymbolvalue)            | [`toSymbolIf`](API.md#tosymbolifvalue-condition)            | A primitive symbol.                                          |
-| [`box`](API.md#boxvalue)                      | [`boxIf`](API.md#boxifvalue-condition)                      | Native primitive wrapper, or unchanged object/nullish input. |
-| [`unbox`](API.md#unboxvalue)                  | [`unboxIf`](API.md#unboxifvalue-condition)                  | Genuine wrapper payload, or unchanged input.                 |
-| [`toRegExp`](API.md#toregexpvalue-flags)      | [`toRegExpIf`](API.md#toregexpifvalue-condition-flags)      | Genuine native RegExp.                                       |
-| [`toPromise`](API.md#topromisevalue)          | [`toPromiseIf`](API.md#topromiseifvalue-condition)          | Native Promise adopting the input.                           |
+| Conversion                                    | Conditional counterpart                                     | Result                                                         |
+| --------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| [`toArray`](API.md#toarrayvalue)              | [`toArrayIf`](API.md#toarrayifvalue-condition)              | A new shallow ordinary array.                                  |
+| [`toBigInt`](API.md#tobigintvalue)            | [`toBigIntIf`](API.md#tobigintifvalue-condition)            | A primitive bigint.                                            |
+| [`toBoolean`](API.md#tobooleanvalue)          | [`toBooleanIf`](API.md#tobooleanifvalue-condition)          | A primitive boolean, using truthiness.                         |
+| [`toDate`](API.md#todatevalue)                | [`toDateIf`](API.md#todateifvalue-condition)                | A `Date`, which may be invalid.                                |
+| [`toInteger`](API.md#tointegervalue)          | [`toIntegerIf`](API.md#tointegerifvalue-condition)          | Number conversion truncated towards zero.                      |
+| [`toJson`](API.md#tojsonvalue-replacer-space) | [`toJsonIf`](API.md#tojsonifvalue-condition-replacer-space) | Native JSON text, or `undefined`.                              |
+| [`fromJson`](API.md#fromjsonvalue-reviver)    | [`fromJsonIf`](API.md#fromjsonifvalue-condition-reviver)    | Parsed or revived value, typed as `unknown`.                   |
+| [`toMap`](API.md#tomapvalue)                  | [`toMapIf`](API.md#tomapifvalue-condition)                  | A new shallow Map from a plain object or iterable entries.     |
+| [`toNumber`](API.md#tonumbervalue)            | [`toNumberIf`](API.md#tonumberifvalue-condition)            | A primitive number, potentially `NaN` or infinite.             |
+| [`toPlainObject`](API.md#toplainobjectvalue)  | [`toPlainObjectIf`](API.md#toplainobjectifvalue-condition)  | A shallow object copy or an object built from key/value pairs. |
+| [`toSet`](API.md#tosetvalue)                  | [`toSetIf`](API.md#tosetifvalue-condition)                  | A new shallow Set of iterable, object or indexed values.       |
+| [`toString`](API.md#tostringvalue)            | [`toStringIf`](API.md#tostringifvalue-condition)            | A primitive string.                                            |
+| [`toSymbol`](API.md#tosymbolvalue)            | [`toSymbolIf`](API.md#tosymbolifvalue-condition)            | A primitive symbol.                                            |
+| [`box`](API.md#boxvalue)                      | [`boxIf`](API.md#boxifvalue-condition)                      | Native primitive wrapper, or unchanged object/nullish input.   |
+| [`unbox`](API.md#unboxvalue)                  | [`unboxIf`](API.md#unboxifvalue-condition)                  | Genuine wrapper payload, or unchanged input.                   |
+| [`toRegExp`](API.md#toregexpvalue-flags)      | [`toRegExpIf`](API.md#toregexpifvalue-condition-flags)      | Genuine native RegExp.                                         |
+| [`toPromise`](API.md#topromisevalue)          | [`toPromiseIf`](API.md#topromiseifvalue-condition)          | Native Promise adopting the input.                             |
 
 See the **[full API documentation](API.md)** for parameters, return values, errors and examples for each function. The additional examples below illustrate the shared rules and important distinctions.
 
@@ -58,7 +58,7 @@ See the **[full API documentation](API.md)** for parameters, return values, erro
 `toArray(value)` and `toSet(value)` select values in this order after rejecting unsupported categories:
 
 1. A synchronous iterable supplies its yielded values.
-2. A plain record supplies its own enumerable string and symbol property values.
+2. A plain object supplies its own enumerable string and symbol property values.
 3. A supported non-plain array-like object supplies its indexed values.
 
 `toArray` returns a fresh ordinary local array. `toSet` returns a fresh local Set and removes duplicate values using native Set equality. Both are shallow: nested values retain their identities.
@@ -77,7 +77,7 @@ toArray(null);                     // => throws TypeError
 toSet(null).size;                  // => 0
 ```
 
-Plain records include null-prototype and foreign-realm records. A property named `length` is ordinary record data, even if its value is not numeric. The own-key list is snapshotted in property order: string keys followed by symbol keys. Each current descriptor is checked for enumerability and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and inherited or non-enumerable properties are not copied. Getters and proxy traps can run, mutate input or throw.
+Plain objects include null-prototype and foreign-realm objects. A property named `length` is ordinary property data, even if its value is not numeric. The own-key list is snapshotted in property order: string keys followed by symbol keys. Each current descriptor is checked for enumerability and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and inherited or non-enumerable properties are not copied. Getters and proxy traps can run, mutate input or throw.
 
 Only non-plain array-like objects use the indexed fallback. Their `length` must already be a primitive number, an integer from zero through `Number.MAX_SAFE_INTEGER`, matching `isArrayLike`. String, fractional, negative, infinite and boxed lengths are rejected instead of coerced. Length is read once; values are read live. Missing indices become explicit `undefined`, and inherited indices can supply values.
 
@@ -92,13 +92,13 @@ toArray(new Indexed('2'));           // => throws TypeError
 toArray(new Indexed(1.5));           // => throws TypeError
 ```
 
-On eligible inputs, a synchronous iterator takes precedence over record and indexed data. The iterator method is read once and called with the original input as its receiver. A nullish method permits fallback; any other non-callable method throws. Strings iterate by Unicode code point. Functions, boxed primitives, Dates and RegExps are rejected before iterator or length inspection, even if custom properties suggest a source. Other non-string primitives are also rejected, apart from the nullish Set case.
+On eligible inputs, a synchronous iterator takes precedence over object and indexed data. The iterator method is read once and called with the original input as its receiver. A nullish method permits fallback; any other non-callable method throws. Strings iterate by Unicode code point. Functions, boxed primitives, Dates and RegExps are rejected before iterator or length inspection, even if custom properties suggest a source. Other non-string primitives are also rejected, apart from the nullish Set case.
 
-Omitted, `null` or `undefined` input throws for `toArray` and creates an empty Set for `toSet`. Ordinary promises and native async-only containers without a supported synchronous source are rejected. A plain async-only record is copied as data, including an enumerable async-iterator symbol and its value; its async iterator is not invoked. No input is awaited.
+Omitted, `null` or `undefined` input throws for `toArray` and creates an empty Set for `toSet`. Ordinary promises and native async-only containers without a supported synchronous source are rejected. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value; its async iterator is not invoked. No input is awaited.
 
 A finite one-shot iterator is consumed. Infinite iterables never finish, and very large inputs can exhaust memory; oversized array results can throw `RangeError`. There is no work limit, hidden buffering or deep cloning. `toArray` retains its native `Array.from` capability requirement; `toSet` requires native `Set` independently of `Array.from`.
 
-Record copying requires `Reflect.ownKeys` or `Object.getOwnPropertySymbols`. If both are absent, it throws rather than silently discarding possible symbol properties. See the [runtime guide](runtime.md#optional-capabilities) for iterator-key capability limits.
+Object copying requires `Reflect.ownKeys` or `Object.getOwnPropertySymbols`. If both are absent, it throws rather than silently discarding possible symbol properties. See the [runtime guide](runtime.md#optional-capabilities) for iterator-key capability limits.
 
 ## Number and integer conversion
 
@@ -192,7 +192,7 @@ fromJson('42', () => 'replacement');                                         // 
 fromJson('42', () => undefined);                                             // => undefined
 ```
 
-Input coercion and reviver exceptions propagate unchanged. Native parsing treats `__proto__` as an own data property; the library adds no unsafe property copying. Newer runtimes can supply source context to a reviver's third argument; Node 8 does not. Declarations therefore make both the context and `context.source` optional. The parsed or revived result is `unknown`, and callers must validate it before accessing application-specific properties. Use `toPlainObject` when the requested result must specifically be a plain object.
+Input coercion and reviver exceptions propagate unchanged. Native parsing treats `__proto__` as an own data property; the library adds no unsafe property copying. Newer runtimes can supply source context to a reviver's third argument; Node 8 does not. Declarations therefore make both the context and `context.source` optional. The parsed or revived result is `unknown`, and callers must validate it before accessing application-specific properties. Use `isPlainObject` to check the parsed result when a plain object is required.
 
 ## JSON serialisation
 
@@ -233,36 +233,35 @@ The return type is `string | undefined`, even for object input, because hooks an
 
 ## Plain-object conversion
 
-`toPlainObject(value)` creates a fresh object with the local `Object.prototype`. It accepts primitive JSON object text, plain objects (including null-prototype and foreign records), Maps and synchronous iterables of entry pairs.
+`toPlainObject(value)` creates a fresh object with the local `Object.prototype`. It accepts plain objects (including null-prototype and foreign objects), Maps and synchronous iterables of entry pairs. Strings are not parsed or converted; use `fromJson` to parse JSON text.
 
 <!-- prettier-ignore -->
 ```javascript
 const original = { x: 1 };
-toPlainObject(original);                   // => ({ x: 1 })
-toPlainObject(original) === original;      // => false
-toPlainObject('{"a":1,"nested":[1,2]}');   // => ({ a: 1, nested: [1, 2] })
-toPlainObject(new Map([['a', 1]]));        // => ({ a: 1 })
-toPlainObject([['a', 1], ['a', 2]]);       // => ({ a: 2 })
-toPlainObject([]);                         // => ({})
-toPlainObject(null);                       // => throws TypeError
-toPlainObject(42);                         // => throws TypeError
-toPlainObject('[1,2]');                    // => throws TypeError
-toPlainObject('{"a":1,}');                 // => throws SyntaxError
+toPlainObject(original);               // => ({ x: 1 })
+toPlainObject(original) === original;  // => false
+toPlainObject(new Map([['a', 1]]));    // => ({ a: 1 })
+toPlainObject([['a', 1], ['a', 2]]);   // => ({ a: 2 })
+toPlainObject([]);                     // => ({})
+toPlainObject(null);                   // => throws TypeError
+toPlainObject(42);                     // => throws TypeError
+toPlainObject('[1,2]');                // => throws TypeError
+toPlainObject('{"a":1}');              // => throws TypeError
 ```
 
-JSON must have a non-null, non-array object at the top level. Malformed text is not repaired; empty or whitespace-only strings throw `SyntaxError`. Nested arrays are allowed. Boxed strings are rejected. JSON values are not schema-validated.
+All strings throw `TypeError`, including valid JSON, malformed text, empty strings and whitespace. To require a JSON object, parse with `fromJson` and validate the result with `isPlainObject`; parsing alone can also produce arrays, primitives or `null`.
 
-Record copying includes own enumerable string and symbol properties, excludes inherited and non-enumerable properties, and retains nested references. The key list is captured first; each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Getters may run, mutate the input or throw. The output contains writable, enumerable, configurable data properties, including safe own `__proto__`, `constructor`, `prototype` and `toString` keys. It never invokes inherited setters when creating properties.
+Object copying includes own enumerable string and symbol properties, excludes inherited and non-enumerable properties, and retains nested references. The key list is captured first; each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Getters may run, mutate the input or throw. The output contains writable, enumerable, configurable data properties, including safe own `__proto__`, `constructor`, `prototype` and `toString` keys. It never invokes inherited setters when creating properties.
 
-A synchronous iterator takes precedence over record copying. Pairs must be actual two-element arrays with both own slots present. Explicit `undefined` values are valid; missing or extra elements are not. Keys must be primitive strings or symbols; numbers and boxed keys are rejected without coercion. Duplicate keys use the last value. Ordinary arrays such as `[10, 20]` and `['a', 'b']` are not entries.
+A synchronous iterator takes precedence over object copying. Pairs must be actual two-element arrays with both own slots present. Explicit `undefined` values are valid; missing or extra elements are not. Keys must be primitive strings or symbols; numbers and boxed keys are rejected without coercion. Duplicate keys use the last value. Ordinary arrays such as `[10, 20]` and `['a', 'b']` are not entries.
 
 Iteration consumes the input once. Validation and property-access errors in the loop close the outer iterator, running its `return`/`finally` cleanup; the original error wins over a cleanup error. Native `for...of` failures while stepping (`next`, `done`, or `value`) propagate without an additional close attempt. Infinite iterables do not complete. Async generators are unsupported and no input is awaited.
 
-Nullish values (including omitted input), non-string primitives, boxed primitives, functions and non-iterable class instances are rejected. Dates and regular expressions are not converted by extracting fields. Use native `Object(value)` explicitly if boxing is wanted; this change does not add a `box` API.
+Nullish values (including omitted input), primitives, boxed primitives, functions and non-iterable class instances are rejected. Dates and regular expressions are not converted by extracting fields. Use `box` explicitly when primitive boxing is wanted.
 
-The function does not depend on native `Object.fromEntries`, `Object.entries`, `Map` or `Set`. Record copying requires `Reflect.ownKeys` or `Object.getOwnPropertySymbols`; if neither exists, it throws instead of dropping possible symbol properties. JSON parsing and array-entry conversion remain usable. The runtime guide records optional-capability limitations.
+The function does not depend on native `Object.fromEntries`, `Object.entries`, `Map` or `Set`. Object copying requires `Reflect.ownKeys` or `Object.getOwnPropertySymbols`; if neither exists, it throws instead of dropping possible symbol properties. Array-entry conversion remains usable. The runtime guide records optional-capability limitations.
 
-`toPlainObjectIf(value, true)` uses the same complete conversion. A false, omitted or undefined condition returns the exact original input without inspection; predicate conditions retain the common synchronous strict-boolean rules.
+`toPlainObjectIf(value, true)` uses the same complete conversion. A false, omitted or undefined condition returns the exact original input, including strings, without inspection; predicate conditions retain the common synchronous strict-boolean rules.
 
 ## Date conversion
 
@@ -298,7 +297,7 @@ Description conversion may run user code and throw. Existing Symbol wrappers byp
 
 ## Map conversion and collection equality
 
-`toMap(value)` accepts plain records or synchronous iterables of strict entry pairs. Omitted, `null` or `undefined` input creates an empty Map. Results are fresh local Maps with shallowly shared keys and values.
+`toMap(value)` accepts plain objects or synchronous iterables of strict entry pairs. Omitted, `null` or `undefined` input creates an empty Map. Results are fresh local Maps with shallowly shared keys and values.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -315,9 +314,9 @@ const key = Symbol('key');
 toMap({[key]: 2}).get(key);                      // => 2
 ```
 
-Plain records include null-prototype and foreign-realm records. All own enumerable string and symbol properties become entries; numeric property names become string keys and symbol keys stay symbols. Inherited and non-enumerable properties are excluded. Keys are captured once, then each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and getter/proxy errors propagate. A `length` property is ordinary record data. Missing both `Reflect.ownKeys` and `Object.getOwnPropertySymbols` makes record copying throw instead of dropping symbol keys.
+Plain objects include null-prototype and foreign-realm objects. All own enumerable string and symbol properties become entries; numeric property names become string keys and symbol keys stay symbols. Inherited and non-enumerable properties are excluded. Keys are captured once, then each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and getter/proxy errors propagate. A `length` property is ordinary property data. Missing both `Reflect.ownKeys` and `Object.getOwnPropertySymbols` makes object copying throw instead of dropping symbol keys.
 
-A synchronous iterator takes precedence over record properties on eligible inputs. Its method is read once and called with the original input as receiver. A nullish iterator permits record conversion; any other non-callable method throws. Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. There is no array-like source fallback. Ordinary promises and native async-only containers without a supported synchronous source are rejected; a plain async-only record is copied, including enumerable symbol properties. No async iterator is invoked and no input is awaited.
+A synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A nullish iterator permits object conversion; any other non-callable method throws. Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. There is no array-like source fallback. Ordinary promises and native async-only containers without a supported synchronous source are rejected; a plain async-only object is copied, including enumerable symbol properties. No async iterator is invoked and no input is awaited.
 
 Every iterable entry must be an actual array of length exactly two, with both indices `0` and `1` present as own properties. Explicit `undefined` keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Keys can have any type without coercion, including objects, numbers and symbols. This differs from `toPlainObject`, whose keys must be primitive strings or symbols. An empty iterable, including an empty string, produces an empty Map; a non-empty string yields invalid primitive entries and throws.
 
@@ -336,7 +335,7 @@ toSetIf(input, false) === input;   // => true
 Array.from(toSetIf(input, true));  // => [1]
 ```
 
-Record inference includes symbol properties as well as string/number properties. A visibly optional iterator keeps inferred collection contents conservative because it may override record or indexed values. TypeScript cannot prove that a structural object type has a plain prototype or that a property is enumerable.
+Object inference includes symbol properties as well as string/number properties. A visibly optional iterator keeps inferred collection contents conservative because it may override object or indexed values. TypeScript cannot prove that a structural object type has a plain prototype or that a property is enumerable.
 
 ## Conditional conversions
 
@@ -371,7 +370,7 @@ Predicates and conversions propagate their original exceptions. A predicate may 
 
 ## TypeScript
 
-Return types preserve known iterable elements, record values, supported indexed elements and Map key/value types from entry tuples where possible. `ConvertedMap<T>` and `ConvertedSet<T>` describe the collection results; unknown inputs keep unknown element types. Literal `true` conditions select the converted type; literal `false` conditions select the original type. General boolean conditions and predicates return a union of both possibilities.
+Return types preserve known iterable elements, object values, supported indexed elements and Map key/value types from entry tuples where possible. `ConvertedMap<T>` and `ConvertedSet<T>` describe the collection results; unknown inputs keep unknown element types. Literal `true` conditions select the converted type; literal `false` conditions select the original type. General boolean conditions and predicates return a union of both possibilities.
 
 <!-- prettier-ignore -->
 ```ts
@@ -382,7 +381,7 @@ const original = toNumberIf('42' as const, false);   // '42'
 const maybe = toNumberIf('42', Math.random() > 0.5); // string | number
 ```
 
-`ConvertedPlainObject<T>` describes a fresh object. JSON properties have `unknown` values. Prototype-name properties and broad string-key records also use `unknown`, because omitted own keys can reveal inherited values. Inferred record and entry keys are optional because TypeScript cannot prove enumerability or that a collection contains a key. Copied properties are writable even if the input is readonly. A visible optional iterator makes the result conservative. Types reject obvious unsupported inputs but cannot prove that an arbitrary structural object is plain or that JSON text is valid. Skipped `toPlainObjectIf` calls preserve the original type; dynamic conditions include both possible results.
+`ConvertedPlainObject<T>` describes a fresh object. Prototype-name properties and broad string-keyed objects also use `unknown`, because omitted own keys can reveal inherited values. Inferred object and entry keys are optional because TypeScript cannot prove enumerability or that a collection contains a key. Copied properties are writable even if the input is readonly. A visible optional iterator makes the result conservative. Types reject strings and other obvious unsupported inputs but cannot prove that an arbitrary structural object is plain. Skipped `toPlainObjectIf` calls preserve the original type; dynamic conditions include both possible results.
 
 A return type describes successful completion, not an absence of exceptions or a guarantee of finite, valid or application-safe content. Conversion conditions are typed as `ConversionCondition<T>`; promises and non-boolean returns are rejected at compile time as well as at runtime.
 

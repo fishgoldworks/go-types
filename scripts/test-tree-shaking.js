@@ -23,6 +23,7 @@ async function verifyTreeShaking(consumer) {
   const expressions = {
     root: "import {isArray} from 'go-types'; globalThis.result = [isArray([]), isArray({})];",
     focused: "import isArray from 'go-types/isArray'; globalThis.result = [isArray([]), isArray({})];",
+    focusedNamed: "import {isArray} from 'go-types/isArray'; globalThis.result = [isArray([]), isArray({})];",
     namespace: "import Types from 'go-types'; globalThis.api = Types;"
   };
   const results = {};

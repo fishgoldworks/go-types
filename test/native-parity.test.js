@@ -141,7 +141,7 @@ test('container precedence survives changed native prototypes and own length pro
     }
   assert.equal(reads, 0);
 });
-test('boxed type names take precedence over descriptor lookalikes without calling getters', () => {
+test('boxed type names are rejected without inspecting descriptor-like getters', () => {
   for (const api of [T, F]) {
     const name = new String('number');
     Object.setPrototypeOf(name, null);
@@ -150,8 +150,8 @@ test('boxed type names take precedence over descriptor lookalikes without callin
         throw Error('not a descriptor');
       }
     });
-    assert.equal(api.isTypeOf(1, name), true);
-    assert.equal(api.isTypeOf('1', name), false);
+    assert.throws(() => api.isArrayOf([1], name), { name: 'TypeError' });
+    assert.throws(() => api.isArrayOf(['1'], name), { name: 'TypeError' });
   }
 });
 test('import works without process, with null process, or without optional getBuiltinModule', () => {
@@ -237,7 +237,7 @@ test('real source imports retain intrinsic fallbacks without getBuiltinModule', 
             Object.setPrototypeOf(value,null);assert.equal(T[name](value),true);
         }
         assert.equal(T.isEmpty({}),true);assert.equal(T.isBlank({x:null}),true);
-        assert.equal(T.isTypeOf(1,{predicate:T.isNumber}),true);
+        assert.equal(T.isArrayOf([1],T.isNumber),true);
     `
     ],
     { encoding: 'utf8', timeout: 10000 }

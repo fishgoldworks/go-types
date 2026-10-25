@@ -13,6 +13,8 @@
   "files": [
     "consumer.mts",
     "consumer.cts",
+    "isPromiseLike.cts",
+    "isPromiseLike.mts",
     "conservative-narrowing.cts",
     "runtime-safe.cts",
     "native-safety.cts",

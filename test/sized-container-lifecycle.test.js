@@ -1,9 +1,7 @@
 'use strict';
-
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const Types = require('../index.js');
-
 const contentChecks = [
   ['array', (matcher) => Types.isArrayOf([1], matcher)],
   ['array-like', (matcher) => Types.isArrayLikeOf({ 0: 1, length: 1 }, matcher)],
@@ -16,14 +14,12 @@ for (const [label, check] of contentChecks) {
     const policy = { allowed: true };
     let calls = 0;
     assert.equal(
-      check({
-        predicate(value) {
-          calls++;
-          assert.equal(this, undefined);
-          assert.equal(arguments.length, 1);
-          assert.equal(value, 1);
-          return true;
-        }
+      check(function (value) {
+        calls++;
+        assert.equal(this, undefined);
+        assert.equal(arguments.length, 1);
+        assert.equal(value, 1);
+        return true;
       }),
       true
     );
@@ -32,26 +28,23 @@ for (const [label, check] of contentChecks) {
       assert.equal(value, 1);
       return this.allowed;
     }
-    assert.throws(() => check({ predicate: needsReceiver }), TypeError);
-    assert.equal(check({ predicate: needsReceiver.bind(policy) }), true);
+    assert.throws(() => check(needsReceiver), TypeError);
+    assert.equal(check(needsReceiver.bind(policy)), true);
     policy.allowed = false;
-    assert.equal(check({ predicate: needsReceiver.bind(policy) }), false);
+    assert.equal(check(needsReceiver.bind(policy)), false);
     const failure = { label };
     assert.throws(
       () =>
-        check({
-          predicate() {
-            throw failure;
-          }
+        check(function () {
+          throw failure;
         }),
       (error) => error === failure
     );
     assert.equal(calls, 1);
   });
 }
-
 for (const name of ['isArrayOf', 'isArrayLikeOf']) {
-  test(name + ' snapshots matcher and length while later inherited positions remain live', () => {
+  test(name + ' snapshots length while later inherited positions remain live', () => {
     const prototype = Object.create(Array.prototype);
     prototype[1] = 2;
     const target = [1, 20];
@@ -64,22 +57,16 @@ for (const name of ['isArrayOf', 'isArrayLikeOf']) {
       }
     });
     const seen = [];
-    const matcher = {
-      predicate(value) {
-        seen.push(value);
-        delete target[1];
-        target.push('beyond snapshot');
-        matcher.predicate = () => {
-          throw Error('matcher recompiled');
-        };
-        return typeof value === 'number';
-      }
+    const matcher = function (value) {
+      seen.push(value);
+      delete target[1];
+      target.push('beyond snapshot');
+      return typeof value === 'number';
     };
     assert.equal(Types[name](input, matcher), true);
     assert.deepEqual(seen, [1, 2]);
     assert.equal(lengthReads, 1);
   });
-
   test(name + ' short-circuits indexed reads and remains usable after a nested failure', () => {
     const failure = { message: 'nested value' };
     const nested = [];
@@ -96,15 +83,13 @@ for (const name of ['isArrayOf', 'isArrayLikeOf']) {
     });
     let calls = 0;
     assert.equal(
-      Types[name](input, {
-        predicate() {
-          calls++;
-          assert.throws(
-            () => Types[name](nested, 'number'),
-            (error) => error === failure
-          );
-          return false;
-        }
+      Types[name](input, function () {
+        calls++;
+        assert.throws(
+          () => Types[name](nested, 'number'),
+          (error) => error === failure
+        );
+        return false;
       }),
       false
     );
@@ -112,7 +97,6 @@ for (const name of ['isArrayOf', 'isArrayLikeOf']) {
     assert.equal(Types[name]([1, 2], 'number'), true);
   });
 }
-
 test('array and array-like length limits remain distinct without traversing enormous fixtures', () => {
   for (const [length, arrayLength, arrayLikeLength] of [
     [-0, true, true],
@@ -140,7 +124,6 @@ test('array and array-like length limits remain distinct without traversing enor
     assert.equal(reads, length === 0 ? 0 : Number(arrayLength) + Number(arrayLikeLength));
   }
 });
-
 test('cardinality-only checks read length once without inspecting values or iterator properties', () => {
   for (const name of ['isPair', 'isNonEmptyArray', 'isEmpty', 'isArrayLike']) {
     const reads = [];
@@ -155,20 +138,22 @@ test('cardinality-only checks read length once without inspecting values or iter
     assert.deepEqual(reads, ['length']);
   }
 });
-
-test('both Map matchers are compiled in order before input inspection or callbacks', () => {
-  const events = [];
+test('both Map matchers are validated before input inspection or callbacks', () => {
   let calls = 0;
-  const descriptor = (label, predicate) =>
-    new Proxy(
-      { predicate },
-      {
-        getOwnPropertyDescriptor(target, key) {
-          events.push(label + ':' + String(key));
-          return Reflect.getOwnPropertyDescriptor(target, key);
-        }
+  const predicate = new Proxy(
+    () => {
+      calls++;
+      return true;
+    },
+    {
+      get() {
+        throw Error('predicate properties inspected');
+      },
+      getOwnPropertyDescriptor() {
+        throw Error('predicate descriptors inspected');
       }
-    );
+    }
+  );
   const input = new Proxy(
     {},
     {
@@ -177,22 +162,11 @@ test('both Map matchers are compiled in order before input inspection or callbac
       }
     }
   );
-  assert.throws(
-    () =>
-      Types.isMapOf(
-        input,
-        descriptor('key', () => {
-          calls++;
-          return true;
-        }),
-        descriptor('value', 42)
-      ),
-    TypeError
-  );
-  assert.deepEqual(events, ['key:predicate', 'key:instanceOf', 'value:predicate', 'value:instanceOf']);
+  assert.throws(() => Types.isMapOf(input, predicate, 'invalid'), TypeError);
+  assert.equal(calls, 0);
+  assert.equal(Types.isMapOf(new Map(), predicate, predicate), true);
   assert.equal(calls, 0);
 });
-
 test('Map validation checks key before value and skips every later callback after a mismatch', () => {
   const input = new Map([
     ['first', 1],
@@ -202,17 +176,13 @@ test('Map validation checks key before value and skips every later callback afte
     const calls = [];
     const result = Types.isMapOf(
       input,
-      {
-        predicate(value) {
-          calls.push(['key', value]);
-          return stop !== 'key';
-        }
+      function (value) {
+        calls.push(['key', value]);
+        return stop !== 'key';
       },
-      {
-        predicate(value) {
-          calls.push(['value', value]);
-          return stop !== 'value';
-        }
+      function (value) {
+        calls.push(['value', value]);
+        return stop !== 'value';
       }
     );
     assert.equal(result, stop === 'none');
@@ -229,7 +199,6 @@ test('Map validation checks key before value and skips every later callback afte
     ['second', 2]
   ]);
 });
-
 for (const family of ['Map', 'Set']) {
   test(family + ' native content and size take precedence over own length, iterator and size getters', () => {
     const input = family === 'Map' ? new Map([['key', null]]) : new Set([null]);
@@ -243,7 +212,12 @@ for (const family of ['Map', 'Set']) {
     Object.setPrototypeOf(input, null);
     assert.equal(Types.isEmpty(input), false);
     assert.equal(Types.isBlank(input), true);
-    assert.equal(family === 'Map' ? Types.isMapOf(input, 'string', null) : Types.isSetOf(input, null), true);
+    assert.equal(
+      family === 'Map'
+        ? Types.isMapOf(input, 'string', (value) => value === null)
+        : Types.isSetOf(input, (value) => value === null),
+      true
+    );
     assert.equal(family === 'Map' ? Types.isMapOf(input, 'string', 'number') : Types.isSetOf(input, 'number'), false);
     if (family === 'Map') Map.prototype.clear.call(input);
     else Set.prototype.clear.call(input);
@@ -251,7 +225,6 @@ for (const family of ['Map', 'Set']) {
     assert.equal(Types.isBlank(input), true);
   });
 }
-
 for (const name of ['isEmpty', 'isBlank']) {
   test(name + ' accepts valid size information before inspecting protocol capabilities', () => {
     const input = Object.create(null);
@@ -279,7 +252,6 @@ for (const name of ['isEmpty', 'isBlank']) {
     );
   });
 }
-
 test('blank dictionaries snapshot own string keys but read their values live', () => {
   const input = Object.create(null);
   Object.defineProperty(input, 'first', {
@@ -301,16 +273,13 @@ test('blank dictionaries snapshot own string keys but read their values live', (
   assert.equal(Types.isBlank(input), false);
   assert.equal(Types.isEmpty(input), false);
 });
-
 test('array-like strings use indexed UTF-16 units rather than iterator code points', () => {
   const text = '\u{1f600}';
   const observed = [];
   assert.equal(
-    Types.isArrayLikeOf(text, {
-      predicate(value) {
-        observed.push(value);
-        return true;
-      }
+    Types.isArrayLikeOf(text, function (value) {
+      observed.push(value);
+      return true;
     }),
     true
   );

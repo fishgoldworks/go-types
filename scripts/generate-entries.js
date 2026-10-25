@@ -39,7 +39,7 @@ module.exports = function generateEntries(destination) {
     'index.d.mts',
     "import Types from './index.js';\nexport default Types;\nexport { " +
       names.join(', ') +
-      " } from './index.js';\nexport type { TypeName, PrimitiveTypeName, PrimitiveTypeMap, TypeMatcher, NarrowingMatcher, TypeGuard, PredicateMatcher, InstanceMatcher, TypedArray, Matched, ConversionCondition, ArrayElement, Boxed, Unboxed, ConvertedMap, ConvertedPlainObject, ConvertedSet } from './index.js';\n"
+      " } from './index.js';\nexport type { TypeName, TypeMatcher, TypeGuard, TypedArray, ConversionCondition, ArrayElement, Boxed, Unboxed, ConvertedMap, ConvertedPlainObject, ConvertedSet } from './index.js';\n"
   );
   const exportsMap = {
     '.': {
@@ -50,12 +50,12 @@ module.exports = function generateEntries(destination) {
   };
   const legacyTypePaths = {};
   for (const name of names) {
-    write('esm/' + name + '.mjs', "export { default } from '../" + sourcePath(name) + "';\n");
+    write('esm/' + name + '.mjs', 'export { default, default as ' + name + " } from '../" + sourcePath(name) + "';\n");
     write(
       'types/' + name + '.d.ts',
       "import Types = require('../index.js');\ndeclare const check: typeof Types." + name + ';\nexport = check;\n'
     );
-    write('types/' + name + '.d.mts', 'export { ' + name + " as default } from '../index.js';\n");
+    write('types/' + name + '.d.mts', 'export { ' + name + ' as default, ' + name + " } from '../index.js';\n");
     const target = {
       import: { types: './types/' + name + '.d.mts', default: './esm/' + name + '.mjs' },
       require: { types: './types/' + name + '.d.ts', default: './' + sourcePath(name) },

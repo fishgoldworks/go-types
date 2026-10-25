@@ -113,6 +113,28 @@ module.exports = function optionalApiChecks() {
       equal(value, undefined, name + ' must not be polyfilled globally');
     }
     equal(api.isArray([]), true, 'unrelated array check');
+    let thenReads = 0;
+    equal(
+      api.isPromiseLike({
+        get then() {
+          thenReads++;
+          return function () {
+            throw Error('Do not invoke then');
+          };
+        },
+        get catch() {
+          throw Error('Do not read catch');
+        },
+        get finally() {
+          throw Error('Do not read finally');
+        }
+      }),
+      true,
+      'then-only detection without optional capabilities'
+    );
+    equal(thenReads, 1, 'read then exactly once');
+    equal(api.isPromiseLike({ then: true }), false, 'non-callable then');
+    equal(api.isPromiseLike(held.promise), true, 'held native promise protocol');
     equal(api.fromJson('{"a":1}').a, 1, 'JSON parsing without optional capabilities');
     equal(api.fromJson('false'), false, 'JSON boolean parsing');
     equal(
@@ -160,7 +182,10 @@ module.exports = function optionalApiChecks() {
       throws(() => api.toPromise(hostile), 'toPromise requires native Promise.resolve support.');
       throws(() => api.toPromiseIf(hostile, true), 'toPromise requires native Promise.resolve support.');
     } else equal(api.toPromise(held.promise), held.promise, 'native Promise identity');
-    equal(api.toPlainObject('{"a":1}').a, 1, 'JSON object without optional capabilities');
+    throws(() => api.toPlainObject('{"a":1}'));
+    throws(() => api.toPlainObject('{'));
+    throws(() => api.toPlainObjectIf('{"a":1}', true));
+    equal(api.toPlainObjectIf('{"a":1}', false), '{"a":1}', 'skipped plain conversion preserves JSON text');
     equal(api.toPlainObject([['a', 1]]).a, 1, 'plain entry conversion without optional capabilities');
     equal(api.toPlainObjectIf(held.map, false), held.map, 'skipped plain conversion preserves identity');
     const missingKeys = (absent('Reflect') || absent('Reflect.ownKeys')) && absent('Object.getOwnPropertySymbols');
@@ -216,15 +241,31 @@ module.exports = function optionalApiChecks() {
     };
     equal(api.isCyclic({ a: shared, b: shared }), false, 'completed shared child');
     equal(reads, 1, 'shared child is read once');
-    const union = ['number', 'string'];
-    const matcher = (value) => api.isTypeOf(value, [union, [union, null]]);
-    equal(matcher(1), true, 'nested numeric matcher');
-    equal(matcher('a'), true, 'shared string matcher');
-    equal(matcher({}), false, 'nested matcher rejects objects');
-    equal(api.isTypeOf(held.date, Date), true, 'instance matcher');
-    const cyclicMatcher = [];
-    cyclicMatcher.push(cyclicMatcher);
-    throws(() => api.isTypeOf(undefined, cyclicMatcher));
+    const matcher = (value) => typeof value === 'number' || typeof value === 'string' || value === null;
+    equal(api.isArrayOf([1, 'a', null], matcher), true, 'ordinary predicate alternatives');
+    equal(api.isArrayOf([{}], matcher), false, 'predicate rejects objects');
+    equal(
+      api.isArrayOf([held.date], (value) => value instanceof Date),
+      true,
+      'explicit instance predicate'
+    );
+    for (const check of [
+      (matcher) => api.isArrayOf([1], matcher),
+      (matcher) => api.isArrayLikeOf({ 0: 1, length: 1 }, matcher)
+    ]) {
+      equal(
+        check((value) => value === 1),
+        true,
+        'direct predicate'
+      );
+      throws(() => check(() => 1));
+      throws(() => check(new String('number')));
+      throws(() => check({ predicate: api.isNumber }));
+    }
+    throws(() => api.isArrayOf([]));
+    throws(() => api.isMapOf({}, 'string'));
+    equal(api.isTypeOf, undefined, 'standalone matching is not public');
+    throws(() => api.isArrayOf([], ['number']));
     throws(() => api.isMapOf({}, 'invalid-type'));
     throws(() => api.isSetOf({}, 'invalid-type'));
     equal(api.isSetOf({}, 'number'), false, 'invalid Set input');
@@ -303,10 +344,10 @@ module.exports = function optionalApiChecks() {
       if (name === 'toMap') throws(() => api.toMap([['a']]));
     }
     for (const [native, operation, label] of [
-      ['Map.prototype.entries', () => api.isMapOf(held.map, 'string', null), 'Map iteration'],
+      ['Map.prototype.entries', () => api.isMapOf(held.map, 'string', (value) => value === null), 'Map iteration'],
       ['Map.prototype.values', () => api.isBlank(held.map), 'Map iteration'],
       ['Set.prototype.values', () => api.isBlank(held.set), 'Set iteration'],
-      ['Set.prototype.values', () => api.isSetOf(held.set, null), 'Set iteration'],
+      ['Set.prototype.values', () => api.isSetOf(held.set, (value) => value === null), 'Set iteration'],
       ['Map.prototype.size', () => api.isEmpty(held.map), 'Map size'],
       ['Set.prototype.size', () => api.isEmpty(held.set), 'Set size']
     ]) {

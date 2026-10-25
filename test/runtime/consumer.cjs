@@ -26,16 +26,26 @@ async function assertPromises(api) {
   assert.strictEqual(caught, error);
 }
 async function main() {
-  const focused = require('go-types/isArray');
-  assert.strictEqual(focused([]), true);
+  const pkg = require('go-types/package.json');
+  const focused = {};
+  for (const alias of Object.keys(pkg.exports)) {
+    if (/^\.\/[A-Za-z][A-Za-z0-9]*$/.test(alias)) focused[alias.slice(2)] = require('go-types/' + alias.slice(2));
+  }
+  assert.strictEqual(focused.isArray([]), true);
   assert.strictEqual(
     require.cache[require.resolve('go-types')],
     undefined,
     'Focused imports must not load the namespace'
   );
   const T = require('go-types');
-  assert.strictEqual(focused, T.isArray);
+  for (const name of Object.keys(focused)) assert.strictEqual(focused[name], T[name]);
   for (const retired of [
+    'go-types/isThenable',
+    'go-types/src/isThenable',
+    'go-types/src/isThenable.js',
+    'go-types/isTypeOf',
+    'go-types/src/isTypeOf',
+    'go-types/src/isTypeOf.js',
     'go-types/createTypeChecker',
     'go-types/src/createTypeChecker',
     'go-types/src/createTypeChecker.js'
@@ -45,7 +55,6 @@ async function main() {
       (error) => error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'
     );
   }
-  const pkg = require('go-types/package.json');
   const assertAPI = require('./assert-api.cjs');
   const sourceOnly = process.argv.indexOf('--source-only') !== -1;
   let aliases = 0;

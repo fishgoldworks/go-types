@@ -106,7 +106,7 @@ const record = { a: 1, b: 'two', 3: true, [symbolKey]: new Date() } as const;
 expectType<Map<string | typeof symbolKey, 1 | 'two' | true | Date>>(T.toMap(record));
 // @ts-expect-error object property keys, including numeric names, become strings.
 expectType<Map<3, unknown>>(T.toMap(record));
-// @ts-expect-error record values also include the string and numeric properties.
+// @ts-expect-error object values also include the string and numeric properties.
 expectType<Map<string, Date>>(T.toMap(record));
 const inferredRecordMap = T.toMap(record);
 expectFalse<IsAny<typeof inferredRecordMap>>();
@@ -140,7 +140,7 @@ interface OptionalRecordIterator {
 }
 declare const optionalRecordIterator: OptionalRecordIterator;
 expectType<Map<unknown, unknown>>(T.toMap(optionalRecordIterator));
-// @ts-expect-error an optional iterator may replace record entries at runtime.
+// @ts-expect-error an optional iterator may replace object entries at runtime.
 expectType<Map<string, number>>(T.toMap(optionalRecordIterator));
 expectType<Map<string | typeof Symbol.iterator, number | null>>(T.toMap({ a: 1, [Symbol.iterator]: null }));
 expectType<Map<string | typeof Symbol.iterator, number | undefined>>(T.toMap({ a: 1, [Symbol.iterator]: undefined }));

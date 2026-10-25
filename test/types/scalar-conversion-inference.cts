@@ -6,9 +6,17 @@ function expectFalse<V extends false>(): void {}
 function expectType<V>(_value: V): void {}
 
 const text: string & { readonly length: number } = '{"a":1}';
-expectType<Record<string | symbol, unknown>>(toPlainObject(text));
-// @ts-expect-error JSON values are unknown until checked.
-expectType<number>(toPlainObject(text).a);
+// @ts-expect-error Strings, including intersections, are not conversion sources.
+toPlainObject(text);
+// @ts-expect-error A requested conversion cannot parse JSON text.
+toPlainObjectIf(text, true);
+// @ts-expect-error A dynamic boolean can request an unsupported conversion.
+toPlainObjectIf(text, Math.random() > 0.5);
+expectType<typeof text>(toPlainObjectIf(text, false));
+expectType<typeof text>(toPlainObjectIf(text));
+expectType<typeof text>(toPlainObjectIf(text, undefined));
+expectType<typeof text>(toPlainObjectIf(text, () => false));
+expectType<never>(null as unknown as T.ConvertedPlainObject<string>);
 const symbol = Symbol('field');
 const input = { a: 1, [symbol]: 'text' } as const;
 const copied = toPlainObject(input);
@@ -131,8 +139,8 @@ expectType<number | undefined>(toPlainObject({} as Record<string, number>).toStr
 // @ts-expect-error the legacy prototype accessor remains inherited if omitted.
 expectType<number | undefined>(toPlainObject(new Map<'__proto__', number>()).__proto__);
 
-// @ts-expect-error JSON can shadow inherited methods with non-callable values.
-toPlainObject('{"toString":1}').toString();
+// @ts-expect-error Copied properties can shadow inherited methods with non-callable values.
+toPlainObject({ toString: 1 }).toString();
 // @ts-expect-error broad entries can shadow inherited methods with non-callable values.
 toPlainObject(new Map<string, number>([['toString', 1]])).toString();
 // @ts-expect-error broad records can shadow inherited methods with non-callable values.

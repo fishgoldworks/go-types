@@ -24,5 +24,5 @@ focusedSet(1);
 legacyMap([['key', 1, 2]] as const);
 // @ts-expect-error definite conditional conversion rejects malformed pairs.
 toMapIf([['key']] as const, true);
-// @ts-expect-error inferred record values include symbol values.
+// @ts-expect-error inferred object values include symbol values.
 const numericOnly: Set<number> = set;

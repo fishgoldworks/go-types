@@ -33,17 +33,23 @@ function verifyFiles(directory, pkg, sourceOnly) {
     assert.deepEqual(pkg[field], metadata[field], 'Consumer dependency metadata differs: ' + field);
   }
   for (const retired of [
+    'isThenable.js',
+    'src/isThenable.js',
+    'esm/isThenable.mjs',
+    'types/isThenable.d.ts',
+    'types/isThenable.d.mts',
+    'isTypeOf.js',
+    'src/isTypeOf.js',
+    'esm/isTypeOf.mjs',
+    'types/isTypeOf.d.ts',
+    'types/isTypeOf.d.mts',
     'createTypeChecker.js',
     'src/createTypeChecker.js',
     'esm/createTypeChecker.mjs',
     'types/createTypeChecker.d.ts',
     'types/createTypeChecker.d.mts'
   ]) {
-    assert.equal(
-      fs.existsSync(path.join(directory, retired)),
-      false,
-      'Retired public matcher entry shipped: ' + retired
-    );
+    assert.equal(fs.existsSync(path.join(directory, retired)), false, 'Retired public entry shipped: ' + retired);
   }
   const expected = ['.', './package.json', './dist/go-types.js', './dist/go-types.min.js', './dist/go-types.mjs'];
   for (const name of names) {

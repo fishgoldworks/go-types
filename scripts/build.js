@@ -90,7 +90,10 @@ async function verifyBundles(temporary) {
   for (const api of apis) {
     assert.deepEqual(Object.keys(api).sort(), [...names].sort());
     assert.equal(api.isArrayOf([], 'number'), true);
-    assert.equal(api.isTypeOf(1, ['number', null]), true);
+    assert.equal(
+      api.isArrayOf([1, null], (value) => typeof value === 'number' || value === null),
+      true
+    );
   }
 }
 

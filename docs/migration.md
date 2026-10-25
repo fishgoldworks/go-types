@@ -1,6 +1,6 @@
 # Migrating from 1.3.1 to 2.0.0
 
-Version 2.0.0 retains all 45 root function names from the published 1.3.1 package, but intentionally changes several contracts. This guide covers the published upgrade path; the [API reference](API.md) describes the complete current contract.
+Version 2.0.0 removes `isTypeOf` and `isThenable`, retains the other 43 root functions from 1.3.1, and adds 50 functions. Several contracts also change. This guide covers the published upgrade path; the [API reference](API.md) describes the complete current contract.
 
 ## Runtime and imports
 
@@ -17,37 +17,29 @@ Types.isArray([]);             // => true
 
 Default and named ESM imports and focused imports are now supported. Public source paths such as `go-types/src/isArray` and `go-types/src/isArray.js` remain available. Use public APIs instead of deep-importing private implementation helpers such as `hasCircularReference`.
 
-## Make predicate matchers explicit
+## Replace isTypeOf and simplify collection matchers
 
-In 1.3.1, a function matcher could run both an instance check and a truthiness-coerced function call. A bare function now requests native `instanceof` only; constructor bodies are never called. Wrap predicates in `{ predicate: fn }`, including inside union arrays:
+`isTypeOf` is no longer exported. Use native `typeof` for primitive categories, a direct predicate such as `isNumber` for a library check, and native `instanceof` for a local class. No replacement dispatcher or `isInstanceOf` helper is provided.
+
+In 1.3.1, a function matcher used `value instanceof type || !!type(value)`. This could invoke the function body and coerce its result. Choose the intended check explicitly when migrating; an instance predicate or direct function call alone does not reproduce every mixed case.
 
 ```javascript
-// Before
+// Before (1.3.1)
+Types.isTypeOf(value, 'number');
 Types.isTypeOf(value, Types.isString);
-Types.isArrayOf(items, Types.isObject);
+Types.isArrayOf(items, Account);
 
 // After
-Types.isTypeOf(value, { predicate: Types.isString });
-Types.isArrayOf(items, { predicate: Types.isObject });
+typeof value === 'number';
+Types.isString(value);
+Types.isArrayOf(items, (value) => value instanceof Account);
 ```
 
-Predicates receive the value only, without an object receiver, and must return a synchronous primitive boolean. Bind receiver-dependent methods or use an arrow adapter. Numbers, boxed booleans and promises are rejected; thrown callback errors propagate.
+The four collection checks now accept only primitive type-name strings or synchronous boolean predicates. Pass predicates directly: `isArrayOf(items, isNumber)`. For alternatives, use a predicate such as `value => typeof value === 'number' || value === null`, or compose predicates with go-fns. Literal `null`/`undefined`, boxed strings, matcher arrays and descriptor objects are not accepted.
 
-String matchers use primitive `typeof` categories. For example, `'number'` accepts `0`, while `Number` is an instance target and rejects `0`. Use `{ predicate: Types.isNumber }` to accept both primitive and boxed numbers. The `'object'` matcher retains `typeof null === 'object'`; use `Types.isObject` when null must be excluded.
+Every matcher is required, including both Map matchers. Use `'undefined'` to check undefined items, or `value => value === null` for null items. Valid names are `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` and `'function'`. The `'object'` name includes `null`; `'number'` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers.
 
-## Validate matcher specifications before use
-
-The supported string names are `undefined`, `object`, `boolean`, `number`, `bigint`, `string`, `symbol` and `function`. Misspellings and invalid alternatives now throw before the value is tested, including empty and non-array inputs:
-
-<!-- prettier-ignore -->
-```javascript
-Types.isTypeOf(1, ['number', 42]);  // => throws TypeError
-Types.isArrayOf([], 'nubmer');     // => throws TypeError
-```
-
-Descriptors require exactly one own data property named `predicate` or `instanceOf`; inherited modes and accessor modes are rejected. Nested union arrays must be acyclic. An empty union matches nothing, and an omitted matcher means `undefined`. See [type specifications](API.md#type-specifications) for the complete rules.
-
-`isTypeOf` validates and snapshots its specification on each call. Collection-content checks prepare their matchers once per call and reuse them for the entries. Use the logic utilities in [go-fns](https://github.com/koyote130708/go-fns) to combine predicates into reusable functions.
+Invalid or missing matchers throw before input inspection, including for empty and wrong-container inputs. A predicate receives one value without a supplied receiver and must return a synchronous primitive boolean. Bind receiver-dependent methods or use an arrow adapter. Non-boolean results throw when reached; callback errors propagate. See [type specifications](API.md#type-specifications) for the complete contract.
 
 ## Separate collection contents from non-emptiness
 
@@ -77,11 +69,43 @@ Use `isEmptyIterable` or `isBlankIterable` when consuming a synchronous iterable
 
 Blankness remains shallow. For a Map, `isBlank` checks values; `isBlankIterable` sees entry arrays, so a non-empty Map is not blank under the iterable operation. See [empty and blank checks](API.md#empty-and-blank-values).
 
+## Replace isThenable with isPromiseLike
+
+`isThenable` and its subpaths have been removed. Replace those imports and calls with `isPromiseLike`, which now checks for a callable `then` method. It no longer requires or reads `catch`; `finally` is also unnecessary.
+
+<!-- prettier-ignore -->
+```javascript
+import { isPromiseLike } from 'go-types';
+
+isPromiseLike({ then() {} });   // => true
+isPromiseLike({ then: true });  // => false
+```
+
+The check does not invoke `then` or verify promise behaviour. Accessing `then` can run getters or proxy traps, and their errors propagate.
+
 ## Review corrected native and cycle checks
 
-Genuine native values are recognised across realms where documented; prototype/tag imitations are rejected. Promise and DOM instance checks retain their local-realm limitations. `isThenable` remains the protocol check for a callable `then` method.
+Genuine native values are recognised across realms where documented; prototype/tag imitations are rejected. Promise and DOM instance checks retain their local-realm limitations. `isPromiseLike` checks for a callable `then` method without requiring a local Promise instance.
 
 `isCyclic` detects a reference to an active ancestor. Repeated primitive values and shared acyclic children are not cycles. It follows enumerable string properties, including inherited properties, but excludes symbols, non-enumerables and Map/Set contents. Getters and proxy traps may still run and throw; inputs must remain stable during traversal.
+
+## Parse JSON before plain-object conversion
+
+`toPlainObject` accepts plain objects and synchronous entry pairs. It no longer parses JSON text: strings throw `TypeError`, including malformed JSON. A requested `toPlainObjectIf` conversion follows the same rule; skipped calls still return the original input unchanged.
+
+Use `fromJson` to parse JSON text. If the result must be an object, validate it before use:
+
+```javascript
+import { fromJson, isPlainObject } from 'go-types';
+
+const value = fromJson(text);
+
+if (!isPlainObject(value)) {
+  throw new TypeError('Expected a JSON object.');
+}
+```
+
+The parsed object is already fresh. Calling `toPlainObject` is useful only when a separate shallow copy is needed. Passing the parsed value straight to `toPlainObject` also accepts entry arrays, so that composition does not replace an object-only JSON check.
 
 ## Adopt new conversions and TypeScript declarations
 

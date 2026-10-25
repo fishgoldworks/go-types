@@ -9,3 +9,11 @@ import checker from 'go-types/createTypeChecker';
 import sourceChecker from 'go-types/src/createTypeChecker.js';
 // @ts-expect-error Private implementation modules are not public ESM entries.
 import internal from 'go-types/src/util/compileTypeMatcher';
+// @ts-expect-error Standalone matching is no longer public.
+void Types.isTypeOf;
+// @ts-expect-error No instance helper has been introduced.
+void Types.isInstanceOf;
+// @ts-expect-error The retired standalone focused entry has no declarations.
+import standalone from 'go-types/isTypeOf';
+// @ts-expect-error The retired standalone source entry has no declarations.
+import sourceStandalone from 'go-types/src/isTypeOf.js';

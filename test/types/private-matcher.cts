@@ -9,3 +9,11 @@ import checker = require('go-types/createTypeChecker');
 import sourceChecker = require('go-types/src/createTypeChecker');
 // @ts-expect-error Private implementation modules have no public declarations.
 import internal = require('go-types/src/util/compileTypeMatcher');
+// @ts-expect-error Standalone matching is no longer public.
+void Types.isTypeOf;
+// @ts-expect-error No instance helper has been introduced.
+void Types.isInstanceOf;
+// @ts-expect-error The retired standalone focused entry has no declarations.
+import standalone from 'go-types/isTypeOf';
+// @ts-expect-error The retired standalone source entry has no declarations.
+import sourceStandalone from 'go-types/src/isTypeOf.js';

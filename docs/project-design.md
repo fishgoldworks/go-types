@@ -2,9 +2,9 @@
 
 This guide records go-types design constraints. The library provides small, composable checks and explicit conversions with stable, documented contracts.
 
-- Keep zero runtime dependencies and small CommonJS source modules. Preserve 45 original root export names. The 95-function API also includes typed Map/Set validators and 34 conversions. Matcher compilation stays internal; use go-fns to combine predicates.
+- Keep zero runtime dependencies and small CommonJS source modules. The 93-function API retains 43 original root functions and includes collection-content checks and 34 conversions. Matcher validation stays internal; use go-fns to combine predicates.
 - Prefer captured standard intrinsics where their contracts match; no speculative legacy polyfills and no security claims about a compromised runtime.
-- Compile and fully validate matcher configuration before checking any input. No constructor bodies or predicates run during compilation. Compile a compact directed acyclic graph of unions using an explicit stack, reject cyclic unions, snapshot each array once per compilation, and preserve callback order and number of calls. Native instance prototype errors are deferred until evaluation rather than inferred from constructibility. Instance matching remains native instanceof.
+- Validate required type-name strings or predicates before inspecting collection inputs. Never probe predicates during validation or infer constructor intent. Preserve traversal, callback order, short-circuiting and exceptions; enforce primitive boolean results when callbacks run.
 - `isArrayOf` and `isArrayLikeOf` accept empty inputs. Holes are read through ordinary indexed access. Non-empty array detection is separate.
 - Include null-prototype plain dictionaries. Reject whitespace-only numeric strings. Preserve boxed Number/String/Boolean support and primitive-only Symbol/BigInt checks.
 - Default empty/blank operations inspect sized containers and plain dictionaries without advancing caller iterators. Unsized iterable/iterator inputs throw. Provide explicit iterable variants with documented consumption/closing and termination limitations. Map blankness concerns values; Set blankness concerns items.

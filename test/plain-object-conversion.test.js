@@ -7,20 +7,30 @@ const scope = {};
 vm.runInNewContext(require('../scripts/source-test-loader')(), scope);
 const backends = [T, scope.Types];
 const typeError = (e) => e && e.name === 'TypeError';
-const syntaxError = (e) => e && e.name === 'SyntaxError';
 for (const [backend, api] of backends.entries()) {
   const prototype = backend ? vm.runInNewContext('Object.prototype', scope) : Object.prototype;
-  test('plain conversion: JSON object validation, backend ' + backend, () => {
-    for (const text of ['{}', '  {"a":1}  ', '{"nested":{"a":[1,null]}}']) {
-      const result = api.toPlainObject(text);
-      assert.equal(JSON.stringify(result), JSON.stringify(JSON.parse(text)));
-      assert.equal(Object.getPrototypeOf(result), prototype);
-      assert.notEqual(result, api.toPlainObject(text));
-    }
-    for (const text of ['[]', '[1]', 'null', '1', 'true', '"text"'])
+  test('plain conversion: all string inputs are rejected without parsing, backend ' + backend, () => {
+    for (const text of [
+      '{}',
+      '  {"a":1}  ',
+      '{"nested":{"a":[1,null]}}',
+      '[]',
+      '[["a",1]]',
+      'null',
+      '1',
+      'true',
+      '"text"',
+      '',
+      ' ',
+      '{',
+      "{'a':1}",
+      '{a:1}',
+      '{"a":1,}',
+      '{}x',
+      'ordinary text'
+    ]) {
       assert.throws(() => api.toPlainObject(text), typeError);
-    for (const text of ['', ' ', '{', "{'a':1}", '{a:1}', '{"a":1,}', '{}x'])
-      assert.throws(() => api.toPlainObject(text), syntaxError);
+    }
   });
   test('plain conversion: own enumerable string/symbol data and shallow copies, backend ' + backend, () => {
     const symbol = Symbol('key');
@@ -159,7 +169,7 @@ for (const [backend, api] of backends.entries()) {
   });
   test('plain conversion: special keys are safe own data properties, backend ' + backend, () => {
     const input = JSON.parse('{"__proto__":{"polluted":true},"constructor":1,"prototype":2,"toString":3}');
-    for (const value of [input, JSON.stringify(input), Object.entries(input), new Map(Object.entries(input))]) {
+    for (const value of [input, Object.entries(input), new Map(Object.entries(input))]) {
       const result = api.toPlainObject(value);
       assert.equal(Object.getPrototypeOf(result), prototype);
       assert.equal(result.polluted, undefined);
@@ -256,7 +266,7 @@ for (const [backend, api] of backends.entries()) {
   test('plain conversion: condition identity and strict predicates, backend ' + backend, () => {
     const revoked = Proxy.revocable({}, {});
     revoked.revoke();
-    for (const value of [revoked.proxy, null, undefined, -0, NaN, new Date(), '{']) {
+    for (const value of [revoked.proxy, null, undefined, -0, NaN, new Date(), '{', '{"a":1}']) {
       assert.equal(api.toPlainObjectIf(value), value);
       assert.equal(api.toPlainObjectIf(value, false), value);
       assert.equal(api.toPlainObjectIf(value, undefined), value);
@@ -283,7 +293,11 @@ for (const [backend, api] of backends.entries()) {
     for (const invalid of [undefined, null, 1, {}, Promise.resolve(true)])
       assert.throws(() => api.toPlainObjectIf(input, () => invalid), typeError);
     assert.throws(() => api.toPlainObjectIf(null, true), typeError);
-    assert.throws(() => api.toPlainObjectIf('{', true), syntaxError);
+    for (const text of ['{"a":1}', '[["a",1]]', '{', 'ordinary text']) {
+      for (const condition of [true, () => true]) {
+        assert.throws(() => api.toPlainObjectIf(text, condition), typeError);
+      }
+    }
     const error = new Error('predicate');
     assert.throws(
       () =>
@@ -295,15 +309,11 @@ for (const [backend, api] of backends.entries()) {
   });
 }
 
-test('plain conversion captures JSON parsing and safe property creation before reassignment', () => {
+test('plain conversion captures safe property creation before reassignment', () => {
   const context = vm.createContext({});
   const { moduleLoader } = require('./fixtures/verify-optional-apis.cjs');
   const convert = moduleLoader(require('node:path').join(__dirname, '..'), context)('src/conversion/toPlainObject.js');
-  vm.runInContext(
-    'JSON.parse = Object.defineProperty = Reflect.ownKeys = function () { throw Error("replaced"); };',
-    context
-  );
-  assert.equal(convert('{"a":1}').a, 1);
+  vm.runInContext('Object.defineProperty = Reflect.ownKeys = function () { throw Error("replaced"); };', context);
   assert.equal(convert({ a: 1 }).a, 1);
   assert.equal(convert([['a', 1]]).a, 1);
 });
@@ -417,4 +427,18 @@ test('missing copied Object.prototype names retain inherited values, not the inp
   assert.equal(T.toPlainObject(input).toString, Object.prototype.toString);
   assert.equal(T.toPlainObject(new Map()).toString, Object.prototype.toString);
   assert.equal(T.toPlainObject(input).__proto__, Object.prototype);
+});
+
+test('plain conversion loads and converts without accessing JSON.parse', () => {
+  const context = vm.createContext({});
+  vm.runInContext(
+    'Object.defineProperty(JSON, "parse", { get() { throw Error("Do not access JSON.parse"); } });',
+    context
+  );
+  const { moduleLoader } = require('./fixtures/verify-optional-apis.cjs');
+  const convert = moduleLoader(require('node:path').join(__dirname, '..'), context)('src/conversion/toPlainObject.js');
+  assert.equal(convert({ a: 1 }).a, 1);
+  assert.equal(convert([['a', 1]]).a, 1);
+  assert.throws(() => convert('{"a":1}'), typeError);
+  assert.throws(() => convert('{'), typeError);
 });

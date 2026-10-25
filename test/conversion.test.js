@@ -532,7 +532,7 @@ const conditionalFixtures = {
   Map: { input: () => [['key', 1]], check: (output) => assert.deepEqual([...output], [['key', 1]]) },
   Set: { input: () => [1, 1, 2], check: (output) => assert.deepEqual([...output], [1, 2]) },
   Number: { input: () => '4.8', check: (output) => assert.equal(output, 4.8) },
-  PlainObject: { input: () => '{"a":1}', check: (output) => assert.deepEqual(output, { a: 1 }) },
+  PlainObject: { input: () => ({ a: 1 }), check: (output) => assert.deepEqual(output, { a: 1 }) },
   String: { input: () => 4, check: (output) => assert.equal(output, '4') },
   Symbol: {
     input: () => 'x',
@@ -649,7 +649,7 @@ test('conversion functions retain captured built-ins after initialisation', () =
         assert.strictEqual(T.toBigInt('12'), 12n);
         assert.strictEqual(T.toString(12), '12');
         assert.strictEqual(T.toBoolean(0), false);
-        assert.strictEqual(T.toPlainObject('{"a":12}').a, 12);
+        assert.strictEqual(T.toPlainObject({ a: 12 }).a, 12);
         assert.strictEqual(T.toDate(date), date);
         assert.strictEqual(T.toDate(0).getTime(), 0);
         assert.strictEqual(T.toSymbol(boxed), symbol);

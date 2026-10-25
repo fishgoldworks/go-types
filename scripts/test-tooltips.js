@@ -27,7 +27,14 @@ module.exports = function testTooltips(consumer) {
       for (const name of [rootName, focusedName]) {
         const marker = name + '(';
         // Use valid inputs for strict converters; skipped If calls still accept undefined.
-        const argument = ['toArray', 'toPlainObject'].includes(item.name) ? '{ a: 1 }' : 'undefined';
+        const argument =
+          item.name === 'isMapOf'
+            ? "undefined, 'string', 'number'"
+            : ['isArrayOf', 'isArrayLikeOf', 'isSetOf'].includes(item.name)
+              ? "undefined, 'number'"
+              : ['toArray', 'toPlainObject'].includes(item.name)
+                ? '{ a: 1 }'
+                : 'undefined';
         statements.push(marker + argument + ');');
         probes.push({ item, marker });
       }

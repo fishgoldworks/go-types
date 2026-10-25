@@ -9,7 +9,12 @@ for (const name of names) {
     assert.equal(require('go-types/src/' + name), T[name]);
     assert.equal(require('go-types/src/' + name + '.js'), T[name]);
   });
-  test('ESM public subpath ' + name, async () => assert.equal((await import('go-types/' + name)).default, T[name]));
+  test('ESM public subpath ' + name, async () => {
+    const entry = await import('go-types/' + name);
+    assert.deepEqual(Object.keys(entry).sort(), ['default', name].sort());
+    assert.equal(entry.default, T[name]);
+    assert.equal(entry[name], T[name]);
+  });
 }
 test('ESM root shares the exact CommonJS API', async () => {
   const esm = await import('go-types');
@@ -24,6 +29,12 @@ test('ESM root shares the exact CommonJS API', async () => {
 });
 test('private and unknown imports are not public entry points', () => {
   for (const name of [
+    'isThenable',
+    'src/isThenable',
+    'src/isThenable.js',
+    'isTypeOf',
+    'src/isTypeOf',
+    'src/isTypeOf.js',
     'createTypeChecker',
     'src/createTypeChecker',
     'src/createTypeChecker.js',
@@ -67,8 +78,16 @@ test('pre-exports CommonJS aliases exist physically and share implementations', 
 
 test('ESM rejects retired matcher entries and private compilation modules', async () => {
   const root = await import('go-types');
+  assert.equal(Object.hasOwn(root, 'isTypeOf'), false);
+  assert.equal(Object.hasOwn(root, 'isInstanceOf'), false);
   assert.equal(Object.hasOwn(root, 'createTypeChecker'), false);
   for (const name of [
+    'isThenable',
+    'src/isThenable',
+    'src/isThenable.js',
+    'isTypeOf',
+    'src/isTypeOf',
+    'src/isTypeOf.js',
     'createTypeChecker',
     'src/createTypeChecker',
     'src/createTypeChecker.js',

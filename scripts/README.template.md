@@ -73,10 +73,12 @@ toNumber('12.5');                // => 12.5
 
 ### Function subpaths
 
+Each function subpath supports default and named ES module imports:
+
 <!-- prettier-ignore -->
 ```javascript
 import isArray from 'go-types/isArray';
-import toNumber from 'go-types/toNumber';
+import { toNumber } from 'go-types/toNumber';
 
 isArray([]);                   // => true
 toNumber('42');                // => 42
@@ -92,6 +94,8 @@ const toNumber = require('go-types/toNumber');
 isArray([]);                   // => true
 toNumber('42');                // => 42
 ```
+
+CommonJS subpaths return the function directly. Root and subpath imports refer to the same functions.
 
 Function subpaths load the requested helper and its dependencies. Named root exports expose separate modules to bundlers; importing the default namespace requests the full API.
 
@@ -161,13 +165,13 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 
 Type checks do not convert their inputs. Scalar conversions follow native coercion: `toBoolean` uses truthiness, `toString` is not JSON serialisation, and numeric/date results can lose precision or be invalid. Conditional conversions require a boolean or synchronous predicate returning a primitive boolean; `false`, omitted or `undefined` conditions leave the input untouched.
 
-`toArray` and `toSet` select synchronous iterable values, then own enumerable string and symbol record values, then supported non-plain array-like indices with strict numeric lengths. `toMap` copies record entries (including symbols) or consumes exact two-element array pairs with both own indices. Unsupported inputs throw; see the [conversion guide](docs/conversions.md).
+`toArray` and `toSet` select synchronous iterable values, then values from own enumerable string and symbol properties, then supported non-plain array-like indices with strict numeric lengths. `toMap` copies object entries (including symbols) or consumes exact two-element array pairs with both own indices. Unsupported inputs throw; see the [conversion guide](docs/conversions.md).
 
 Ordinary failed checks return `false`. Invalid matcher configurations and unsupported inputs can throw; callback, getter, proxy, coercion and iterator errors propagate. These checks are not schema validation or a security boundary.
 
 `isEmpty` and `isBlank` reject unsized iterators instead of consuming them. Use `isEmptyIterable` or `isBlankIterable` only when consumption and early iterator closing are intended. Do not reuse a one-shot iterator after inspection; a nullish-only infinite iterable never finishes a blankness check.
 
-Use a bare function matcher for native `instanceof`, or `{ predicate: fn }` for a custom check. Predicates must be synchronous and must not mutate Map/Set inputs. Specifications are validated completely before matching, and user-supplied structures have no built-in work budget. See [type specifications](docs/API.md#type-specifications), [shared contracts](docs/API.md#shared-contracts) and [errors and side effects](docs/API.md#errors-and-side-effects).
+Collection checks accept a required native `typeof` name or synchronous boolean predicate. For example, `isArrayOf(items, 'number')` accepts primitive numbers; `isArrayOf(items, isNumber)` also accepts Number wrappers. Use `value => value instanceof Account` for class instances. Empty collections pass valid checks. See [type specifications](docs/API.md#type-specifications) for callback and traversal rules.
 
 ### Create plain objects
 
@@ -175,12 +179,12 @@ Use a bare function matcher for native `instanceof`, or `{ predicate: fn }` for 
 ```javascript
 import { toPlainObject } from 'go-types';
 
-toPlainObject('{"a":1}');              // => ({ a: 1 })
+toPlainObject({ a: 1 });               // => ({ a: 1 })
 toPlainObject(new Map([['a', 1]]));    // => ({ a: 1 })
 toPlainObject([['a', 1], ['b', 2]]);   // => ({ a: 1, b: 2 })
 ```
 
-Plain records produce fresh shallow copies of own enumerable string and symbol properties. Nullish input, boxed primitives and malformed entries throw. See [plain-object conversion](docs/conversions.md#plain-object-conversion) for the complete contract.
+Copying a plain object preserves nested references and includes only its own enumerable string and symbol properties. Strings, nullish input, boxed primitives and malformed entries throw. Use `fromJson` to parse JSON text. See [plain-object conversion](docs/conversions.md#plain-object-conversion) for the complete contract.
 
 ### Parse JSON
 
@@ -230,15 +234,13 @@ toPromiseIf(3, false);             // => 3
 
 TypeScript declarations are included; no separate `@types` package is required.
 
-Declarations cover root, per-function and bundle imports. Fixed exact primitive names and strict `null`/`undefined` matchers support narrowing; `isNonNullish` also narrows filtered values. Native identity checks, dynamic specifications, unions, predicate descriptors and collection validators return `boolean`. `toDate()` returns `Date` without promising extra input properties.
+Declarations cover root, per-function and bundle imports. Use native `typeof` for primitive narrowing; `isNonNullish` also narrows filtered values. Native identity and collection-content checks return `boolean`. `toDate()` returns `Date` without promising extra input properties.
 
 <!-- prettier-ignore -->
 ```typescript
-import { isTypeOf } from 'go-types';
-
 const value: unknown = 'hello';
 
-if (isTypeOf(value, 'string')) {
+if (typeof value === 'string') {
   value.toUpperCase();         // => 'HELLO'
 }
 ```
@@ -254,7 +256,7 @@ Strict CommonJS consumers can target ES2017 with ES2017 libraries and `skipLibCh
 
 ## Performance
 
-Each call to `isTypeOf` validates and snapshots its specification; separate calls do not cache mutable configuration. Collection checks such as `isArrayOf` prepare the specification once per call and reuse it for their entries. Fixed type-name matchers use shared checks without graph compilation.
+Collection checks validate their matchers once per call and reuse them for the entries. Type-name strings use shared checks; predicates run only for reached values, with no result caching.
 
 Use [function subpaths](#function-subpaths) to load the requested helper and its dependencies. Bundlers can omit unused named ESM exports; the default namespace exposes the full API.
 
@@ -268,7 +270,7 @@ Measurements depend on the workload and runtime; they are not universal speed gu
 
 ## Migration
 
-Version 2.0.0 changes matcher validation, collection checks and runtime requirements, and adds TypeScript declarations. Bare function matchers use native `instanceof`; wrap predicate functions as `{ predicate: fn }`. Empty collections pass valid element constraints, and invalid matcher configurations are rejected before matching.
+Version 2.0.0 removes `isTypeOf` and `isThenable`, uses a callable-`then` check for `isPromiseLike`, simplifies collection matchers to required type-name strings or predicates, changes collection and runtime contracts, and adds TypeScript declarations. Empty collections pass valid element constraints; invalid or missing matchers throw before matching.
 
 Read the [migration guide](docs/migration.md) and [changelog](CHANGELOG.md) before upgrading from version 1.
 

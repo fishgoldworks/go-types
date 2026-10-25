@@ -9,7 +9,6 @@ const methods = [
   ['isIterable', Symbol.iterator],
   ['isAsyncIterable', Symbol.asyncIterator],
   ['isIteratorLike', 'next'],
-  ['isThenable', 'then'],
   ['isPromiseLike', 'then']
 ];
 
@@ -27,7 +26,7 @@ for (const [name, key] of methods) {
     const input = new Proxy(Object.create(null), {
       get(target, property) {
         trace.push(property);
-        if (property === key || (name === 'isPromiseLike' && property === 'catch')) return callable;
+        if (property === key) return callable;
         assert.fail('Unexpected property read');
       },
       has() {
@@ -38,7 +37,7 @@ for (const [name, key] of methods) {
       }
     });
     assert.equal(T[name](input), true);
-    assert.deepEqual(trace, name === 'isPromiseLike' ? ['then', 'catch'] : [key]);
+    assert.deepEqual(trace, [key]);
   });
 }
 
@@ -52,7 +51,6 @@ test('capabilities are read afresh; class and revoked function methods are not e
   };
   for (const [name, key] of methods) {
     const prototype = { [key]: function () {} };
-    if (name === 'isPromiseLike') prototype.catch = function () {};
     const input = Object.create(prototype);
     for (const [method, expected] of [
       [function () {}, true],
@@ -82,36 +80,26 @@ test('capabilities are read afresh; class and revoked function methods are not e
   }
 });
 
-test('promise-like detection short-circuits then and reads the current catch exactly once', () => {
-  const sentinel = { reason: 'getter failure' };
-  let catchReads = 0;
+test('promise-like detection reads then once without inspecting catch or finally', () => {
+  const trace = [];
+  let method = 0;
   const input = {
-    then: 0,
+    get then() {
+      trace.push('then');
+      return method;
+    },
     get catch() {
-      catchReads++;
-      throw sentinel;
+      return assert.fail('Do not read catch');
+    },
+    get finally() {
+      return assert.fail('Do not read finally');
     }
   };
   assert.equal(T.isPromiseLike(input), false);
-  assert.equal(catchReads, 0);
-  input.then = () => {};
-  assert.equal(T.isThenable(input), true);
-  assert.equal(catchReads, 0);
-  assert.throws(
-    () => T.isPromiseLike(input),
-    (error) => error === sentinel
-  );
-  assert.equal(catchReads, 1);
-  const trace = [];
-  const changing = {
-    get then() {
-      trace.push('then');
-      this.catch = () => {};
-      return () => {};
-    },
-    catch: null
-  };
-  assert.equal(T.isPromiseLike(changing), true);
+  assert.deepEqual(trace, ['then']);
+  trace.length = 0;
+  method = () => assert.fail('Do not invoke then');
+  assert.equal(T.isPromiseLike(input), true);
   assert.deepEqual(trace, ['then']);
 });
 
@@ -124,14 +112,13 @@ test('object-only capabilities ignore primitive prototype methods and accept box
     `
     Number.prototype.next = function () {};
     Number.prototype.then = function () {};
-    Number.prototype.catch = function () {};
     globalThis.primitive = 7;
     globalThis.boxed = new Number(7);
   `,
     realm
   );
   for (const api of [T, realm.Types]) {
-    for (const name of ['isIteratorLike', 'isThenable', 'isPromiseLike']) {
+    for (const name of ['isIteratorLike', 'isPromiseLike']) {
       assert.equal(api[name](realm.primitive), false, name);
       assert.equal(api[name](realm.boxed), true, name);
     }

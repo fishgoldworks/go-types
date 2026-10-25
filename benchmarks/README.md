@@ -6,7 +6,7 @@ The harness reports all samples and their median nanoseconds per call. For an ev
 
 These measurements include the cost of dispatching the benchmark and consuming results. Just-in-time compilation, garbage collection, process scheduling, input distributions and runtime versions affect results. Measurements do not establish a statistically reliable speedup, a cross-engine ranking, worst-case complexity or production throughput.
 
-The preconstructed union specification is held constant; the direct `isTypeOf` case still compiles it on every call. The array-collection case includes creation of its small input array; account for that cost when comparing results.
+The composed predicate is held constant. Small collection workloads include input-array creation; account for that cost when comparing results.
 
 Use repeated independent process runs and realistic application inputs before setting performance requirements. Do not replace correct native branding with weaker tag/prototype heuristics merely to improve a microbenchmark. Capturing a native reference is not, by itself, a speed claim.
 
@@ -14,10 +14,10 @@ Keep benchmark output in a task-owned temporary directory outside the checkout, 
 
 ## Compare two versions
 
-Run `node scripts/benchmark-compare.js /absolute/old/root /absolute/new/root` for alternating isolated-process measurements and `node scripts/benchmark-matcher-scaling.js /absolute/old/root /absolute/new/root` for shared-union scaling. See [the performance guide](../docs/performance.md).
+Run `node scripts/benchmark-compare.js /absolute/old/root /absolute/new/root` for alternating isolated-process measurements and `node scripts/benchmark-matcher-scaling.js /absolute/old/root /absolute/new/root` for collection-length scaling. See [the performance guide](../docs/performance.md).
 
-## Dictionary and descriptor paths
+## Dictionary and predicate paths
 
-Run `node scripts/benchmark-hot-paths.js /absolute/old/root /absolute/new/root` for warmed processes in alternating version order, with identical input sequences and all raw samples. This covers dictionaries, Maps/Sets, scalar descriptors, primitive/boxed numbers and already-fast controls.
+Run `node scripts/benchmark-hot-paths.js /absolute/old/root /absolute/new/root` for warmed processes in alternating version order, with identical input sequences and all raw samples. This covers dictionaries, Maps/Sets, collection predicates, primitive/boxed numbers and already-fast controls.
 
 `node scripts/benchmark-native-exceptions.js` counts native exception events independently of timing. `--assert-zero` checks the targeted optimised paths on Node versions exposing `process.getBuiltinModule`; it is not a browser/fallback requirement.

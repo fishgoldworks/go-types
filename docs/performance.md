@@ -2,11 +2,7 @@
 
 ## What the implementation optimises
 
-Primitive type-name matchers return shared check functions without compiling a graph. Ordinary flat unions allocate no WeakMap or WeakSet; graph bookkeeping is created only when a nested union is encountered.
-
-Nested unions are compiled as a compact graph. Each distinct union array is snapshotted once per compilation; completed nodes are reused. Pure built-in subunions contain at most ten distinct checks and can be deduplicated. Compilation and evaluation use explicit stacks rather than recursive calls.
-
-Application predicates and custom instance hooks may have side effects. Evaluation preserves their order, number of calls, exceptions and live state. A compact shared graph can still request many callback invocations. There is no hidden result cache or work limit.
+Type-name strings use shared checks. Collection calls validate each required matcher once and reuse the resulting check for their entries. Predicates run in traversal order, stop at the first failure and are never cached or called during validation.
 
 Actual-array empty/blank checks bypass irrelevant boxed-String/Map/Set receiver checks. These used to create and catch exceptions on the ordinary array path. Lengths and items are still read according to the same array-like policy, including observable getters, unsupported-size errors and sparse/inherited indices.
 
@@ -14,7 +10,7 @@ Numeric refinements extract a boxed Number payload once rather than repeatedly r
 
 ## Non-throwing native-brand paths on Node
 
-When available, captured `node:util.types` predicates handle native brand checks. Ordinary dictionaries no longer create and catch three incompatible-receiver exceptions before reaching empty/blank dictionary logic. Map/Set dispatch and predicate-descriptor compilation also avoid irrelevant receiver errors. Selection happens once through guarded `process.getBuiltinModule`, with no static Node import in browser code.
+When available, captured `node:util.types` predicates handle native brand checks. Ordinary dictionaries no longer create and catch three incompatible-receiver exceptions before reaching empty/blank dictionary logic. Map/Set dispatch and matcher validation also avoid irrelevant receiver errors. Selection happens once through guarded `process.getBuiltinModule`, with no static Node import in browser code.
 
 Browsers and other hosts without the native classifiers retain intrinsic receiver checks. The Node improvement does not establish a browser speed guarantee. Primitive fast paths remain unchanged.
 
@@ -28,7 +24,7 @@ This is a bundler optimisation, not native Node lazy loading. Use `import isArra
 
 ## Repeated validation
 
-Each call to `isTypeOf(value, specification)` validates and snapshots the specification again so later mutations are respected. Collection checks such as `isArrayOf` prepare the matcher once per call and reuse it for their entries. Fixed type names do not require graph compilation.
+Collection checks such as `isArrayOf` validate a type-name string or predicate once per call and reuse it for their entries. Predicate closures retain their live state.
 
 Use the logic utilities in [go-fns](https://github.com/koyote130708/go-fns) to combine existing predicates into reusable functions. Go Types does not depend on go-fns.
 
@@ -45,7 +41,7 @@ node scripts/benchmark-native-exceptions.js
 node scripts/benchmark-numeric-paths.js /path/to/previous-library /path/to/updated-library
 ```
 
-The comparison uses identical input sequences, consumes results, warms each case and repeats each library in independent processes with alternating order. It reports the median of process medians and keeps every raw sample. The scripts define the batch and process counts. The scaling probe uses fresh subprocesses with deadlines so an exponential case cannot hang the test session.
+The comparison uses identical input sequences, consumes results, warms each case and repeats each library in independent processes with alternating order. It reports the median of process medians and keeps every raw sample. The scripts define the batch and process counts. The scaling probe uses fresh subprocesses with deadlines to bound each measurement.
 
 The scripts accept source checkout directories, generated `package/` directories or explicit CommonJS entry files. Directory inputs use the package's declared `main` or Node's directory index fallback, even when a neighbouring `package.json` exists. Matcher-scaling timeouts remain reported results; unexpected worker failures retain their diagnostics and make the command exit unsuccessfully.
 
@@ -53,7 +49,7 @@ The comparison and matcher-scaling scripts print JSON when supplied with two sou
 
 These local microbenchmarks do not guarantee application latency or another runtime's speed. Garbage collection, just-in-time compilation, CPU load and timer resolution affect very small measurements. Timings also include benchmark dispatch and result-consumption overhead. Near-equal nanosecond results are not reliable evidence of improvement or regression.
 
-No timing threshold is a unit-test assertion. The shared-graph regression asserts observable descriptor-read counts, while behaviour tests check answers, exceptions, callback order and mutations independently of timing.
+No timing threshold is a unit-test assertion. Behaviour tests check answers, exceptions, callback order, indexed reads and mutations independently of timing.
 
 The hot-path comparison also alternates versions in separate processes, warms each case, uses identical inputs and consumes results. It prints every timing sample as JSON. Exception events are counted separately with the Node inspector; timing is never gathered under that debugger. Measurements do not establish a universal speedup or describe unmeasured generated bundles.
 

@@ -1,53 +1,47 @@
 import T = require('go-types');
-import isTypeOf = require('go-types/isTypeOf');
+import isArrayOf = require('go-types/isArrayOf');
 
 type IsAny<V> = 0 extends 1 & V ? true : false;
 function expectFalse<V extends false>(): void {}
 function expectType<V>(_value: V): void {}
 
-// Matcher callbacks retain unknown contextual input types on the public checks.
-const check = T.isTypeOf(1, {
-  predicate(value) {
-    expectFalse<IsAny<typeof value>>();
-    // @ts-expect-error unknown input needs a value check before property access.
-    void value.member;
-    return typeof value === 'number';
-  }
+const check = isArrayOf([1], function (value) {
+  expectFalse<IsAny<typeof value>>();
+  expectType<undefined>(this);
+  // @ts-expect-error A reusable predicate receives unknown input.
+  void value.member;
+  return typeof value === 'number';
 });
-const nested = isTypeOf(1, [
-  'string',
-  [
-    {
-      predicate(value) {
-        expectFalse<IsAny<typeof value>>();
-        // @ts-expect-error unknown is not an implicitly inferred number.
-        const number: number = value;
-        return typeof value === 'number';
-      }
-    }
-  ]
-]);
 expectType<boolean>(check);
-expectType<boolean>(nested);
-
+T.isArrayLikeOf({ length: 0 }, (value) => value === null);
+T.isSetOf(new Set(), 'object');
+T.isMapOf(new Map(), (value) => typeof value === 'string', T.isNumber);
+// @ts-expect-error The matcher is required even for an empty collection.
+T.isArrayOf([]);
+// @ts-expect-error Array-like matchers are required too.
+T.isArrayLikeOf({ length: 0 });
+// @ts-expect-error Set matchers are required.
+T.isSetOf(new Set());
+// @ts-expect-error Both Map matchers are required.
+T.isMapOf(new Map(), 'string');
+// @ts-expect-error Literal null is not a matcher.
+T.isArrayOf([], null);
+// @ts-expect-error Explicit undefined does not supply a matcher.
+T.isArrayOf([], undefined);
+// @ts-expect-error Boxed strings are not type-name strings.
+T.isArrayOf([], new String('number'));
+// @ts-expect-error Arrays of alternatives are not matchers.
+T.isArrayOf([], ['number', 'string']);
+// @ts-expect-error Predicates must return a primitive boolean.
+T.isArrayOf([], () => 1);
+// @ts-expect-error Async predicates are not supported.
+T.isArrayOf([], async () => true);
+// @ts-expect-error A class must be used through an explicit predicate.
+T.isArrayOf([], Date);
 function checkNarrowing(value: unknown): void {
-  if (isTypeOf(value, 'number')) expectType<number>(value);
-  if (isTypeOf(value, undefined)) expectType<undefined>(value);
-  if (isTypeOf(value, 'undefined')) {
-    // @ts-expect-error typeof-undefined also includes document.all.
-    expectType<undefined>(value);
-  }
-  if (isTypeOf(value, { predicate: (input: unknown) => typeof input === 'number' })) {
-    // @ts-expect-error arbitrary predicates do not establish two-sided narrowing.
-    expectType<number>(value);
-  }
-}
-function checkFailure(value: number | string, name: 'number' | 'boolean'): void {
-  if (!isTypeOf(value, name)) {
-    expectType<number | string>(value);
-    // @ts-expect-error failure of the boolean alternative can still leave a number.
-    expectType<string>(value);
+  if (T.isArrayOf(value, (item): item is number => typeof item === 'number')) {
+    // @ts-expect-error Collection checks return boolean, including with a type guard.
+    expectType<number[]>(value);
   }
 }
 checkNarrowing(1);
-checkFailure(1, 'boolean');

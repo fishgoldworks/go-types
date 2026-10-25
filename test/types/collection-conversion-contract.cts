@@ -24,9 +24,9 @@ type RecordSet = Expect<Equal<T.ConvertedSet<typeof record>, Set<1 | 'answer' | 
 const withLength = { 0: 'first', length: 2, label: false } as const;
 expectType<('first' | 2 | false | undefined)[]>(toArray(withLength));
 expectType<Set<'first' | 2 | false | undefined>>(toSet(withLength));
-// @ts-expect-error length and named values cannot be discarded from a possible plain record.
+// @ts-expect-error length and named values cannot be discarded from a possible plain object.
 expectType<string[]>(toArray(withLength));
-// @ts-expect-error record conversion is not limited to indexed values.
+// @ts-expect-error object conversion is not limited to indexed values.
 expectType<Set<string>>(toSet(withLength));
 type ArrayLikeElements = Expect<Equal<T.ArrayElement<ArrayLike<string>>, string | number | undefined>>;
 type ArrayLikeSet = Expect<Equal<T.ConvertedSet<ArrayLike<string>>, Set<string | number | undefined>>>;
@@ -37,7 +37,7 @@ expectType<Set<'ordinary data' | true>>(toSet(ordinaryLength));
 declare const optional: { a: number; [Symbol.iterator]?: () => IterableIterator<string> };
 expectType<unknown[]>(toArray(optional));
 expectType<Set<unknown>>(toSet(optional));
-// @ts-expect-error optional iterators can replace the record values.
+// @ts-expect-error optional iterators can replace the object values.
 expectType<Set<number>>(toSet(optional));
 const absentIterator = { a: 1, [Symbol.iterator]: null } as const;
 expectType<(1 | null)[]>(toArray(absentIterator));

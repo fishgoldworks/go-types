@@ -5,9 +5,9 @@ const result: boolean = Types.isArray([]);
 if (!result || DefaultTypes !== Types || isArray !== Types.isArray) throw new Error('ES2017 root imports differ');
 const number: number = Types.toNumber('42');
 if (number !== 42) throw new Error('ES2017 root conversion failed');
-const plainObject: Record<string | symbol, unknown> = Types.toPlainObject('{"a":42}');
+const plainObject: Partial<{ a: number }> = Types.toPlainObject({ a: 42 });
 if (plainObject.a !== 42 || Object.getPrototypeOf(plainObject) !== Object.prototype)
-  throw new Error('ES2017 JSON object conversion failed');
+  throw new Error('ES2017 plain object conversion failed');
 const record = { a: 1 };
 const copied: Partial<typeof record> = Types.toPlainObject(record);
 // @ts-expect-error Copied properties may be omitted because they are non-enumerable.
@@ -33,9 +33,18 @@ if (
 }
 
 const scalarText: string & { readonly length: number } = '{"a":1}';
-const parsed = Types.toPlainObject(scalarText);
+let rejectedText = false;
+try {
+  // @ts-expect-error Strings remain unsupported even with a structural object intersection.
+  Types.toPlainObject(scalarText);
+} catch (error) {
+  rejectedText = error instanceof TypeError;
+}
 const unchangedText: typeof scalarText = Types.toPlainObjectIf(scalarText, false);
-if (parsed.a !== 1 || unchangedText !== scalarText) throw new Error('ES2017 structural string conversion failed');
+const skippedPredicateText: typeof scalarText = Types.toPlainObjectIf(scalarText, () => false);
+if (!rejectedText || unchangedText !== scalarText || skippedPredicateText !== scalarText) {
+  throw new Error('ES2017 string rejection or skipped conversion failed');
+}
 
 // Visible optional iteration prevents the declaration from promising indexed numbers.
 interface OptionalArrayIterator extends ArrayLike<number> {

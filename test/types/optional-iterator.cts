@@ -57,7 +57,7 @@ expectType<OptionalIterator | unknown[]>(dynamic);
 // @ts-expect-error a skipped conversion can retain the original non-array object.
 expectType<unknown[]>(dynamic);
 
-// Definite iteration remains precise; absent iteration includes record values and possible array-like holes.
+// Definite iteration remains precise; absent iteration includes object values and possible array-like holes.
 const definite: Iterable<string> & ArrayLike<number> = {
   0: 1,
   length: 1,

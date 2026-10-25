@@ -2,7 +2,7 @@
 
 | Location                                                               | Responsibility                                                                                                                                               |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/`                                                                 | Focused type checks, matcher compilation and graph traversal.                                                                                                |
+| `src/`                                                                 | Focused type checks, collection matcher validation and cycle traversal.                                                                                      |
 | `src/conversion/`                                                      | Explicit conversions and their conditional variants; see the public inventory in `scripts/exports.json`.                                                     |
 | `src/util/nativeTypes.js`                                              | Optional once-only Node classifier discovery; browser code needs no static Node import.                                                                      |
 | `src/util/`                                                            | Private shared helpers; no public import guarantee.                                                                                                          |

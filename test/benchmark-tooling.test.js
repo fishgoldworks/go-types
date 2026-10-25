@@ -92,9 +92,8 @@ test('matcher scaling reports an intentional worker timeout without treating it 
     const slow = path.join(directory, 'slow.cjs');
     fs.writeFileSync(
       slow,
-      'exports.isTypeOf = (value, type) => {' +
-        'let depth = 0; while (type.length) { depth++; type = type[0]; }' +
-        'if (depth === 12) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0);' +
+      'exports.isArrayOf = (values) => {' +
+        'if (values.length === 12) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0);' +
         'return false; };'
     );
     const result = run('benchmark-matcher-scaling.js', [slow, entry]);
@@ -103,7 +102,7 @@ test('matcher scaling reports an intentional worker timeout without treating it 
     const timedOut = report.results.filter((row) => row.timeoutMilliseconds);
     assert.equal(timedOut.length, 1);
     assert.equal(timedOut[0].label, 'baseline');
-    assert.equal(timedOut[0].depth, 12);
+    assert.equal(timedOut[0].items, 12);
     assert.ok(!report.results.some((row) => row.error));
     assert.ok(report.results.some((row) => row.label === 'updated' && row.result === false));
   }));

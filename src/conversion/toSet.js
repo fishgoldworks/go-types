@@ -4,19 +4,19 @@ const collectionInput = require('../util/collectionInput');
 const NativeSet = typeof Set === 'function' ? Set : undefined;
 
 /**
- * Converts a synchronous iterable, plain record or supported array-like input to a new shallow
+ * Converts a synchronous iterable, plain object or supported array-like input to a new shallow
  * Set.
  *
- * Copies iterable values, own enumerable string and symbol record values, or supported array-like
- * indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty
- * Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing
- * support throws before inspecting the input.
+ * Copies iterable values, values from own enumerable string and symbol properties, or supported
+ * array-like indices. Lengths must be numeric safe integers at least zero. Nullish input creates
+ * an empty Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`;
+ * missing support throws before inspecting the input.
  *
  * @param {*} [value] The value to convert.
- * @returns {Set} A new Set of iterable items, own enumerable record values or indexed array-like
+ * @returns {Set} A new Set of iterable items, plain object property values or indexed array-like
  * values, or an empty Set for omitted or nullish input.
  * @throws {*} TypeError for unsupported input, malformed iterators or invalid array-like lengths.
- * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; record
+ * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; object
  * copying requires symbol-enumeration support.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
  * @example Array.from(toSet([3, 1, 3]));            // => [3,1]

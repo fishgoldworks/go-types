@@ -1,7 +1,6 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const compileTypeMatcher = require('../src/util/compileTypeMatcher');
 const vm = require('node:vm');
 const T = require('../');
 const F = (s) => vm.runInNewContext(s);
@@ -117,12 +116,10 @@ test('collection length is snapshotted but indexed reads remain live and inherit
   const value = [1, 2];
   const seen = [];
   assert.equal(
-    T.isArrayOf(value, {
-      predicate(x) {
-        seen.push(x);
-        value.push(3);
-        return true;
-      }
+    T.isArrayOf(value, function (x) {
+      seen.push(x);
+      value.push(3);
+      return true;
     }),
     true
   );
@@ -161,7 +158,7 @@ test('throwing value accessors propagate their original error', () => {
   );
   assert.throws(
     () =>
-      T.isThenable({
+      T.isPromiseLike({
         get then() {
           throw error;
         }
@@ -207,7 +204,6 @@ test('native Promise check retains realm/prototype semantics; thenable checks do
       calls++;
     }
   };
-  assert.equal(T.isThenable(x), true);
   assert.equal(T.isPromiseLike(x), true);
   assert.equal(T.isPromise(x), false);
   assert.equal(calls, 0);
@@ -218,32 +214,6 @@ test('DOM checks return false when the corresponding constructors are absent', (
     assert.equal(T.isElement(value), false);
     assert.equal(T.isFragment(value), false);
   }
-});
-test('cross-realm arrows defer native instance errors until evaluation', () => {
-  const arrow = F('(()=>true)');
-  const check = compileTypeMatcher(arrow);
-  assert.equal(check(1), false);
-  assert.throws(
-    () => check({}),
-    (error) => error.name === 'TypeError'
-  );
-});
-test('invalid and throwing Symbol.hasInstance configurations are observable', () => {
-  function A() {}
-  Object.defineProperty(A, Symbol.hasInstance, { value: 1 });
-  assert.throws(() => compileTypeMatcher(A), TypeError);
-  const error = Error('hook');
-  function B() {}
-  Object.defineProperty(B, Symbol.hasInstance, {
-    value() {
-      throw error;
-    }
-  });
-  const check = compileTypeMatcher(B);
-  assert.throws(
-    () => check(1),
-    (e) => e === error
-  );
 });
 test('collection constraints validate complete matcher configurations before reading input', () => {
   let reads = 0;

@@ -44,6 +44,18 @@ module.exports = function aliasFixtures(pkg) {
         JSON.stringify('ESM alias identity: ' + alias) +
         ');'
     );
+    esmAliasTypes.push(
+      'import { ' + name + ' as namedAlias' + index + ' } from ' + JSON.stringify('go-types/' + alias.slice(2)) + ';',
+      'const namedTyped' + index + ': typeof Types.' + name + ' = namedAlias' + index + ';',
+      'type NamedChecked' + index + ' = NotAny<IsAny<typeof namedAlias' + index + '>>;',
+      'if (namedTyped' +
+        index +
+        ' !== alias' +
+        index +
+        ') throw new Error(' +
+        JSON.stringify('Named ESM alias identity: ' + alias) +
+        ');'
+    );
   }
   return { aliases, aliasTypes, esmAliasTypes };
 };

@@ -39,6 +39,8 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     throw new Error('Expected TypeError');
   }
   test('matcher compilation is internal to the browser API', () => {
+    equal(Object.prototype.hasOwnProperty.call(api, 'isTypeOf'), false);
+    equal(Object.prototype.hasOwnProperty.call(api, 'isInstanceOf'), false);
     equal(Object.prototype.hasOwnProperty.call(api, 'createTypeChecker'), false);
     equal(Object.prototype.hasOwnProperty.call(api, 'compileTypeMatcher'), false);
   });
@@ -365,10 +367,29 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
   }
   test('HTMLDDA iterable item is nonblank', () => equal(api.isBlankIterable([document.all]), false));
   test('HTMLDDA retains intentional native typeof and truthiness', () => {
-    equal(api.isTypeOf(document.all, 'undefined'), true);
-    equal(api.isTypeOf(document.all, undefined), false);
+    equal(api.isArrayOf([document.all], 'undefined'), true);
+    throws(() => api.isArrayOf([document.all], undefined));
     equal(api.toBoolean(document.all), false);
     throws(() => api.toPlainObject(document.all));
+  });
+  test('promise-like detection ignores catch and finally without invoking then', () => {
+    let reads = 0;
+    const input = {
+      get then() {
+        reads++;
+        return () => {
+          throw Error('Do not invoke then');
+        };
+      },
+      get catch() {
+        throw Error('Do not read catch');
+      },
+      get finally() {
+        throw Error('Do not read finally');
+      }
+    };
+    equal(api.isPromiseLike(input), true);
+    equal(reads, 1);
   });
   // A protocol method can have [[Call]] without reporting typeof "function".
   // Keep this separate from isFunction(), whose public contract is literal typeof.
@@ -376,12 +397,10 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     ['isIterable', Symbol.iterator],
     ['isAsyncIterable', Symbol.asyncIterator],
     ['isIteratorLike', 'next'],
-    ['isThenable', 'then'],
     ['isPromiseLike', 'then']
   ]) {
     test('callable HTMLDDA protocol method: ' + name, () => {
       const prototype = { [key]: document.all };
-      if (name === 'isPromiseLike') prototype.catch = document.all;
       equal(api[name](Object.create(prototype)), true);
       prototype[key] = undefined;
       equal(api[name](Object.create(prototype)), false);
@@ -431,34 +450,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       }
     }
   }
-  for (const mode of ['predicate', 'instanceOf']) {
-    test('HTMLDDA matcher descriptor: ' + mode, () => {
-      let calls = 0;
-      const callback = (value) => {
-        calls++;
-        return value === 7;
-      };
-      function Target() {}
-      Object.defineProperty(Target, Symbol.hasInstance, { value: callback });
-      const selectors = {
-        [mode]: { configurable: true, value: mode === 'predicate' ? callback : Target }
-      };
-      withMatcherSelectors(document.all, selectors, (descriptor) => {
-        const shared = [descriptor];
-        const check = (value) => api.isTypeOf(value, [shared, shared]);
-        equal(calls, 0);
-        equal(check(7), true);
-        equal(check(8), false);
-        equal(calls, 3);
-        equal(api.isTypeOf(7, descriptor), true);
-        equal(api.isTypeOf(8, descriptor), false);
-        equal(api.isArrayOf([7], descriptor), true);
-        equal(api.isArrayOf([8], descriptor), false);
-        equal(api.isTypeOf(document.all, 'undefined'), true);
-        equal(api.isTypeOf(document.all, undefined), false);
-      });
-    });
-  }
   test('HTMLDDA descriptor selectors still reject accessors, ambiguous and absent configurations', () => {
     let reads = 0;
     withMatcherSelectors(
@@ -472,7 +463,7 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
           }
         }
       },
-      (value) => throws(() => api.isTypeOf(undefined, value))
+      (value) => throws(() => api.isArrayOf([undefined], value))
     );
     equal(reads, 0);
     withMatcherSelectors(
@@ -481,23 +472,9 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
         predicate: { configurable: true, value: () => true },
         instanceOf: { configurable: true, value: Object }
       },
-      (value) => throws(() => api.isTypeOf(undefined, value))
+      (value) => throws(() => api.isArrayOf([undefined], value))
     );
-    withMatcherSelectors(document.all, {}, (value) => throws(() => api.isTypeOf(undefined, value)));
-  });
-  test('shared pure matcher graph stays compact', () => {
-    let spec = ['number'];
-    for (let i = 0; i < 2000; i++) spec = [spec, spec];
-    const check = (value) => api.isTypeOf(value, spec);
-    equal(check(1), true);
-    equal(check('x'), false);
-  });
-  test('bound custom instance hooks are valid targets', () => {
-    const f = () => {};
-    Object.defineProperty(f, Symbol.hasInstance, { value: (x) => x === 7 });
-    const bound = f.bind(null);
-    equal(api.isTypeOf(7, bound), true);
-    equal(api.isTypeOf(8, { instanceOf: bound }), false);
+    withMatcherSelectors(document.all, {}, (value) => throws(() => api.isArrayOf([undefined], value)));
   });
   test('real DOM nodes', () => {
     equal(api.isNode(document), true);
@@ -535,8 +512,11 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(api.isTypedArray(new realm.Uint8Array(buffer)), true);
   });
   test('foreign instance matching remains realm-sensitive', () => {
-    equal(api.isTypeOf(new realm.Date(), Date), false);
-    equal(api.isTypeOf(new realm.Date(), { predicate: api.isDate }), true);
+    equal(
+      api.isArrayOf([new realm.Date()], (value) => value instanceof Date),
+      false
+    );
+    equal(api.isArrayOf([new realm.Date()], api.isDate), true);
     equal(api.isPromise(realm.Promise.resolve()), false);
     equal(api.isNode(realm.document.body), false);
     equal(api.isElement(realm.document.body), false);
@@ -584,17 +564,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       throws(() => api[name](revoked.proxy));
     });
   }
-  test('foreign arrow defers native instanceof errors', () => {
-    const check = (value) => api.isTypeOf(value, realm.eval('(x => true)'));
-    equal(check(1), false);
-    let failure;
-    try {
-      check({});
-    } catch (error) {
-      failure = error;
-    }
-    equal(failure instanceof realm.TypeError, true);
-  });
   test('conversion: real NodeList and HTMLCollection', () => {
     const host = document.createElement('div');
     host.innerHTML = '<span>a</span><span>b</span>';
@@ -622,6 +591,14 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(special.__proto__.injected, true);
     equal(api.toPlainObject(new realm.Map([['a', 1]])).a, 1);
     equal(api.toPlainObjectIf(null, false), null);
+    throws(() => api.toPlainObjectIf('{"a":1}', true));
+    throws(() => api.toPlainObjectIf('{"a":1}', () => true));
+    equal(api.toPlainObjectIf('{"a":1}', false), '{"a":1}');
+    equal(api.toPlainObjectIf('{"a":1}'), '{"a":1}');
+    equal(
+      api.toPlainObjectIf('{"a":1}', () => false),
+      '{"a":1}'
+    );
     for (const value of [
       null,
       undefined,
@@ -630,7 +607,12 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       [[1, 2]],
       [['a']],
       [['a', 1, 2]],
-      '[]'
+      '[]',
+      '{"a":1}',
+      '[["a",1]]',
+      '{',
+      'ordinary text',
+      ''
     ])
       throws(() => api.toPlainObject(value));
     equal('toObject' in api, false);
@@ -697,7 +679,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(api.toNumberIf('2', true), 2);
     throws(() => api.toNumberIf('2', async () => true));
   });
-
   test('conversion: Map and Set copy foreign collections into local collections', () => {
     const key = {},
       value = {};
@@ -801,21 +782,66 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(reads, 0);
     equal(api.isError(Object.create(Error.prototype)), false);
   });
-  test('instance matchers accept callable HTMLDDA hooks', () => {
-    function Target() {}
-    Object.defineProperty(Target, Symbol.hasInstance, { value: document.all });
-    equal({} instanceof Target, false);
-    equal(api.isTypeOf({}, Target), false);
-    equal(api.isTypeOf({}, { instanceOf: Target }), false);
-    equal(api.isTypeOf({}, Target), false);
-    equal(api.isArrayOf([{}], Target), false);
+  for (const [name, check] of [
+    ['array', (matcher) => api.isArrayOf([1], matcher)],
+    ['array-like', (matcher) => api.isArrayLikeOf({ 0: 1, length: 1 }, matcher)],
+    ['Set', (matcher) => api.isSetOf(new Set([1]), matcher)],
+    ['Map key', (matcher) => api.isMapOf(new Map([[1, 1]]), matcher, 'number')],
+    ['Map value', (matcher) => api.isMapOf(new Map([[1, 1]]), 'number', matcher)]
+  ]) {
+    test(name + ': direct predicates and required string-or-predicate matchers', () => {
+      let calls = 0;
+      equal(
+        check(function (value) {
+          'use strict';
+          calls++;
+          equal(this, undefined);
+          equal(arguments.length, 1);
+          return value === 1;
+        }),
+        true
+      );
+      equal(calls, 1);
+      equal(
+        check(() => false),
+        false
+      );
+      for (const matcher of [undefined, null, new String('number'), ['number'], { predicate: api.isNumber }]) {
+        throws(() => check(matcher));
+      }
+      for (const result of [1, new Boolean(true), Promise.resolve(true)]) throws(() => check(() => result));
+      const failure = {};
+      let observed;
+      try {
+        check(() => {
+          throw failure;
+        });
+      } catch (error) {
+        observed = error;
+      }
+      equal(observed, failure);
+    });
+  }
+  test('empty containers still require matchers without probing callbacks', () => {
+    const predicate = () => {
+      throw Error('must not execute');
+    };
+    equal(api.isArrayOf([], predicate), true);
+    equal(api.isMapOf(new Map(), predicate, predicate), true);
+    throws(() => api.isArrayOf([]));
+    throws(() => api.isMapOf(new Map(), predicate));
+    equal(api.isArrayOf([new Number(1)], 'number'), false);
+    equal(api.isArrayOf([new Number(1)], api.isNumber), true);
   });
   test('matcher validation is independent of value', () => {
-    throws(() => api.isTypeOf(1, ['number', 42]));
+    throws(() => api.isArrayOf([1], ['number', 42]));
     const cycle = [];
     cycle.push(cycle);
-    throws(() => api.isTypeOf(undefined, cycle));
-    equal(api.isTypeOf('x', ['string', null]), true);
+    throws(() => api.isArrayOf([undefined], cycle));
+    equal(
+      api.isArrayOf(['x'], (value) => typeof value === 'string' || value === null),
+      true
+    );
   });
   test('empty checks do not consume a generator', () => {
     function* values() {
