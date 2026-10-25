@@ -89,9 +89,11 @@ Genuine native values are recognised across realms where documented; prototype/t
 
 `isCyclic` detects a reference to an active ancestor. Repeated primitive values and shared acyclic children are not cycles. It follows enumerable string properties, including inherited properties, but excludes symbols, non-enumerables and Map/Set contents. Getters and proxy traps may still run and throw; inputs must remain stable during traversal.
 
-## Parse JSON before plain-object conversion
+## Adopt new conversions and TypeScript declarations
 
-`toPlainObject` accepts plain objects and synchronous entry pairs. It no longer parses JSON text: strings throw `TypeError`, including malformed JSON. A requested `toPlainObjectIf` conversion follows the same rule; skipped calls still return the original input unchanged.
+The published 1.3.1 package did not include conversion utilities or TypeScript declarations. The new conversions are described in the [conversion guide](conversions.md); they are not implicit extensions of the predicate functions. In particular, `toBoolean('false')` uses truthiness, `toPlainObject` creates a fresh plain object, and `fromJson` parses any JSON root with an `unknown` TypeScript result.
+
+`toPlainObject` accepts plain objects and synchronous entry pairs. Strings throw `TypeError`. Requested `toPlainObjectIf` conversions follow the same rule; skipped calls return the original input unchanged.
 
 Use `fromJson` to parse JSON text. If the result must be an object, validate it before use:
 
@@ -106,9 +108,5 @@ if (!isPlainObject(value)) {
 ```
 
 The parsed object is already fresh. Calling `toPlainObject` is useful only when a separate shallow copy is needed. Passing the parsed value straight to `toPlainObject` also accepts entry arrays, so that composition does not replace an object-only JSON check.
-
-## Adopt new conversions and TypeScript declarations
-
-The published 1.3.1 package did not include conversion utilities or TypeScript declarations. The new conversions are described in the [conversion guide](conversions.md); they are not implicit extensions of the predicate functions. In particular, `toBoolean('false')` uses truthiness, `toPlainObject` creates a fresh plain object, and `fromJson` parses any JSON root with an `unknown` TypeScript result.
 
 Declarations cover root, focused and bundle imports. Fixed primitive/nullish checks narrow, while native identity checks, dynamic matchers and partial validators generally return `boolean` to avoid unsound false-branch narrowing. TypeScript interfaces are structural and cannot prove native identity. See the [TypeScript guidance](API.md#typescript) for module settings and narrowing boundaries.

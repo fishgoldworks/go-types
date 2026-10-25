@@ -6,7 +6,6 @@ This major update removes `isTypeOf` and `isThenable`, retains the other 43 root
 
 ### Breaking changes
 
-- `toPlainObject` and requested `toPlainObjectIf` conversions reject strings with `TypeError`; JSON parsing belongs to `fromJson`. Object copying and entry conversion are unchanged.
 - Removed `isThenable`; use `isPromiseLike` for the same callable-`then` check. `isPromiseLike` no longer requires or reads `catch`.
 - Removed `isTypeOf`. Collection matchers accept only required type-name strings or predicates; use an explicit predicate for `instanceof`. Predicate results must be synchronous primitive booleans.
 - Missing or invalid matchers throw before input inspection, including empty and wrong-container inputs. Boxed names, matcher arrays and descriptors are no longer accepted.
