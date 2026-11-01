@@ -220,8 +220,8 @@ test('package builds are repeatable, self-contained and leave canonical inputs u
     assert.equal(packaged.private, undefined);
     assert.equal(packaged.scripts, undefined);
     assert.equal(packaged.devDependencies, undefined);
-    assert.equal(Object.keys(packaged.exports).length, 420);
-    assert.equal(Object.keys(packaged.typesVersions['*']).length, 418);
+    assert.equal(Object.keys(packaged.exports).length, 414);
+    assert.equal(Object.keys(packaged.typesVersions['*']).length, 412);
     assert.equal(packaged.exports['./isThenable'], undefined);
     assert.equal(packaged.typesVersions['*'].isThenable, undefined);
     assert.equal(packaged.exports['./isTypeOf'], undefined);

@@ -11,20 +11,17 @@ const pkg = require('../package.json');
 // extend the related categories; conversions have their own complete sections.
 const categories = [
   ['Primitive', ['isUndefined', 'isNull', 'isBoolean', 'isNumber', 'isString', 'isSymbol', 'isBigInt', 'isPrimitive']],
-  ['Utility', ['isNullish', 'isNonNullish', 'isEmpty', 'isBlank', 'isTruthy', 'isFalsy', 'isJson']],
+  ['Utility', ['isNullish', 'isNotNullish', 'isEmpty', 'isBlank', 'isTruthy', 'isFalsy', 'isJson']],
   ['Number', ['isInteger', 'isSafeInteger', 'isFloat', 'isFinite', 'isInfinite', 'isNaN', 'isNumeric']],
   [
     'Object',
     [
       'isObject',
-      'isObjectLike',
       'isPlainObject',
-      'isCyclic',
+      'isCircular',
       'isIterable',
       'isAsyncIterable',
       'isIteratorLike',
-      'isEmptyIterable',
-      'isBlankIterable',
       'isFunction',
       'isDate',
       'isValidDate',
@@ -35,9 +32,9 @@ const categories = [
       'isError'
     ]
   ],
-  ['Array', ['isArray', 'isNonEmptyArray', 'isArrayOf', 'isArrayLike', 'isArrayLikeOf', 'isPair']],
+  ['Array', ['isArray', 'isArrayOf', 'isArrayLike', 'isArrayLikeOf', 'isPair']],
   ['Collection', ['isMap', 'isMapOf', 'isSet', 'isSetOf', 'isWeakMap', 'isWeakSet']],
-  ['DOM', ['isNode', 'isElement', 'isFragment']],
+  ['DOM', ['isNode', 'isElement', 'isDocumentFragment']],
   ['Binary', ['isArrayBuffer', 'isSharedArrayBuffer', 'isArrayBufferView', 'isTypedArray', 'isDataView']],
   [
     'Conversion',
@@ -47,6 +44,7 @@ const categories = [
       'toRegExp',
       'toPromise',
       'toArray',
+      'ensureArray',
       'toBigInt',
       'toBoolean',
       'toDate',
@@ -57,6 +55,7 @@ const categories = [
       'toNumber',
       'toPlainObject',
       'toSet',
+      'ensureSet',
       'toString',
       'toSymbol'
     ]
@@ -88,14 +87,39 @@ const categories = [
 // Multi-step examples are easier to copy than immediately invoked expressions.
 // They are executed directly from the generated API reference by the tests.
 const readableExamples = {
-  isCyclic: `const value = {};
+  ensureSet: `ensureSet().size; // => 0
+ensureSet("read").has("read"); // => true
+Array.from(ensureSet([1, 2, 1])); // => [1, 2]
+ensureSet(null).has(null); // => true
+ensureSet(undefined).has(undefined); // => true
+
+const permissions = new Set(["read", "write"]);
+ensureSet(permissions) === permissions; // => true`,
+  ensureArray: `ensureArray(); // => []
+ensureArray(1); // => [1]
+ensureArray('hello'); // => ['hello']
+ensureArray(null); // => [null]
+ensureArray(undefined); // => [undefined]
+
+const items = [1, 2];
+ensureArray(items) === items; // => true`,
+
+  isCircular: `const value = {};
 value.self = value;
 
-isCyclic(value); // => true
-isCyclic({ a: 1, b: { c: 1 } }); // => false
+isCircular(value); // => true
+isCircular({ a: 1, b: { c: 1 } }); // => false
 
 const shared = {};
-isCyclic({ a: shared, b: shared }); // => false`,
+isCircular({ a: shared, b: shared }); // => false
+
+const team = { members: new Set() };
+team.members.add({ team });
+isCircular(team); // => true
+
+const lookup = new Map();
+lookup.set(lookup, "self");
+isCircular(lookup); // => true`,
   isAsyncIterable: `async function* values() {
   yield 1;
 }
@@ -108,21 +132,6 @@ isIteratorLike(iterator); // => true
 isIteratorLike({ next() {} }); // => true
 isIteratorLike([]); // => false
 isIteratorLike({ next: 1 }); // => false`,
-  isEmptyIterable: `function* values() {
-  yield 1;
-}
-
-isEmptyIterable([]); // => true
-isEmptyIterable(values()); // => false
-isEmptyIterable(null); // => throws TypeError`,
-  isBlankIterable: `function* values() {
-  yield null;
-  yield undefined;
-}
-
-isBlankIterable(values()); // => true
-isBlankIterable([0]); // => false
-isBlankIterable(new Map([['key', null]])); // => false`,
   toBigInt: `toBigInt('9007199254740993'); // => 9007199254740993n
 toBigInt(true); // => 1n
 toBigInt('0xff'); // => 255n
@@ -165,10 +174,11 @@ const referenceExamples = {
 
 function parameterTable(item) {
   const entries = parameters(item);
-  const optional = entries.some((parameter) => parameter.optional);
+  const showDefault =
+    !['ensureArray', 'ensureSet'].includes(item.name) && entries.some((parameter) => parameter.optional);
   const table = [
-    optional ? '| Parameter | Type | Default | Description |' : '| Parameter | Type | Description |',
-    optional ? '| --- | --- | --- | --- |' : '| --- | --- | --- |'
+    showDefault ? '| Parameter | Type | Default | Description |' : '| Parameter | Type | Description |',
+    showDefault ? '| --- | --- | --- | --- |' : '| --- | --- | --- |'
   ];
   for (const parameter of entries) {
     const type =
@@ -182,7 +192,7 @@ function parameterTable(item) {
         '` | ' +
         type +
         ' | ' +
-        (optional ? (parameter.optional ? '`undefined`' : '—') + ' | ' : '') +
+        (showDefault ? (parameter.optional ? '`undefined`' : '—') + ' | ' : '') +
         parameter.description +
         ' |'
     );
@@ -223,7 +233,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
       );
     if (category === 'Conversion')
       documentation.push(
-        'These functions explicitly convert values. Native coercion rules, exceptions, and observable side effects are part of their documented contracts.',
+        'These functions convert or normalise values. Each function documents its input, copying and coercion rules.',
         ''
       );
     if (category === 'Conditional conversion')

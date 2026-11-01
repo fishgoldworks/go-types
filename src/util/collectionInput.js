@@ -1,6 +1,6 @@
 'use strict';
 const isPlainObject = require('../isPlainObject');
-const isObjectLike = require('../isObjectLike');
+const isNonFunctionObject = require('./isNonFunctionObject');
 const isCallable = require('./isCallable');
 const getArrayLikeLength = require('./getArrayLikeLength');
 const { ownKeys, iteratorKey, isUnsupportedObject } = require('./conversionSupport');
@@ -10,7 +10,7 @@ const call = Function.prototype.call;
 // Delay inspection until the native consumer has checked its capabilities/adder.
 // for-of preserves original iterator errors and performs closing on consumer errors.
 function* collectionInput(value, entries, maxLength) {
-  if (typeof value !== 'string' && (!isObjectLike(value) || isUnsupportedObject(value))) {
+  if (typeof value !== 'string' && (!isNonFunctionObject(value) || isUnsupportedObject(value))) {
     throw new TypeError('Collection conversion requires a supported iterable, record or array-like object.');
   }
   if (iteratorKey === undefined) {

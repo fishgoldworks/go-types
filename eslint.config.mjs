@@ -46,7 +46,7 @@ export default [
   { files: ['src/util/nativeTypes.js'], languageOptions: { globals: { process: 'readonly' } } },
   { files: ['src/isNode.js'], languageOptions: { globals: { Node: 'readonly' } } },
   { files: ['src/isElement.js'], languageOptions: { globals: { Element: 'readonly' } } },
-  { files: ['src/isFragment.js'], languageOptions: { globals: { DocumentFragment: 'readonly' } } },
+  { files: ['src/isDocumentFragment.js'], languageOptions: { globals: { DocumentFragment: 'readonly' } } },
   {
     files: ['test/browser/**/*.js'],
     languageOptions: { sourceType: 'script', globals: globals.browser }

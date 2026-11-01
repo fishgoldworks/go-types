@@ -175,7 +175,7 @@ test('throwing value accessors propagate their original error', () => {
     (e) => e === error
   );
 });
-test('nonempty checks do not read values simply to count keys or elements', () => {
+test('emptiness checks do not read property values or array elements', () => {
   const x = {
     get a() {
       throw Error('must not read');
@@ -189,7 +189,6 @@ test('nonempty checks do not read values simply to count keys or elements', () =
     }
   });
   assert.equal(T.isEmpty(a), false);
-  assert.equal(T.isNonEmptyArray(a), true);
 });
 test('native Promise check retains realm/prototype semantics; thenable checks do not subscribe', () => {
   assert.equal(T.isPromise(Promise.resolve(1)), true);
@@ -212,7 +211,7 @@ test('DOM checks return false when the corresponding constructors are absent', (
   for (const value of [null, {}, { nodeType: 1 }, () => {}]) {
     assert.equal(T.isNode(value), false);
     assert.equal(T.isElement(value), false);
-    assert.equal(T.isFragment(value), false);
+    assert.equal(T.isDocumentFragment(value), false);
   }
 });
 test('collection constraints validate complete matcher configurations before reading input', () => {
@@ -226,48 +225,6 @@ test('collection constraints validate complete matcher configurations before rea
   assert.throws(() => T.isArrayLikeOf(input, ['number', 42]), TypeError);
   assert.equal(reads, 0);
 });
-for (const fn of ['isEmptyIterable', 'isBlankIterable']) {
-  test(fn + ' closes after early false and rejects invalid return results', () => {
-    let returns = 0;
-    const iterable = {
-      [Symbol.iterator]() {
-        return {
-          next() {
-            return { value: 1, done: false };
-          },
-          return() {
-            returns++;
-            return 1;
-          }
-        };
-      }
-    };
-    assert.throws(() => T[fn](iterable), TypeError);
-    assert.equal(returns, 1);
-  });
-  test(fn + ' propagates thrown next errors without inventing IteratorClose', () => {
-    let returns = 0;
-    const error = Error('next');
-    const iterable = {
-      [Symbol.iterator]() {
-        return {
-          next() {
-            throw error;
-          },
-          return() {
-            returns++;
-            return { done: true };
-          }
-        };
-      }
-    };
-    assert.throws(
-      () => T[fn](iterable),
-      (e) => e === error
-    );
-    assert.equal(returns, 0);
-  });
-}
 test('default container checks never consume caller Map/Set iterators', () => {
   const map = new Map([['a', null]]),
     set = new Set([null]);

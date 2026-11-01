@@ -2,6 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
+const isNonFunctionObject = require('../src/util/isNonFunctionObject');
 const T = require('../');
 const foreign = (text) => vm.runInNewContext(text);
 
@@ -13,38 +14,27 @@ for (const name of [
   'isDataView',
   'isAsyncIterable',
   'isIteratorLike',
-  'isNonNullish',
-  'isObjectLike',
-  'isNonEmptyArray',
+  'isNotNullish',
+  'ensureArray',
+  'ensureSet',
   'isJson',
   'isSetOf',
-  'isMapOf',
-  'isEmptyIterable',
-  'isBlankIterable'
+  'isMapOf'
 ]) {
   test('public export: ' + name, () => assert.equal(typeof T[name], 'function'));
 }
 for (const value of [undefined, null, false, true, 0, -0, NaN, Infinity, '', 'x', 0n, Symbol(), {}, [], () => {}]) {
   test('non-nullish is the strict complement of nullish: ' + String(value), () => {
-    assert.equal(T.isNonNullish(value), value !== null && value !== undefined);
-    assert.equal(T.isNonNullish(value), !T.isNullish(value));
+    assert.equal(T.isNotNullish(value), value !== null && value !== undefined);
+    assert.equal(T.isNotNullish(value), !T.isNullish(value));
   });
-  test('object-like excludes functions: ' + String(value), () => {
-    assert.equal(T.isObjectLike(value), value !== null && typeof value === 'object');
+  test('non-function object check excludes functions: ' + String(value), () => {
+    assert.equal(isNonFunctionObject(value), value !== null && typeof value === 'object');
   });
 }
 test('non-nullish filtering retains every valid falsy value', () => {
-  assert.deepEqual([0, false, '', NaN, 0n, null, undefined].filter(T.isNonNullish), [0, false, '', NaN, 0n]);
+  assert.deepEqual([0, false, '', NaN, 0n, null, undefined].filter(T.isNotNullish), [0, false, '', NaN, 0n]);
 });
-for (const [label, value, expected] of [
-  ['empty', [], false],
-  ['one hole', new Array(1), true],
-  ['pair', [1, 2], true],
-  ['arraylike', { length: 1 }, false],
-  ['foreign', foreign('[1]'), true]
-]) {
-  test('non-empty array: ' + label, () => assert.equal(T.isNonEmptyArray(value), expected));
-}
 for (const [name, make, result] of [
   ['isArrayBuffer', () => new ArrayBuffer(0), true],
   ['isArrayBuffer', () => new SharedArrayBuffer(0), false],
@@ -264,21 +254,25 @@ test('empty and blank dictionary scope excludes symbol/non-enumerable/inherited 
   assert.equal(T.isEmpty(x), true);
   assert.equal(T.isBlank(x), true);
 });
-for (const fn of ['isEmptyIterable', 'isBlankIterable']) {
-  test(fn + ' reads Symbol.iterator once', () => {
-    let gets = 0;
-    const input = {
-      get [Symbol.iterator]() {
-        gets++;
-        return function* () {
-          yield null;
-        };
-      }
-    };
-    assert.equal(T[fn](input), fn === 'isBlankIterable');
-    assert.equal(gets, 1);
-  });
-  test(fn + ' rejects non-iterables instead of classifying them as empty', () => {
-    for (const value of [null, undefined, 1, {}, { next() {} }]) assert.throws(() => T[fn](value), TypeError);
+
+for (const name of ['isEmptyIterable', 'isBlankIterable']) {
+  test('consuming iterable checks are not public: ' + name, () => {
+    assert.equal(Object.hasOwn(T, name), false);
   });
 }
+
+test('DocumentFragment check uses its explicit public name', () => {
+  assert.equal(typeof T.isDocumentFragment, 'function');
+  assert.equal(Object.hasOwn(T, 'isFragment'), false);
+  assert.equal(T.isDocumentFragment({}), false);
+});
+
+test('circular-reference check uses isCircular without the previous alias', () => {
+  assert.equal(typeof T.isCircular, 'function');
+  assert.equal(Object.hasOwn(T, 'isCyclic'), false);
+  const value = {};
+  value.self = value;
+  assert.equal(T.isCircular(value), true);
+  const shared = {};
+  assert.equal(T.isCircular({ left: shared, right: shared }), false);
+});

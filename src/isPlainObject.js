@@ -1,4 +1,4 @@
-var isObjectLike = require('./isObjectLike');
+var isNonFunctionObject = require('./util/isNonFunctionObject');
 var getPrototypeOf = Object.getPrototypeOf;
 var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 var functionToString = Function.prototype.toString;
@@ -22,7 +22,7 @@ var objectConstructorSource = functionToString.call(Object);
 function isPlainObject(value) {
   // Inspect the actual prototype, not value.constructor (ordinary user data).
   // Null-prototype dictionaries and ordinary object prototypes from other realms are supported.
-  if (!isObjectLike(value)) {
+  if (!isNonFunctionObject(value)) {
     return false;
   }
   var prototype = getPrototypeOf(value);

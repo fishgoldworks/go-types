@@ -20,22 +20,16 @@ for (const length of [-1, 0.5, NaN, Infinity, '1', 1n, undefined, 2 ** 32]) {
     });
     assert.equal(memberReads, 0);
     assert.equal(T.isArrayOf(value, 'number'), false);
-    assert.equal(T.isNonEmptyArray(value), false);
   });
 }
-test('valid array proxy length is read once by array and matcher operations', () => {
-  for (const [check, values] of [
-    [(value) => T.isArrayOf(value, 'number'), [1]],
-    [T.isNonEmptyArray, [1]]
-  ]) {
-    let reads = 0;
-    const value = new Proxy(values, {
-      get(target, key, receiver) {
-        if (key === 'length') reads++;
-        return Reflect.get(target, key, receiver);
-      }
-    });
-    assert.equal(check(value), true);
-    assert.equal(reads, 1);
-  }
+test('array content validation reads a valid proxy length once', () => {
+  let reads = 0;
+  const value = new Proxy([1], {
+    get(target, key, receiver) {
+      if (key === 'length') reads++;
+      return Reflect.get(target, key, receiver);
+    }
+  });
+  assert.equal(T.isArrayOf(value, 'number'), true);
+  assert.equal(reads, 1);
 });

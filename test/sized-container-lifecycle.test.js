@@ -116,7 +116,6 @@ test('array and array-like length limits remain distinct without traversing enor
         throw Error('unexpected property read: ' + String(key));
       }
     });
-    assert.equal(Types.isNonEmptyArray(input), arrayLength && length > 0);
     assert.equal(Types.isPair(input), false);
     assert.equal(Types.isArrayLike(input), arrayLikeLength);
     assert.equal(Types.isArrayOf(input, 'number'), arrayLength && length === 0);
@@ -125,7 +124,7 @@ test('array and array-like length limits remain distinct without traversing enor
   }
 });
 test('cardinality-only checks read length once without inspecting values or iterator properties', () => {
-  for (const name of ['isPair', 'isNonEmptyArray', 'isEmpty', 'isArrayLike']) {
+  for (const name of ['isPair', 'isEmpty', 'isArrayLike']) {
     const reads = [];
     const input = new Proxy(new Array(2), {
       get(target, key, receiver) {

@@ -9,7 +9,7 @@ const T = require('../index.js');
 const sourcePath = require('../scripts/source-path.js');
 const names = Object.keys(T);
 const values = Object.values(T);
-const dom = new Set(['isNode', 'isElement', 'isFragment']);
+const dom = new Set(['isNode', 'isElement', 'isDocumentFragment']);
 for (const name of names.filter((name) => !dom.has(name))) {
   const source = fs.readFileSync(path.join(__dirname, '..', sourcePath(name)), 'utf8');
   const examples = [...source.matchAll(/^\s*\* @example (.*);\s+\/\/ => (.*)$/gm)];

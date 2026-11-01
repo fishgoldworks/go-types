@@ -9,12 +9,12 @@
  * passes its instance check; otherwise `false`.
  * @throws {*} Native `instanceof` errors propagate, including errors from proxy prototype access
  * or a custom `Symbol.hasInstance` method.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfragmentvalue
- * @example isFragment(document.createDocumentFragment());   // => true
- * @example isFragment({nodeType:1});                        // => false
+ * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdocumentfragmentvalue
+ * @example isDocumentFragment(document.createDocumentFragment());   // => true
+ * @example isDocumentFragment({nodeType:1});                        // => false
  */
-function isFragment(value) {
+function isDocumentFragment(value) {
   return typeof DocumentFragment === 'function' && value instanceof DocumentFragment;
 }
 
-module.exports = isFragment;
+module.exports = isDocumentFragment;

@@ -4,7 +4,9 @@ const path = require('node:path');
 const os = require('node:os');
 const { spawnSync } = require('node:child_process');
 const { packageRoot } = require('./package-layout');
-function run(command, argv, cwd, { inherit = false, env = {} } = {}) {
+function run(command, argv, cwd, { inherit = false, env = {}, timeout = 180000 } = {}) {
+  if (!Number.isSafeInteger(timeout) || timeout <= 0)
+    throw new TypeError('Process timeout must be a positive integer in milliseconds.');
   if (command === 'npm') {
     const cli =
       process.env.npm_execpath || path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
@@ -15,7 +17,7 @@ function run(command, argv, cwd, { inherit = false, env = {} } = {}) {
   const result = spawnSync(command, argv, {
     cwd,
     encoding: 'utf8',
-    timeout: 180000,
+    timeout,
     stdio: inherit ? 'inherit' : 'pipe',
     env: { ...process.env, ...env, npm_config_audit: 'false', npm_config_fund: 'false' }
   });

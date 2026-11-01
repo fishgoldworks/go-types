@@ -171,14 +171,7 @@ for (const name of ['isEmpty', 'isBlank']) {
         return { done: true };
       }
     };
-    for (const value of [iterator, asyncOnly, nextOnly])
-      assert.throws(
-        () => T[name](value),
-        (error) =>
-          error instanceof TypeError &&
-          /synchronous iterable/i.test(error.message) &&
-          /asynchronous/i.test(error.message)
-      );
+    for (const value of [iterator, asyncOnly, nextOnly]) assert.throws(() => T[name](value), TypeError);
     assert.equal(calls, 0);
     // Valid lengths take precedence; opaque protocols do not turn into empty dictionaries.
     iterator.length = 0;

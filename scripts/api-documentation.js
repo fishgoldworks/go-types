@@ -4,6 +4,8 @@
 const api = require('./api.json');
 const formatExamples = require('./format-examples');
 const conversionTypes = {
+  ensureArray: 'EnsuredArray<T>',
+  ensureSet: 'EnsuredSet<T>',
   fromJson: 'unknown',
   box: 'Boxed<T>',
   unbox: 'Unboxed<T>',
@@ -24,7 +26,9 @@ const conversionTypes = {
 };
 
 function signature(item) {
-  const optionalValue = item.group === 'Conversion' && !['toArray', 'toPlainObject', 'fromJson'].includes(item.name);
+  const optionalValue =
+    ['ensureArray', 'ensureSet'].includes(item.name) ||
+    (item.group === 'Conversion' && !['toArray', 'toPlainObject', 'fromJson'].includes(item.name));
   return (
     item.name +
     '(' +
@@ -55,10 +59,28 @@ function parameters(item) {
     if (name === 'value') {
       type =
         item.name.endsWith('If') ||
-        ['box', 'unbox', 'toPromise', 'toArray', 'toMap', 'toPlainObject', 'toSet', 'isNonNullish'].includes(item.name)
+        [
+          'ensureArray',
+          'ensureSet',
+          'box',
+          'unbox',
+          'toPromise',
+          'toArray',
+          'toMap',
+          'toPlainObject',
+          'toSet',
+          'isNotNullish'
+        ].includes(item.name)
           ? 'T'
           : 'unknown';
-      description = 'The value to ' + (item.group.toLowerCase().includes('conversion') ? 'convert' : 'check') + '.';
+      description =
+        'The value to ' +
+        (['ensureArray', 'ensureSet'].includes(item.name)
+          ? 'normalise'
+          : item.group.toLowerCase().includes('conversion')
+            ? 'convert'
+            : 'check') +
+        '.';
     } else if (name === 'condition') {
       type = 'boolean | ((this: undefined, value: T) => boolean)';
       description =
@@ -83,6 +105,11 @@ function parameters(item) {
       const scope = name === 'keyMatcher' ? 'Map keys' : name === 'valueMatcher' ? 'Map values' : 'collection items';
       description = 'A required native `typeof` name or synchronous boolean predicate for ' + scope + '.';
     }
+    if (['ensureArray', 'ensureSet'].includes(item.name) && name === 'value')
+      description +=
+        item.name === 'ensureSet'
+          ? ' Omit to create an empty Set; explicit undefined or null remains one member.'
+          : ' Omit to create an empty array; explicit undefined or null remains one item.';
     return { name, type, description, optional };
   });
 }

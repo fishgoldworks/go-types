@@ -27,6 +27,9 @@ module.exports = function optionalApiChecks() {
     'Error.isError',
     'Map.prototype.has',
     'Set.prototype.has',
+    'Set.prototype.entries',
+    'Set.prototype.keys',
+    'Set.prototype.add',
     'WeakSet.prototype.has',
     'WeakSet.prototype.add',
     'WeakSet.prototype.delete',
@@ -37,7 +40,9 @@ module.exports = function optionalApiChecks() {
     'Map.prototype.values',
     'Set.prototype.values',
     'Map.prototype.size',
-    'Set.prototype.size'
+    'Set.prototype.size',
+    'Map.prototype.forEach',
+    'Set.prototype.forEach'
   ];
   const scenarios = [[]].concat(
     features.map((name) => [name]),
@@ -45,6 +50,37 @@ module.exports = function optionalApiChecks() {
       ['Symbol', 'Error.isError'],
       ['Reflect.ownKeys', 'Object.getOwnPropertySymbols'],
       ['Symbol', 'Reflect.ownKeys', 'Object.getOwnPropertySymbols'],
+      ['Map.prototype.has', 'Map.prototype.size'],
+      ['Map.prototype.has', 'Map.prototype.forEach'],
+      ['Map.prototype.has', 'Map.prototype.size', 'Map.prototype.forEach'],
+      ['Map.prototype.has', 'Map.prototype.size', 'Map.prototype.entries'],
+      ['Map.prototype.has', 'Map.prototype.size', 'Map.prototype.entries', 'Map.prototype.forEach'],
+      ['Set.prototype.has', 'Set.prototype.size'],
+      ['Set.prototype.has', 'Set.prototype.forEach'],
+      ['Set.prototype.has', 'Set.prototype.size', 'Set.prototype.forEach'],
+      ['Set.prototype.has', 'Set.prototype.size', 'Set.prototype.values'],
+      ['Set.prototype.has', 'Set.prototype.size', 'Set.prototype.values', 'Set.prototype.forEach'],
+      ['Set.prototype.size', 'Set.prototype.has', 'Set.prototype.values', 'Set.prototype.entries'],
+      [
+        'Set.prototype.size',
+        'Set.prototype.has',
+        'Set.prototype.values',
+        'Set.prototype.entries',
+        'Set.prototype.keys'
+      ],
+      [
+        'Set.prototype.size',
+        'Set.prototype.has',
+        'Set.prototype.values',
+        'Set.prototype.entries',
+        'Set.prototype.keys',
+        'Set.prototype.add'
+      ],
+      ['Set.prototype.add', 'Set.prototype.has', 'Set.prototype.size'],
+      ['Set', 'Symbol'],
+      ['Map', 'Set'],
+      ['Map.prototype.forEach', 'Set.prototype.forEach'],
+      ['Map.prototype.has', 'Set.prototype.has', 'WeakSet'],
       features
     ]
   );
@@ -60,6 +96,8 @@ module.exports = function optionalApiChecks() {
       recordSymbol: Symbol('record'),
       symbolRecord: { a: 1 },
       set: new Set([null]),
+      setHas: Set.prototype.has,
+      setSize: Object.getOwnPropertyDescriptor(Set.prototype, 'size').get,
       weakMap: new WeakMap(),
       weakSet: new WeakSet(),
       buffer: new ArrayBuffer(4),
@@ -79,6 +117,12 @@ module.exports = function optionalApiChecks() {
       }),
       shared: typeof SharedArrayBuffer === 'function' ? new SharedArrayBuffer(4) : undefined
     };
+    held.mapCycle = new Map();
+    held.mapCycle.set('self', held.mapCycle);
+    held.mapKeyCycle = new Map();
+    held.mapKeyCycle.set(held.mapKeyCycle, 0);
+    held.setCycle = new Set();
+    held.setCycle.add(held.setCycle);
     held.symbolValue = Symbol.prototype.valueOf.call(held.boxedSymbol);
     held.symbolRecord[held.recordSymbol] = 2;
     for (const name of missing) {
@@ -113,6 +157,55 @@ module.exports = function optionalApiChecks() {
       equal(value, undefined, name + ' must not be polyfilled globally');
     }
     equal(api.isArray([]), true, 'unrelated array check');
+    const normalised = [];
+    normalised.length = 2;
+    equal(api.ensureArray(normalised), normalised, 'array identity without optional APIs');
+    equal(0 in normalised, false, 'sparse slots remain absent');
+    equal(api.ensureArray(held.recordIterable)[0], held.recordIterable, 'normalisation ignores iterable contents');
+    equal(api.ensureArray().length, 0, 'omission is empty without optional APIs');
+    equal(api.ensureArray() === api.ensureArray(), false, 'omission creates fresh arrays');
+    equal(api.ensureArray(undefined).length, 1, 'undefined is one item');
+    equal(api.ensureArray(null)[0], null, 'null is retained');
+    if (absent('Set')) {
+      throws(() => api.ensureSet(), 'Native Set normalisation is unavailable in this runtime.');
+      throws(() => api.ensureSet(held.set), 'Native Set normalisation is unavailable in this runtime.');
+    } else {
+      const brandMissing = [
+        'Set.prototype.size',
+        'Set.prototype.has',
+        'Set.prototype.values',
+        'Set.prototype.entries',
+        'Set.prototype.keys'
+      ].every(absent);
+      const emptySet = api.ensureSet();
+      equal(held.setSize.call(emptySet), 0, 'normalisation omission is empty');
+      equal(emptySet === api.ensureSet(), false, 'normalisation omission is fresh');
+      if (brandMissing)
+        throws(() => api.ensureSet(held.set), 'Native Set identity checks are unavailable in this runtime.');
+      else equal(api.ensureSet(held.set), held.set, 'native Set identity survives missing methods');
+      if (absent('Set.prototype.add')) {
+        throws(() => api.ensureSet([1]));
+        throws(() => api.ensureSet('read'));
+        equal(held.setSize.call(api.toSet()), 0, 'native empty Set conversion needs no adder');
+      } else {
+        equal(held.setHas.call(api.ensureSet('read'), 'read'), true, 'string normalisation retains one whole member');
+        equal(held.setHas.call(api.ensureSet(null), null), true, 'null normalisation retains a member');
+        equal(held.setHas.call(api.ensureSet(undefined), undefined), true, 'undefined normalisation retains a member');
+        equal(held.setSize.call(api.ensureSet([1, 1, 2])), 2, 'array normalisation deduplicates');
+        if (brandMissing)
+          throws(
+            () => api.ensureSet(held.recordIterable),
+            'Native Set identity checks are unavailable in this runtime.'
+          );
+        else
+          equal(
+            held.setHas.call(api.ensureSet(held.recordIterable), held.recordIterable),
+            true,
+            'non-array iterables remain members'
+          );
+      }
+    }
+    equal(api.isNotNullish(false), true, 'falsy non-nullish value is retained');
     let thenReads = 0;
     equal(
       api.isPromiseLike({
@@ -228,10 +321,10 @@ module.exports = function optionalApiChecks() {
     equal(api.isIterable([]), !absent('Symbol'), 'iterator detection');
     equal(api.isAsyncIterable({}), false, 'async iterator detection');
     const leaf = Object.freeze({ value: 1 });
-    equal(api.isCyclic({ left: leaf, right: { leaf } }), false, 'shared acyclic identity');
+    equal(api.isCircular({ left: leaf, right: { leaf } }), false, 'shared acyclic identity');
     const cycle = {};
     cycle.self = cycle;
-    equal(api.isCyclic(cycle), true, 'actual cycle');
+    equal(api.isCircular(cycle), true, 'actual cycle');
     let reads = 0;
     const shared = {
       get item() {
@@ -239,8 +332,28 @@ module.exports = function optionalApiChecks() {
         return null;
       }
     };
-    equal(api.isCyclic({ a: shared, b: shared }), false, 'completed shared child');
+    equal(api.isCircular({ a: shared, b: shared }), false, 'completed shared child');
     equal(reads, 1, 'shared child is read once');
+    for (const [family, value, label] of [
+      ['Map', held.mapCycle, 'Map value cycle'],
+      ['Map', held.mapKeyCycle, 'Map key cycle'],
+      ['Set', held.setCycle, 'Set member cycle'],
+      ['Map', held.map, 'acyclic Map'],
+      ['Set', held.set, 'acyclic Set']
+    ]) {
+      const canDetect =
+        !absent(family) &&
+        (!absent(family + '.prototype.has') ||
+          !absent(family + '.prototype.size') ||
+          !absent(family + '.prototype.' + (family === 'Map' ? 'entries' : 'values')) ||
+          !absent(family + '.prototype.forEach'));
+      if (canDetect && absent(family + '.prototype.forEach')) {
+        throws(() => api.isCircular(value), 'Native ' + family + ' traversal is unavailable in this runtime.');
+      } else {
+        equal(api.isCircular(value), canDetect && label.indexOf('cycle') !== -1, label);
+      }
+    }
+
     const matcher = (value) => typeof value === 'number' || typeof value === 'string' || value === null;
     equal(api.isArrayOf([1, 'a', null], matcher), true, 'ordinary predicate alternatives');
     equal(api.isArrayOf([{}], matcher), false, 'predicate rejects objects');
@@ -318,6 +431,9 @@ module.exports = function optionalApiChecks() {
         const message = 'Native ' + description + ' conversion is unavailable in this runtime.';
         throws(() => api[name](argument), message);
         throws(() => api[name + 'If'](original, true), message);
+      } else if (native === 'Set' && absent('Set.prototype.add')) {
+        throws(() => api[name](argument));
+        throws(() => api[name + 'If'](original, true));
       } else {
         const value = api[name](argument);
         equal(value !== undefined, true, name + ' native conversion');
@@ -333,7 +449,7 @@ module.exports = function optionalApiChecks() {
       ['Set', 'toSet'],
       ['Map', 'toMap']
     ]) {
-      if (absent(native)) continue;
+      if (absent(native) || (native === 'Set' && absent('Set.prototype.add'))) continue;
       if (missingKeys) throws(() => api[name](held.symbolRecord));
       else {
         const output = api[name](held.symbolRecord);
@@ -351,8 +467,21 @@ module.exports = function optionalApiChecks() {
       ['Map.prototype.size', () => api.isEmpty(held.map), 'Map size'],
       ['Set.prototype.size', () => api.isEmpty(held.set), 'Set size']
     ]) {
-      if (absent(native) && !absent(native.split('.')[0]))
+      if (absent(native) && !absent(native.split('.')[0]) && !absent(native.split('.')[0] + '.prototype.has'))
         throws(operation, 'Native ' + label + ' is unavailable in this runtime.');
+    }
+    for (const [family, value] of [
+      ['Map', held.map],
+      ['Set', held.set]
+    ]) {
+      if (!absent(family) && absent(family + '.prototype.has')) {
+        const checked = family === 'Map' ? api.isMapOf(value, 'string', () => true) : api.isSetOf(value, () => true);
+        equal(checked, false, family + ' classifier remains conservative without has');
+        if (!absent('Symbol')) {
+          throws(() => api.isEmpty(value));
+          throws(() => api.isBlank(value));
+        }
+      }
     }
     return count;
   }

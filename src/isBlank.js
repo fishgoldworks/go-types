@@ -11,7 +11,7 @@ const mapValues = typeof Map === 'function' ? Map.prototype.values : undefined;
 const setValues = typeof Set === 'function' ? Set.prototype.values : undefined;
 const nonSpace = /\S/;
 /**
- * Checks whether a value is nullish, an empty or whitespace-only string, or a supported container
+ * Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection
  * containing only nullish values.
  *
  * Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw
@@ -20,8 +20,8 @@ const nonSpace = /\S/;
  * size or iteration operation, the check throws `TypeError`.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is nullish, a whitespace-only string, or a supported
- * container containing only nullish values; otherwise `false`.
+ * @returns {boolean} `true` if the value is nullish, an empty or whitespace-only string, or a
+ * supported collection containing only nullish values; otherwise `false`.
  * @throws {*} `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
  * throw. See Empty and blank values.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isblankvalue

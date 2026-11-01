@@ -8,7 +8,7 @@
 - **Version:** [2.0.0](CHANGELOG.md)
 - **Licence:** [MIT](LICENSE.md)
 
-Check JavaScript values, validate collection contents, and convert values with explicit rules, including JSON serialisation, general JSON parsing and shallow plain-object copies. Import individual functions as needed. Type checks do not convert their inputs; conversions are explicit.
+Check JavaScript values, validate collection contents, and convert values with explicit rules, including JSON serialisation, general JSON parsing and shallow plain-object copies. Import individual functions as needed. Type checks do not convert their inputs.
 
 No runtime dependencies. TypeScript declarations included.
 
@@ -189,9 +189,9 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isNullish(value)`](docs/API.md#isnullishvalue) | Checks whether a value is `null` or `undefined`. | **`boolean`**<br><br>`true` if the value is `null` or `undefined`; otherwise `false`. |
-| [`isNonNullish(value)`](docs/API.md#isnonnullishvalue) | Checks whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
-| [`isEmpty(value)`](docs/API.md#isemptyvalue) | Checks whether a value is nullish or a supported string or container has no items. | **`boolean`**<br><br>`true` if the value is nullish or a supported string or container with no items; otherwise `false`. |
-| [`isBlank(value)`](docs/API.md#isblankvalue) | Checks whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`. |
+| [`isNotNullish(value)`](docs/API.md#isnotnullishvalue) | Checks whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
+| [`isEmpty(value)`](docs/API.md#isemptyvalue) | Checks whether a value is nullish, an empty string, or an empty supported collection. | **`boolean`**<br><br>`true` if the value is nullish, an empty string, or an empty supported collection; otherwise `false`. |
+| [`isBlank(value)`](docs/API.md#isblankvalue) | Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values; otherwise `false`. |
 | [`isTruthy(value)`](docs/API.md#istruthyvalue) | Checks whether JavaScript treats a value as `true` in a condition. | **`boolean`**<br><br>`true` if the value is truthy under JavaScript boolean coercion; otherwise `false`. |
 | [`isFalsy(value)`](docs/API.md#isfalsyvalue) | Checks whether JavaScript treats a value as `false` in a condition. | **`boolean`**<br><br>`true` if the value is falsy under JavaScript boolean coercion; otherwise `false`. |
 | [`isJson(value)`](docs/API.md#isjsonvalue) | Checks whether primitive or boxed string text is valid JSON. | **`boolean`**<br><br>`true` if the value is primitive or boxed string text that parses as JSON; otherwise `false`. |
@@ -213,14 +213,11 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isObject(value)`](docs/API.md#isobjectvalue) | Checks whether a value is a non-null object or function. | **`boolean`**<br><br>`true` if the value is a non-null object or function; otherwise `false`. |
-| [`isObjectLike(value)`](docs/API.md#isobjectlikevalue) | Checks whether a value is a non-null object, excluding functions. | **`boolean`**<br><br>`true` if the value is a non-null object other than a function; otherwise `false`. |
 | [`isPlainObject(value)`](docs/API.md#isplainobjectvalue) | Checks whether a value has a null or ordinary `Object` prototype. | **`boolean`**<br><br>`true` if the value has a null or ordinary `Object` prototype; otherwise `false`. |
-| [`isCyclic(value)`](docs/API.md#iscyclicvalue) | Checks whether following enumerable string-keyed properties leads back to an ancestor. | **`boolean`**<br><br>`true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`. |
+| [`isCircular(value)`](docs/API.md#iscircularvalue) | Checks whether a value contains a circular reference through enumerable string-keyed properties, Map keys and values, or Set members. | **`boolean`**<br><br>`true` if following the supported references leads back to an object already on the current path; otherwise `false`. |
 | [`isIterable(value)`](docs/API.md#isiterablevalue) | Checks whether a value exposes a synchronous iterator method. | **`boolean`**<br><br>`true` if the value has a callable `Symbol.iterator` method; otherwise `false`. |
 | [`isAsyncIterable(value)`](docs/API.md#isasynciterablevalue) | Checks whether a value exposes an asynchronous iterator method. | **`boolean`**<br><br>`true` if the async-iterator symbol is available and the value has a callable `Symbol.asyncIterator` method; otherwise `false`. |
 | [`isIteratorLike(value)`](docs/API.md#isiteratorlikevalue) | Checks whether a value is an object or function with a callable `next` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `next` method; otherwise `false`. |
-| [`isEmptyIterable(value)`](docs/API.md#isemptyiterablevalue) | Checks whether a synchronous iterable is empty by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items; otherwise `false`. |
-| [`isBlankIterable(value)`](docs/API.md#isblankiterablevalue) | Checks whether every item yielded by a synchronous iterable is nullish by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items or only nullish items; otherwise `false`. |
 | [`isFunction(value)`](docs/API.md#isfunctionvalue) | Checks whether JavaScript reports a value as a function. | **`boolean`**<br><br>`true` if `typeof value` is `"function"`; otherwise `false`. |
 | [`isDate(value)`](docs/API.md#isdatevalue) | Checks whether a value is a genuine `Date`, valid or invalid. | **`boolean`**<br><br>`true` if the value is a genuine `Date`, valid or invalid; otherwise `false`. |
 | [`isValidDate(value)`](docs/API.md#isvaliddatevalue) | Checks whether a genuine `Date` contains a finite timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`. |
@@ -235,7 +232,6 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isArray(value)`](docs/API.md#isarrayvalue) | Checks whether a value is an array, including from another realm. | **`boolean`**<br><br>`true` if the value passes native `Array.isArray`; otherwise `false`. |
-| [`isNonEmptyArray(value)`](docs/API.md#isnonemptyarrayvalue) | Checks whether a value is an array with a valid length greater than zero. | **`boolean`**<br><br>`true` if the value is an array with a valid length greater than zero; otherwise `false`. |
 | [`isArrayOf(value, matcher)`](docs/API.md#isarrayofvalue-matcher) | Checks whether a value is an array whose items match a type-name string or predicate. | **`boolean`**<br><br>`true` if the value is an array and every element matches the matcher, including an empty array; otherwise `false`. |
 | [`isArrayLike(value)`](docs/API.md#isarraylikevalue) | Checks whether a non-function value has a valid numeric length. | **`boolean`**<br><br>`true` if the value is not a function and has a numeric integer length from `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`. |
 | [`isArrayLikeOf(value, matcher)`](docs/API.md#isarraylikeofvalue-matcher) | Checks whether an array-like value contains only items matching a type-name string or predicate. | **`boolean`**<br><br>`true` if the value is array-like and every indexed value matches the matcher, including an empty input; otherwise `false`. |
@@ -258,7 +254,7 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | --- | --- | --- |
 | [`isNode(value)`](docs/API.md#isnodevalue) | Checks whether a value is an instance of the local DOM `Node` constructor. | **`boolean`**<br><br>`true` if a local `Node` constructor is available and the value passes its instance check; otherwise `false`. |
 | [`isElement(value)`](docs/API.md#iselementvalue) | Checks whether a value is an instance of the local DOM `Element` constructor. | **`boolean`**<br><br>`true` if a local `Element` constructor is available and the value passes its instance check; otherwise `false`. |
-| [`isFragment(value)`](docs/API.md#isfragmentvalue) | Checks whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
+| [`isDocumentFragment(value)`](docs/API.md#isdocumentfragmentvalue) | Checks whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
 
 **Binary**
 
@@ -279,6 +275,7 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | [`toRegExp(value?, flags?)`](docs/API.md#toregexpvalue-flags) | Converts a native pattern and optional `flags` to a genuine `RegExp`. | **`RegExp`**<br><br>A genuine `RegExp`, which may retain input identity under native rules. |
 | [`toPromise(value?)`](docs/API.md#topromisevalue) | Converts a value to a native `Promise`, adopting thenables and preserving ordinary local promises. | **`Promise<Awaited<T>>`**<br><br>A native `Promise` that adopts the input; ordinary local promises retain identity. |
 | [`toArray(value)`](docs/API.md#toarrayvalue) | Converts a synchronous iterable, plain object or supported array-like input to a new shallow array. | **`ArrayElement<T>[]`**<br><br>A new shallow array containing iterable items, plain object property values or indexed array-like values. |
+| [`ensureArray(value?)`](docs/API.md#ensurearrayvalue) | Returns an existing array unchanged or wraps a supplied value as one item. Without arguments, returns an empty array. | **`EnsuredArray<T>`**<br><br>A new empty array when no value is supplied; otherwise the original array or a new array containing the supplied value. |
 | [`toBigInt(value?)`](docs/API.md#tobigintvalue) | Converts a value to a primitive bigint using native conversion. | **`bigint`**<br><br>The converted primitive bigint. |
 | [`toBoolean(value?)`](docs/API.md#tobooleanvalue) | Converts a value to a boolean using JavaScript truthiness. | **`boolean`**<br><br>`true` if the input is truthy under JavaScript boolean coercion; otherwise `false`. |
 | [`toDate(value?)`](docs/API.md#todatevalue) | Converts a value to a `Date`, returning genuine `Date` objects unchanged. The result can be invalid. | **`Date`**<br><br>The original genuine `Date`, or a new `Date` constructed from the input; it may be invalid. |
@@ -289,6 +286,7 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 | [`toNumber(value?)`](docs/API.md#tonumbervalue) | Converts a value to a primitive number using JavaScript’s `Number` conversion. | **`number`**<br><br>The converted primitive number; it may be `NaN` or infinite. |
 | [`toPlainObject(value)`](docs/API.md#toplainobjectvalue) | Creates a plain object from key/value pairs, or makes a shallow copy of an existing plain object. | **`ConvertedPlainObject<T>`**<br><br>A fresh ordinary object containing the copied enumerable properties or supplied entries. |
 | [`toSet(value?)`](docs/API.md#tosetvalue) | Converts a synchronous iterable, plain object or supported array-like input to a new shallow Set. | **`ConvertedSet<T>`**<br><br>A new Set of iterable items, plain object property values or indexed array-like values, or an empty Set for omitted or nullish input. |
+| [`ensureSet(value?)`](docs/API.md#ensuresetvalue) | Returns an existing Set unchanged, creates a Set from array items, or treats another supplied value as one member. | **`EnsuredSet<T>`**<br><br>The original Set, or a new Set containing array items or one supplied member. With no arguments, a new empty Set. |
 | [`toString(value?)`](docs/API.md#tostringvalue) | Converts a value to a primitive string using JavaScript’s `String` conversion. | **`string`**<br><br>The converted primitive string; nullish inputs become their literal text. |
 | [`toSymbol(value?)`](docs/API.md#tosymbolvalue) | Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol wrappers. | **`symbol`**<br><br>The original or unboxed symbol, or a new symbol created from the description. |
 
@@ -324,9 +322,46 @@ Type checks do not convert their inputs. Scalar conversions follow native coerci
 
 Ordinary failed checks return `false`. Invalid matcher configurations and unsupported inputs can throw; callback, getter, proxy, coercion and iterator errors propagate. These checks are not schema validation or a security boundary.
 
-`isEmpty` and `isBlank` reject unsized iterators instead of consuming them. Use `isEmptyIterable` or `isBlankIterable` only when consumption and early iterator closing are intended. Do not reuse a one-shot iterator after inspection; a nullish-only infinite iterable never finishes a blankness check.
+`isEmpty` and `isBlank` inspect [supported collections](docs/API.md#empty-and-blank-values) and reject unsized iterators and iterables without consuming them. Handle iteration explicitly when consumption is intended.
 
 Collection checks accept a required native `typeof` name or synchronous boolean predicate. For example, `isArrayOf(items, 'number')` accepts primitive numbers; `isArrayOf(items, isNumber)` also accepts Number wrappers. Use `value => value instanceof Account` for class instances. Empty collections pass valid checks. See [type specifications](docs/API.md#type-specifications) for callback and traversal rules.
+
+### Normalise a single item or an array
+
+<!-- prettier-ignore -->
+```javascript
+import { ensureArray } from 'go-types';
+
+ensureArray();                             // => []
+ensureArray(undefined);                    // => [undefined]
+ensureArray('hello');                      // => ['hello']
+ensureArray(null);                         // => [null]
+
+const selection = new Set([1, 2]);
+ensureArray(selection)[0] === selection;   // => true
+
+const items = [1, 2];
+ensureArray(items) === items;              // => true
+```
+
+With no arguments, `ensureArray()` creates an empty array. Arrays are returned unchanged; other supplied values, including `null` and `undefined`, become one item. Use `toArray` to extract iterable, object or array-like contents into a new array.
+
+### Normalise a single item, an array or a Set
+
+<!-- prettier-ignore -->
+```javascript
+import { ensureSet } from 'go-types';
+
+ensureSet('read').has('read');                     // => true
+Array.from(ensureSet(['read', 'write', 'read']));  // => ['read', 'write']
+ensureSet().size;                                  // => 0
+ensureSet(undefined).has(undefined);               // => true
+
+const permissions = new Set(['read', 'write']);
+ensureSet(permissions) === permissions;            // => true
+```
+
+Existing Sets are returned unchanged. Arrays supply members; other supplied values, including strings, Maps, `null` and `undefined`, become one member. Use `toSet` to extract other supported collection contents into a new Set. See [`ensureSet`](docs/API.md#ensuresetvalue) for native API requirements and iteration rules.
 
 ### Create plain objects
 
@@ -389,7 +424,7 @@ toPromiseIf(3, false);             // => 3
 
 TypeScript declarations are included; no separate `@types` package is required.
 
-Declarations cover root, per-function and bundle imports. Use native `typeof` for primitive narrowing; `isNonNullish` also narrows filtered values. Native identity and collection-content checks return `boolean`. `toDate()` returns `Date` without promising extra input properties.
+Declarations cover root, per-function and bundle imports. Use native `typeof` for primitive narrowing; `isNotNullish` also narrows filtered values. Native identity and collection-content checks return `boolean`. `toDate()` returns `Date` without promising extra input properties.
 
 <!-- prettier-ignore -->
 ```typescript
@@ -425,7 +460,7 @@ Measurements depend on the workload and runtime; they are not universal speed gu
 
 ## Migration
 
-Version 2.0.0 removes `isTypeOf` and `isThenable`, uses a callable-`then` check for `isPromiseLike`, simplifies collection matchers to required type-name strings or predicates, changes collection and runtime contracts, and adds TypeScript declarations. Empty collections pass valid element constraints; invalid or missing matchers throw before matching.
+Version 2.0.0 removes `isTypeOf` and `isThenable`, renames `isFragment` to `isDocumentFragment`, uses a callable-`then` check for `isPromiseLike`, simplifies collection matchers to required type-name strings or predicates, changes collection and runtime contracts, and adds TypeScript declarations. Empty collections pass valid element constraints; invalid or missing matchers throw before matching.
 
 Read the [migration guide](docs/migration.md) and [changelog](CHANGELOG.md) before upgrading from version 1.
 

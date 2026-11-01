@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 const native = require('node:util').types;
+const isNonFunctionObject = require('../src/util/isNonFunctionObject');
 const T = require('..');
 const source = require('../scripts/source-test-loader.js')();
 
@@ -201,7 +202,8 @@ for (const [label, api] of [
       ]) {
         assert.equal(api[name](input), false, name);
       }
-      for (const name of ['isObject', 'isObjectLike', 'isNonNullish', 'isTruthy']) {
+      assert.equal(isNonFunctionObject(input), true);
+      for (const name of ['isObject', 'isNotNullish', 'isTruthy']) {
         assert.equal(api[name](input), true, name);
       }
     }
@@ -231,7 +233,7 @@ for (const [label, api] of [
         Object.setPrototypeOf(input, prototype);
         assert.equal(api.isPlainObject(input), false);
         assert.equal(api.isObject(input), true);
-        assert.equal(api.isObjectLike(input), false);
+        assert.equal(isNonFunctionObject(input), false);
         assert.equal(api.isFunction(input), true);
       }
     }

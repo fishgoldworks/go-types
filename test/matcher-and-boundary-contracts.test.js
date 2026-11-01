@@ -29,7 +29,7 @@ for (const value of [
       (typeof value === 'object' ? 'object' : String(value)),
     () => {
       assert.equal(T.isNullish(value), value === null || value === undefined);
-      assert.equal(T.isNonNullish(value), !T.isNullish(value));
+      assert.equal(T.isNotNullish(value), !T.isNullish(value));
       assert.equal(T.isPrimitive(value), !T.isObject(value));
     }
   );

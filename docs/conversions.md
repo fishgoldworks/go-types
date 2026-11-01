@@ -11,6 +11,12 @@ const toInteger = require('go-types/conversion/toInteger');
 const toDate = require('go-types/src/conversion/toDate.js');
 ```
 
+## Single-item-or-array inputs
+
+Use [`ensureArray`](API.md#ensurearrayvalue) to preserve an existing array or wrap one value. With no arguments it creates a fresh empty array; explicit `null` and `undefined` remain single items. Unlike `toArray`, it does not extract iterable, object or array-like contents.
+
+Use [`ensureSet`](API.md#ensuresetvalue) to preserve a Set, create one from array items, or store one supplied value as a member. Strings remain whole; other non-array iterables are not consumed. As with `ensureArray`, omission creates an empty collection while explicit nullish values remain members.
+
 ## Conversion versus validation
 
 Checks classify values; conversions apply the coercion rules described here. A successful conversion can still produce a value unsuitable for your application: a number can be `NaN`, an integer-conversion result can be infinite, and a Date can be invalid. Validate the result when your application needs a narrower range of values.
@@ -94,7 +100,7 @@ toArray(new Indexed(1.5));           // => throws TypeError
 
 On eligible inputs, a synchronous iterator takes precedence over object and indexed data. The iterator method is read once and called with the original input as its receiver. A nullish method permits fallback; any other non-callable method throws. Strings iterate by Unicode code point. Functions, boxed primitives, Dates and RegExps are rejected before iterator or length inspection, even if custom properties suggest a source. Other non-string primitives are also rejected, apart from the nullish Set case.
 
-Omitted, `null` or `undefined` input throws for `toArray` and creates an empty Set for `toSet`. Ordinary promises and native async-only containers without a supported synchronous source are rejected. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value; its async iterator is not invoked. No input is awaited.
+Omitted, `null` or `undefined` input throws for `toArray` and creates an empty Set for `toSet`. Ordinary promises and native async-only collections without a supported synchronous source are rejected. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value; its async iterator is not invoked. No input is awaited.
 
 A finite one-shot iterator is consumed. Infinite iterables never finish, and very large inputs can exhaust memory; oversized array results can throw `RangeError`. There is no work limit, hidden buffering or deep cloning. `toArray` retains its native `Array.from` capability requirement; `toSet` requires native `Set` independently of `Array.from`.
 
@@ -316,7 +322,7 @@ toMap({[key]: 2}).get(key);                      // => 2
 
 Plain objects include null-prototype and foreign-realm objects. All own enumerable string and symbol properties become entries; numeric property names become string keys and symbol keys stay symbols. Inherited and non-enumerable properties are excluded. Keys are captured once, then each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and getter/proxy errors propagate. A `length` property is ordinary property data. Missing both `Reflect.ownKeys` and `Object.getOwnPropertySymbols` makes object copying throw instead of dropping symbol keys.
 
-A synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A nullish iterator permits object conversion; any other non-callable method throws. Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. There is no array-like source fallback. Ordinary promises and native async-only containers without a supported synchronous source are rejected; a plain async-only object is copied, including enumerable symbol properties. No async iterator is invoked and no input is awaited.
+A synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A nullish iterator permits object conversion; any other non-callable method throws. Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. There is no array-like source fallback. Ordinary promises and native async-only collections without a supported synchronous source are rejected; a plain async-only object is copied, including enumerable symbol properties. No async iterator is invoked and no input is awaited.
 
 Every iterable entry must be an actual array of length exactly two, with both indices `0` and `1` present as own properties. Explicit `undefined` keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Keys can have any type without coercion, including objects, numbers and symbols. This differs from `toPlainObject`, whose keys must be primitive strings or symbols. An empty iterable, including an empty string, produces an empty Map; a non-empty string yields invalid primitive entries and throws.
 

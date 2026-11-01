@@ -1,3 +1,26 @@
+/** Preserve declared Set restrictions; only arrays supply iterable members. */
+type EnsuredSet<T> =
+  T extends Set<infer Member>
+    ? Set<Member>
+    : T extends ReadonlyMap<unknown, unknown>
+      ? Set<T>
+      : T extends ReadonlySet<infer Member>
+        ? ReadonlySet<Member>
+        : T extends readonly unknown[]
+          ? Set<Types.ArrayElement<T>>
+          : object extends T
+            ? ReadonlySet<unknown>
+            : Set<T>;
+
+/** Infer declared array contents without promising custom subtype properties. */
+type EnsuredArray<T> = T extends readonly unknown[]
+  ? T extends unknown[]
+    ? [...T]
+    : readonly [...T]
+  : object extends T
+    ? readonly unknown[]
+    : T[];
+
 /** Native JSON replacers receive arbitrary values and holder objects. */
 type JsonReplacer = ((this: unknown, key: string, value: unknown) => unknown) | readonly (string | number)[] | null;
 
@@ -180,7 +203,7 @@ declare namespace Types {
    */
   function isNullish(value: unknown): value is null | undefined;
   /**
-   * Checks whether a value is nullish or a supported string or container has no items.
+   * Checks whether a value is nullish, an empty string, or an empty supported collection.
    *
    * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
    * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
@@ -188,7 +211,7 @@ declare namespace Types {
    * size or iteration operation, the check throws `TypeError`.
    *
    * @param value The value to check.
-   * @returns `true` if the value is nullish or a supported string or container with no items;
+   * @returns `true` if the value is nullish, an empty string, or an empty supported collection;
    * otherwise `false`.
    * @throws `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
    * throw. See Empty and blank values.
@@ -196,7 +219,7 @@ declare namespace Types {
    */
   function isEmpty(value: unknown): boolean;
   /**
-   * Checks whether a value is nullish, an empty or whitespace-only string, or a supported container
+   * Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection
    * containing only nullish values.
    *
    * Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw
@@ -205,8 +228,8 @@ declare namespace Types {
    * size or iteration operation, the check throws `TypeError`.
    *
    * @param value The value to check.
-   * @returns `true` if the value is nullish, a whitespace-only string, or a supported container
-   * containing only nullish values; otherwise `false`.
+   * @returns `true` if the value is nullish, an empty or whitespace-only string, or a supported
+   * collection containing only nullish values; otherwise `false`.
    * @throws `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
    * throw. See Empty and blank values.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isblankvalue
@@ -324,19 +347,22 @@ declare namespace Types {
    */
   function isPlainObject(value: unknown): boolean;
   /**
-   * Checks whether following enumerable string-keyed properties leads back to an ancestor.
+   * Checks whether a value contains a circular reference through enumerable string-keyed properties,
+   * Map keys and values, or Set members.
    *
-   * Includes inherited enumerable string keys, but ignores symbols, non-enumerable properties and
-   * Map/Set entries. Getters and proxy traps may run. Internal reference tracking falls back to
-   * local arrays when weak collections are unavailable; no platform globals are changed.
+   * Includes inherited enumerable string properties and genuine Map/Set contents. Symbols,
+   * non-enumerable properties and WeakMap/WeakSet entries are excluded. Getters and proxy traps may
+   * run and throw; keep the graph stable. Missing native detection limits inspection to ordinary
+   * properties; a recognised collection without native traversal support throws `TypeError`.
    *
    * @param value The value to check.
-   * @returns `true` if enumerable string-keyed property traversal reaches an active ancestor;
-   * otherwise `false`.
-   * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iscyclicvalue
+   * @returns `true` if following the supported references leads back to an object already on the
+   * current path; otherwise `false`.
+   * @throws Property getters and proxy traps may throw; their errors propagate. Requested Map/Set
+   * content inspection throws `TypeError` when native traversal support is unavailable.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iscircularvalue
    */
-  function isCyclic(value: unknown): boolean;
+  function isCircular(value: unknown): boolean;
   /**
    * Checks whether a value exposes a synchronous iterator method.
    *
@@ -582,9 +608,9 @@ declare namespace Types {
    * instance check; otherwise `false`.
    * @throws Native `instanceof` errors propagate, including errors from proxy prototype access or a
    * custom `Symbol.hasInstance` method.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfragmentvalue
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdocumentfragmentvalue
    */
-  function isFragment(value: unknown): boolean;
+  function isDocumentFragment(value: unknown): boolean;
   /**
    * Checks whether a value is a genuine `ArrayBuffer`.
    *
@@ -677,30 +703,9 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is neither `null` nor `undefined`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnonnullishvalue
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnotnullishvalue
    */
-  function isNonNullish<T>(value: T): value is NonNullable<T>;
-  /**
-   * Checks whether a value is a non-null object, excluding functions.
-   *
-   * @param value The value to check.
-   * @returns `true` if the value is a non-null object other than a function; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isobjectlikevalue
-   */
-  function isObjectLike(value: unknown): boolean;
-  /**
-   * Checks whether a value is an array with a valid length greater than zero.
-   *
-   * Sparse arrays count as non-empty when their length is positive. Does not validate elements.
-   *
-   * @param value The value to check.
-   * @returns `true` if the value is an array with a valid length greater than zero; otherwise
-   * `false`.
-   * @throws Property getters or proxy traps may throw; their errors propagate. Native
-   * `Array.isArray` also throws `TypeError` for a revoked proxy.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnonemptyarrayvalue
-   */
-  function isNonEmptyArray(value: unknown): boolean;
+  function isNotNullish<T>(value: T): value is NonNullable<T>;
   /**
    * Checks whether primitive or boxed string text is valid JSON.
    *
@@ -751,32 +756,6 @@ declare namespace Types {
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
    */
   function isMapOf(value: unknown, keyMatcher: TypeMatcher, valueMatcher: TypeMatcher): boolean;
-  /**
-   * Checks whether a synchronous iterable is empty by advancing its iterator.
-   *
-   * Consumes input and may close it early, running iterator cleanup. Requires a synchronous
-   * iterable; do not reuse one-shot input.
-   *
-   * @param value The value to check.
-   * @returns `true` if the synchronous iterable yields no items; otherwise `false`.
-   * @throws `TypeError` for non-iterable input. Iterator and iterator-closing errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isemptyiterablevalue
-   */
-  function isEmptyIterable(value: unknown): boolean;
-  /**
-   * Checks whether every item yielded by a synchronous iterable is nullish by advancing its
-   * iterator.
-   *
-   * Consumes input and may close it early. A nullish-only infinite iterable never completes. Map
-   * entries are arrays, so a non-empty Map is not blank.
-   *
-   * @param value The value to check.
-   * @returns `true` if the synchronous iterable yields no items or only nullish items; otherwise
-   * `false`.
-   * @throws `TypeError` for non-iterable input. Iterator and iterator-closing errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isblankiterablevalue
-   */
-  function isBlankIterable(value: unknown): boolean;
   /** Conditions are booleans or synchronous predicates invoked without a receiver. */
   type ConversionCondition<T> = boolean | ((this: undefined, value: T) => boolean);
   /** Iteration takes precedence. Otherwise include all declared record values, including symbols and length.
@@ -2426,5 +2405,77 @@ declare namespace Types {
     condition: ConversionCondition<T> | undefined,
     reviver?: JsonReviver | null
   ): unknown;
+  /**
+   * Returns an existing array unchanged or wraps a supplied value as one item. Without arguments,
+   * returns an empty array.
+   *
+   * Without arguments, creates a fresh empty array; explicit `null` and `undefined` remain items.
+   * Preserves array identity and sparse slots without iteration or coercion. TypeScript retains
+   * element and readonly tuple types; broad `object` and `unknown` inputs remain conservative. A
+   * preserved array is not a copy.
+   *
+   * @param value The value to normalise. Omit to create an empty array; explicit undefined or null
+   * remains one item.
+   * @returns A new empty array when no value is supplied; otherwise the original array or a new
+   * array containing the supplied value.
+   * @throws Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensurearrayvalue
+   */
+  function ensureArray<T = unknown>(): T[];
+  /**
+   * Returns an existing array unchanged or wraps a supplied value as one item. Without arguments,
+   * returns an empty array.
+   *
+   * Without arguments, creates a fresh empty array; explicit `null` and `undefined` remain items.
+   * Preserves array identity and sparse slots without iteration or coercion. TypeScript retains
+   * element and readonly tuple types; broad `object` and `unknown` inputs remain conservative. A
+   * preserved array is not a copy.
+   *
+   * @param value The value to normalise. Omit to create an empty array; explicit undefined or null
+   * remains one item.
+   * @returns A new empty array when no value is supplied; otherwise the original array or a new
+   * array containing the supplied value.
+   * @throws Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensurearrayvalue
+   */
+  function ensureArray<T>(value: T): EnsuredArray<T>;
+  /**
+   * Returns an existing Set unchanged, creates a Set from array items, or treats another supplied
+   * value as one member.
+   *
+   * Without arguments, creates a fresh empty Set; explicit `null` and `undefined` remain members.
+   * Preserves genuine Sets without consuming their members. Array input follows native Set iteration
+   * and equality; other values remain single members. A preserved Set is not a copy.
+   *
+   * @param value The value to normalise. Omit to create an empty Set; explicit undefined or null
+   * remains one member.
+   * @returns The original Set, or a new Set containing array items or one supplied member. With no
+   * arguments, a new empty Set.
+   * @throws Missing native Set support throws TypeError before input inspection. Opaque object
+   * inputs throw when all captured native identity checks are unavailable. Native construction,
+   * revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member
+   * fails.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
+   */
+  function ensureSet<T = unknown>(): Set<T>;
+  /**
+   * Returns an existing Set unchanged, creates a Set from array items, or treats another supplied
+   * value as one member.
+   *
+   * Without arguments, creates a fresh empty Set; explicit `null` and `undefined` remain members.
+   * Preserves genuine Sets without consuming their members. Array input follows native Set iteration
+   * and equality; other values remain single members. A preserved Set is not a copy.
+   *
+   * @param value The value to normalise. Omit to create an empty Set; explicit undefined or null
+   * remains one member.
+   * @returns The original Set, or a new Set containing array items or one supplied member. With no
+   * arguments, a new empty Set.
+   * @throws Missing native Set support throws TypeError before input inspection. Opaque object
+   * inputs throw when all captured native identity checks are unavailable. Native construction,
+   * revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member
+   * fails.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
+   */
+  function ensureSet<T>(value: T): EnsuredSet<T>;
 }
 export = Types;

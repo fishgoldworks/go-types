@@ -7,10 +7,54 @@ module.exports = function assertAPI(T, PromiseConstructor) {
   const LocalPromise = PromiseConstructor || Promise;
   const checked = new Set();
   assert.strictEqual(Object.prototype.hasOwnProperty.call(T, 'createTypeChecker'), false);
+  for (const name of [
+    'isNonNullish',
+    'isObjectLike',
+    'isNonFunctionObject',
+    'ensureArrayIf',
+    'ensureSetIf',
+    'ensureMap',
+    'ensurePlainObject',
+    'isFragment',
+    'isEmptyIterable',
+    'isBlankIterable',
+    'isNonEmptyArray',
+    'isNonEmptyMap',
+    'isNonEmptySet',
+    'isNonEmptyPlainObject'
+  ])
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(T, name), false, name);
   function result(name, args, expected) {
     checked.add(name);
     assert.strictEqual(T[name].apply(undefined, args), expected, name);
   }
+  const emptyNormalisation = T.ensureArray();
+  assert.strictEqual(Array.isArray(emptyNormalisation), true);
+  assert.strictEqual(emptyNormalisation.length, 0);
+  assert.notStrictEqual(emptyNormalisation, T.ensureArray());
+  const normalised = Object.freeze([1, 2]);
+  result('ensureArray', [normalised], normalised);
+  for (const value of [null, undefined, false, '', 1, new Set([1, 2])]) {
+    const items = T.ensureArray(value);
+    assert.strictEqual(items.length, 1);
+    assert.strictEqual(items[0], value);
+  }
+  const sparseArray = [];
+  sparseArray.length = 2;
+  assert.strictEqual(T.ensureArray(sparseArray), sparseArray);
+  assert.strictEqual(0 in sparseArray, false);
+  const existingSet = new Set([1, 2]);
+  result('ensureSet', [existingSet], existingSet);
+  assert.strictEqual(T.ensureSet().size, 0);
+  assert.notStrictEqual(T.ensureSet(), T.ensureSet());
+  assert.deepStrictEqual(Array.from(T.ensureSet([1, 2, 1])), [1, 2]);
+  for (const value of [undefined, null, 'read', false, {}, new Map(), new Uint8Array(2), LocalPromise.resolve(1)]) {
+    const output = T.ensureSet(value);
+    assert.strictEqual(output.size, 1);
+    assert.strictEqual(output.has(value), true);
+  }
+  const foreignSet = vm.runInNewContext('new Set([1, 2])');
+  assert.strictEqual(T.ensureSet(foreignSet), foreignSet);
   const cycle = {};
   cycle.self = cycle;
   const data = new ArrayBuffer(8);
@@ -36,7 +80,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     ['isNumeric', '12', '  '],
     ['isObject', {}, null],
     ['isPlainObject', Object.create(null), new Date()],
-    ['isCyclic', cycle, {}],
+    ['isCircular', cycle, {}],
     ['isIterable', [], {}],
     ['isArray', [], {}],
     ['isArrayLike', { 0: 'x', length: 1 }, { length: -1 }],
@@ -58,12 +102,9 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     ['isTypedArray', new Uint8Array(data), new DataView(data)],
     ['isDataView', new DataView(data), data],
     ['isIteratorLike', { next() {} }, {}],
-    ['isNonNullish', 0, null],
-    ['isObjectLike', {}, null],
-    ['isNonEmptyArray', [1], []],
-    ['isJson', 'null', 'undefined'],
-    ['isEmptyIterable', [], [1]],
-    ['isBlankIterable', [null, undefined], [0]]
+    ['isNotNullish', 0, null],
+
+    ['isJson', 'null', 'undefined']
   ];
   for (const entry of predicates) {
     result(entry[0], [entry[1]], true);
@@ -100,7 +141,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       delete value.temporary;
       const proto = { edge: value };
       Object.setPrototypeOf(value, proto);
-      result('isCyclic', [value], true);
+      result('isCircular', [value], true);
       let reads = 0;
       const descriptor = accessor
         ? {
@@ -111,14 +152,30 @@ module.exports = function assertAPI(T, PromiseConstructor) {
           }
         : { value };
       Object.defineProperty(value, 'edge', Object.assign(descriptor, { configurable: true, enumerable: false }));
-      result('isCyclic', [value], false);
+      result('isCircular', [value], false);
       assert.strictEqual(reads, 0, 'A hidden getter must not be invoked');
       Object.defineProperty(value, 'edge', { enumerable: true });
-      result('isCyclic', [value], true);
+      result('isCircular', [value], true);
       assert.strictEqual(reads, accessor ? 1 : 0);
     }
   }
-  for (const name of ['isNode', 'isElement', 'isFragment']) result(name, [{}], false);
+  const mapCycle = new Map(),
+    keyCycle = new Map(),
+    setCycle = new Set();
+  mapCycle.set('self', mapCycle);
+  keyCycle.set(keyCycle, 0);
+  setCycle.add(setCycle);
+  for (const value of [mapCycle, keyCycle, setCycle]) result('isCircular', [value], true);
+  const sharedCollectionLeaf = {};
+  result(
+    'isCircular',
+    [{ map: new Map([[sharedCollectionLeaf, sharedCollectionLeaf]]), set: new Set([sharedCollectionLeaf]) }],
+    false
+  );
+  const mixedCycle = { members: new Set() };
+  mixedCycle.members.add({ parent: mixedCycle });
+  result('isCircular', [mixedCycle], true);
+  for (const name of ['isNode', 'isElement', 'isDocumentFragment']) result(name, [{}], false);
   result('isSharedArrayBuffer', [{}], false);
   if (typeof SharedArrayBuffer === 'function') result('isSharedArrayBuffer', [new SharedArrayBuffer(4)], true);
   result('isBigInt', [1], false);
@@ -420,17 +477,6 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       ),
     (error) => error === applicationError
   );
-  let closed = false;
-  function* iterator() {
-    try {
-      yield 1;
-      yield 2;
-    } finally {
-      closed = true;
-    }
-  }
-  result('isEmptyIterable', [iterator()], false);
-  assert.strictEqual(closed, true);
   for (const entry of [
     ['isDate', 'new Date(0)'],
     ['isMap', 'new Map()'],

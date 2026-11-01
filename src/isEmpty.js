@@ -11,7 +11,7 @@ const getNativeGetter = require('./util/getNativeGetter');
 const mapSize = getNativeGetter(typeof Map === 'function' ? Map : undefined, 'size');
 const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'size');
 /**
- * Checks whether a value is nullish or a supported string or container has no items.
+ * Checks whether a value is nullish, an empty string, or an empty supported collection.
  *
  * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
  * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
@@ -19,8 +19,8 @@ const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'si
  * size or iteration operation, the check throws `TypeError`.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is nullish or a supported string or container with no
- * items; otherwise `false`.
+ * @returns {boolean} `true` if the value is nullish, an empty string, or an empty supported
+ * collection; otherwise `false`.
  * @throws {*} `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
  * throw. See Empty and blank values.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isemptyvalue

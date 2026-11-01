@@ -2,14 +2,13 @@ import Types, {
   isNumber,
   isString,
   isBoolean,
-  isNonNullish,
+  isNotNullish,
   isNullish,
   isSymbol,
   isBigInt,
   isInteger,
   isPlainObject,
   isArray,
-  isNonEmptyArray,
   isArrayOf,
   isMapOf,
   isSetOf,
@@ -21,7 +20,7 @@ import Types, {
 } from 'go-types';
 function expectType<T>(_value: T): void {}
 const value = null as unknown;
-const filtered = [0, false, '', null, undefined].filter(isNonNullish);
+const filtered = [0, false, '', null, undefined].filter(isNotNullish);
 expectType<(number | boolean | string)[]>(filtered);
 // @ts-expect-error null was removed by filtering.
 const nullable: null = filtered[0];
@@ -54,8 +53,6 @@ if (isPlainObject(value)) {
 }
 // @ts-expect-error structural array-like interfaces are broader than actual array identity.
 if (isArray(value)) expectType<unknown[]>(value);
-// @ts-expect-error shape/cardinality validation is not structural tuple identity.
-if (isNonEmptyArray(value)) expectType<[unknown, ...unknown[]]>(value);
 if (isTypedArray(value)) {
   // @ts-expect-error native internal slots are not represented by the structural TypedArray interface.
   expectType<TypedArray>(value);

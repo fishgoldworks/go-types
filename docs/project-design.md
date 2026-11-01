@@ -2,14 +2,15 @@
 
 This guide records go-types design constraints. The library provides small, composable checks and explicit conversions with stable, documented contracts.
 
-- Keep zero runtime dependencies and small CommonJS source modules. The 93-function API retains 43 original root functions and includes collection-content checks and 34 conversions. Matcher validation stays internal; use go-fns to combine predicates.
+- Keep zero runtime dependencies and small CommonJS source modules. The public API includes collection-content checks, collection normalisation and conversions. The changelog records published upgrade changes. Matcher validation stays internal; use go-fns to combine predicates.
 - Prefer captured standard intrinsics where their contracts match; no speculative legacy polyfills and no security claims about a compromised runtime.
 - Validate required type-name strings or predicates before inspecting collection inputs. Never probe predicates during validation or infer constructor intent. Preserve traversal, callback order, short-circuiting and exceptions; enforce primitive boolean results when callbacks run.
 - `isArrayOf` and `isArrayLikeOf` accept empty inputs. Holes are read through ordinary indexed access. Non-empty array detection is separate.
 - Include null-prototype plain dictionaries. Reject whitespace-only numeric strings. Preserve boxed Number/String/Boolean support and primitive-only Symbol/BigInt checks.
-- Default empty/blank operations inspect sized containers and plain dictionaries without advancing caller iterators. Unsized iterable/iterator inputs throw. Provide explicit iterable variants with documented consumption/closing and termination limitations. Map blankness concerns values; Set blankness concerns items.
+- Default empty/blank operations inspect sized collections and plain dictionaries without advancing caller iterators. Unsized iterable/iterator inputs throw. Map blankness concerns values; Set blankness concerns items.
 - Binary checks establish native identity across realms; detached buffers/views remain their respective types. Protocol checks do not invoke the checked methods.
-- Keep existing cycle traversal scope: enumerable string properties, including inherited; no symbols, non-enumerables or Map/Set entries.
+- Cycle detection follows enumerable string properties, including inherited, and genuine Map keys/values and Set members. Preserve property-first order and shared identity. Exclude symbols, non-enumerables, weak entries and arbitrary iterable contents; keep one fixed public policy and the private traversal helper.
+- Normalise single-item-or-array inputs with `ensureArray`: preserve genuine array identity and readonly types; wrap supplied non-array values once without iteration or coercion; omission creates a fresh empty array. Normalise item/array/Set inputs with `ensureSet`: preserve genuine Set identity; arrays use native construction; other supplied values remain single members. Keep non-function-object inspection private under its explicit name.
 - Keep local-realm Promise and DOM instance checks and document their prototype-chain and realm limitations.
 - Type declarations are conservative: no unsafe integer/blank/plain-object/boxed-primitive negative-branch narrowing. Exact primitive checks and non-nullish filtering narrow.
 - Use `node:test` for public-API tests, alongside independent generated graph/model tests, TypeScript consumer tests, browser tests and packed-package checks.

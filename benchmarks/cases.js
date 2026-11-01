@@ -12,6 +12,6 @@ module.exports = function createCases(T) {
     ['isMap / ordinary-object negatives', (index) => T.isMap(objects[index % objects.length])],
     ['isArrayOf / composed predicate', (index) => T.isArrayOf([numbers[index % numbers.length]], predicate)],
     ['isArrayOf / valid numeric collection', () => T.isArrayOf([1, 2, 3, 4], 'number')],
-    ['isNonNullish / primitive mix', (index) => T.isNonNullish(numbers[index % numbers.length])]
+    ['isNotNullish / primitive mix', (index) => T.isNotNullish(numbers[index % numbers.length])]
   ];
 };

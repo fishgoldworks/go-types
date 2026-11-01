@@ -38,6 +38,67 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     }
     throw new Error('Expected TypeError');
   }
+  test('normalisation preserves identity and the revised API boundary', () => {
+    const empty = api.ensureArray();
+    exampleEqual(empty, []);
+    const anotherEmpty = api.ensureArray();
+    equal(empty === anotherEmpty, false);
+    empty.push('item');
+    equal(anotherEmpty.length, 0);
+    for (const name of [
+      'isNonNullish',
+      'isObjectLike',
+      'isNonFunctionObject',
+      'ensureArrayIf',
+      'ensureSetIf',
+      'ensureMap',
+      'ensurePlainObject',
+      'asArray'
+    ])
+      equal(Object.prototype.hasOwnProperty.call(api, name), false);
+    const sparse = [];
+    sparse.length = 2;
+    for (const value of [[], sparse, Object.freeze([1])]) equal(api.ensureArray(value), value);
+    equal(0 in sparse, false);
+    for (const value of [null, undefined, 0, false, '', 'hello', new Set([1, 2])]) {
+      const result = api.ensureArray(value);
+      equal(result.length, 1);
+      equal(result[0], value);
+    }
+    equal(api.ensureArray(document.all)[0], document.all);
+    const revoked = Proxy.revocable([], {});
+    revoked.revoke();
+    throws(() => api.ensureArray(revoked.proxy));
+  });
+  test('Set normalisation preserves Sets and treats other non-array values as single members', () => {
+    const existing = new Set([1, 2]);
+    equal(api.ensureSet(existing), existing);
+    equal(api.ensureSet().size, 0);
+    equal(api.ensureSet() === api.ensureSet(), false);
+    equal(api.ensureSet([1, 1, 2]).size, 2);
+    for (const value of [undefined, null, 'read', document.all, {}, new Map(), new Uint8Array(2)]) {
+      const result = api.ensureSet(value);
+      equal(result.size, 1);
+      equal(result.has(value), true);
+    }
+    const fail = () => {
+      throw Error('Do not inspect single values');
+    };
+    const iterable = Object.defineProperty({}, Symbol.iterator, { get: fail });
+    equal(api.ensureSet(iterable).has(iterable), true);
+    const frame = document.createElement('iframe');
+    document.body.appendChild(frame);
+    try {
+      const foreign = new frame.contentWindow.Set([1]);
+      equal(api.ensureSet(foreign), foreign);
+    } finally {
+      frame.remove();
+    }
+  });
+  test('consuming iterable checks are not browser exports', () => {
+    equal(Object.prototype.hasOwnProperty.call(api, 'isEmptyIterable'), false);
+    equal(Object.prototype.hasOwnProperty.call(api, 'isBlankIterable'), false);
+  });
   test('matcher compilation is internal to the browser API', () => {
     equal(Object.prototype.hasOwnProperty.call(api, 'isTypeOf'), false);
     equal(Object.prototype.hasOwnProperty.call(api, 'isInstanceOf'), false);
@@ -264,21 +325,84 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     throws(() => api.toJsonIf(poison, () => 1));
   });
   test('public export names', () => equal(Object.keys(api).sort().join(','), [...names].sort().join(',')));
+  test('cycle traversal follows native Map keys, values and Set members', () => {
+    const keyMap = new Map(),
+      valueMap = new Map(),
+      set = new Set();
+    keyMap.set(keyMap, 0);
+    valueMap.set('self', valueMap);
+    set.add(set);
+    for (const value of [keyMap, valueMap, set]) equal(api.isCircular(value), true);
+    const shared = {};
+    equal(api.isCircular({ map: new Map([[shared, shared]]), set: new Set([shared]) }), false);
+    const root = { members: new Set() };
+    root.members.add({ parent: root });
+    equal(api.isCircular(root), true);
+  });
+  test('native cycle traversal ignores replaced iterators and content methods', () => {
+    for (const Constructor of [Map, Set]) {
+      const value = new Constructor();
+      if (Constructor === Map) value.set(value, value);
+      else value.add(value);
+      const fail = () => {
+        throw Error('Do not use overridden collection access');
+      };
+      for (const key of [Symbol.iterator, Symbol.toStringTag, 'forEach', 'entries', 'values', 'size']) {
+        Object.defineProperty(value, key, { get: fail });
+      }
+      equal(api.isCircular(value), true);
+    }
+  });
+  test('native cycle traversal retains content getter failures and ordinary-property priority', () => {
+    const failure = new Error('collection child getter');
+    const child = {
+      get edge() {
+        throw failure;
+      }
+    };
+    const map = new Map([['child', child]]);
+    map.self = map;
+    equal(api.isCircular(map), true);
+    delete map.self;
+    try {
+      api.isCircular(map);
+      throw Error('Expected original getter failure');
+    } catch (error) {
+      equal(error, failure);
+    }
+    equal(api.isCircular({}), false);
+  });
+  test('cycle traversal recognises foreign native collections', () => {
+    const frame = document.createElement('iframe');
+    document.body.appendChild(frame);
+    try {
+      const ForeignMap = frame.contentWindow.Map,
+        ForeignSet = frame.contentWindow.Set;
+      const map = new ForeignMap(),
+        set = new ForeignSet();
+      map.set(map, 0);
+      set.add(set);
+      equal(api.isCircular(map), true);
+      equal(api.isCircular(set), true);
+    } finally {
+      frame.remove();
+    }
+  });
   test('cycle traversal recognises HTMLDDA vertices and does not retain prior graph state', () => {
     const isolated = document.implementation.createHTMLDocument('graph fixture');
     isolated.removeChild(isolated.documentElement);
     const value = isolated.all;
     equal(value.length, 0);
-    equal(api.isCyclic(value), false);
+    equal(api.isCircular(value), false);
     try {
       Object.defineProperty(value, '__goTypesGraphEdge', { value, enumerable: true, configurable: true });
-      equal(api.isCyclic(value), true);
+      equal(api.isCircular(value), true);
       Object.defineProperty(value, '__goTypesGraphEdge', { enumerable: false });
-      equal(api.isCyclic(value), false);
+      equal(api.isCircular(value), false);
     } finally {
       delete value.__goTypesGraphEdge;
     }
-    equal(api.isCyclic(value), false);
+    equal(api.isCircular(value), false);
   });
   test('cycle traversal follows foreign inherited getters but honours hidden own shadows', () => {
     const iframe = document.createElement('iframe');
@@ -297,12 +421,12 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       });
       Object.setPrototypeOf(value, proto);
       Object.defineProperty(value, 'destination', { value });
-      equal(api.isCyclic(value), true);
+      equal(api.isCircular(value), true);
       Object.defineProperty(value, 'edge', { value, configurable: true, enumerable: false });
-      equal(api.isCyclic(value), false);
+      equal(api.isCircular(value), false);
       equal(reads, 1);
       delete value.edge;
-      equal(api.isCyclic(value), true);
+      equal(api.isCircular(value), true);
       equal(reads, 2);
     } finally {
       iframe.remove();
@@ -332,10 +456,10 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
   }
   for (const [name, expected] of [
     ['isNullish', false],
-    ['isNonNullish', true],
+    ['isNotNullish', true],
     ['isUndefined', false],
     ['isObject', true],
-    ['isObjectLike', true],
+
     ['isPrimitive', false],
     ['isArrayLike', true],
     ['isIterable', true],
@@ -354,7 +478,7 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       try {
         Object.setPrototypeOf(value, prototype);
         equal(api.isPlainObject(value), expected);
-        equal(api.isObjectLike(value), true);
+        equal(api.ensureArray(value)[0], value);
         equal(api.isPrimitive(value), false);
       } finally {
         Object.setPrototypeOf(value, original);
@@ -365,7 +489,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
   for (const input of [[document.all], new Set([document.all]), new Map([['x', document.all]]), { x: document.all }]) {
     test('HTMLDDA nested item is nonblank', () => equal(api.isBlank(input), false));
   }
-  test('HTMLDDA iterable item is nonblank', () => equal(api.isBlankIterable([document.all]), false));
   test('HTMLDDA retains intentional native typeof and truthiness', () => {
     equal(api.isArrayOf([document.all], 'undefined'), true);
     throws(() => api.isArrayOf([document.all], undefined));
@@ -430,8 +553,7 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       // This method is callable, but its no-argument result is not an iterator.
       // A shape check does not promise successful consumption.
       const input = { [Symbol.iterator]: document.all };
-      throws(() => api.isEmptyIterable(input));
-      throws(() => api.isBlankIterable(input));
+      throws(() => api.toArray(input));
     } finally {
       element.remove();
     }
@@ -481,8 +603,9 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(api.isNode(document.createTextNode('x')), true);
     equal(api.isElement(document.body), true);
     equal(api.isElement(document), false);
-    equal(api.isFragment(document.createDocumentFragment()), true);
-    equal(api.isFragment(document.body), false);
+    equal(api.isDocumentFragment(document.createDocumentFragment()), true);
+    equal(api.isDocumentFragment(document.body), false);
+    equal(Object.prototype.hasOwnProperty.call(api, 'isFragment'), false);
     equal(api.isNode({ nodeType: 1 }), false);
   });
   const iframe = document.createElement('iframe');
@@ -524,7 +647,7 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
   for (const [name, Constructor, make] of [
     ['isNode', Node, (doc) => doc.createTextNode('identity')],
     ['isElement', Element, (doc) => doc.createElement('div')],
-    ['isFragment', DocumentFragment, (doc) => doc.createDocumentFragment()]
+    ['isDocumentFragment', DocumentFragment, (doc) => doc.createDocumentFragment()]
   ]) {
     test(`${name}: adoption preserves agreement with the native local instance check`, () => {
       const local = make(document);
@@ -851,19 +974,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     const iterator = values();
     throws(() => api.isEmpty(iterator));
     equal(iterator.next().value, 1);
-  });
-  test('explicit consuming helper closes on early return', () => {
-    let closed = false;
-    function* values() {
-      try {
-        yield 1;
-        yield 2;
-      } finally {
-        closed = true;
-      }
-    }
-    equal(api.isEmptyIterable(values()), false);
-    equal(closed, true);
   });
   for (const name of [
     'Int8Array',

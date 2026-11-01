@@ -8,7 +8,7 @@
 - **Version:** [{{VERSION}}](CHANGELOG.md)
 - **Licence:** [MIT](LICENSE.md)
 
-Check JavaScript values, validate collection contents, and convert values with explicit rules, including JSON serialisation, general JSON parsing and shallow plain-object copies. Import individual functions as needed. Type checks do not convert their inputs; conversions are explicit.
+Check JavaScript values, validate collection contents, and convert values with explicit rules, including JSON serialisation, general JSON parsing and shallow plain-object copies. Import individual functions as needed. Type checks do not convert their inputs.
 
 No runtime dependencies. TypeScript declarations included.
 
@@ -169,9 +169,46 @@ Type checks do not convert their inputs. Scalar conversions follow native coerci
 
 Ordinary failed checks return `false`. Invalid matcher configurations and unsupported inputs can throw; callback, getter, proxy, coercion and iterator errors propagate. These checks are not schema validation or a security boundary.
 
-`isEmpty` and `isBlank` reject unsized iterators instead of consuming them. Use `isEmptyIterable` or `isBlankIterable` only when consumption and early iterator closing are intended. Do not reuse a one-shot iterator after inspection; a nullish-only infinite iterable never finishes a blankness check.
+`isEmpty` and `isBlank` inspect [supported collections](docs/API.md#empty-and-blank-values) and reject unsized iterators and iterables without consuming them. Handle iteration explicitly when consumption is intended.
 
 Collection checks accept a required native `typeof` name or synchronous boolean predicate. For example, `isArrayOf(items, 'number')` accepts primitive numbers; `isArrayOf(items, isNumber)` also accepts Number wrappers. Use `value => value instanceof Account` for class instances. Empty collections pass valid checks. See [type specifications](docs/API.md#type-specifications) for callback and traversal rules.
+
+### Normalise a single item or an array
+
+<!-- prettier-ignore -->
+```javascript
+import { ensureArray } from 'go-types';
+
+ensureArray();                             // => []
+ensureArray(undefined);                    // => [undefined]
+ensureArray('hello');                      // => ['hello']
+ensureArray(null);                         // => [null]
+
+const selection = new Set([1, 2]);
+ensureArray(selection)[0] === selection;   // => true
+
+const items = [1, 2];
+ensureArray(items) === items;              // => true
+```
+
+With no arguments, `ensureArray()` creates an empty array. Arrays are returned unchanged; other supplied values, including `null` and `undefined`, become one item. Use `toArray` to extract iterable, object or array-like contents into a new array.
+
+### Normalise a single item, an array or a Set
+
+<!-- prettier-ignore -->
+```javascript
+import { ensureSet } from 'go-types';
+
+ensureSet('read').has('read');                     // => true
+Array.from(ensureSet(['read', 'write', 'read']));  // => ['read', 'write']
+ensureSet().size;                                  // => 0
+ensureSet(undefined).has(undefined);               // => true
+
+const permissions = new Set(['read', 'write']);
+ensureSet(permissions) === permissions;            // => true
+```
+
+Existing Sets are returned unchanged. Arrays supply members; other supplied values, including strings, Maps, `null` and `undefined`, become one member. Use `toSet` to extract other supported collection contents into a new Set. See [`ensureSet`](docs/API.md#ensuresetvalue) for native API requirements and iteration rules.
 
 ### Create plain objects
 
@@ -234,7 +271,7 @@ toPromiseIf(3, false);             // => 3
 
 TypeScript declarations are included; no separate `@types` package is required.
 
-Declarations cover root, per-function and bundle imports. Use native `typeof` for primitive narrowing; `isNonNullish` also narrows filtered values. Native identity and collection-content checks return `boolean`. `toDate()` returns `Date` without promising extra input properties.
+Declarations cover root, per-function and bundle imports. Use native `typeof` for primitive narrowing; `isNotNullish` also narrows filtered values. Native identity and collection-content checks return `boolean`. `toDate()` returns `Date` without promising extra input properties.
 
 <!-- prettier-ignore -->
 ```typescript
@@ -270,7 +307,7 @@ Measurements depend on the workload and runtime; they are not universal speed gu
 
 ## Migration
 
-Version 2.0.0 removes `isTypeOf` and `isThenable`, uses a callable-`then` check for `isPromiseLike`, simplifies collection matchers to required type-name strings or predicates, changes collection and runtime contracts, and adds TypeScript declarations. Empty collections pass valid element constraints; invalid or missing matchers throw before matching.
+Version 2.0.0 removes `isTypeOf` and `isThenable`, renames `isFragment` to `isDocumentFragment`, uses a callable-`then` check for `isPromiseLike`, simplifies collection matchers to required type-name strings or predicates, changes collection and runtime contracts, and adds TypeScript declarations. Empty collections pass valid element constraints; invalid or missing matchers throw before matching.
 
 Read the [migration guide](docs/migration.md) and [changelog](CHANGELOG.md) before upgrading from version 1.
 

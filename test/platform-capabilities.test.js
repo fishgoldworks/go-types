@@ -144,7 +144,7 @@ test('Error fallback retains its captured string intrinsic after reassignment', 
 for (const [name, constructorName] of [
   ['isNode', 'Node'],
   ['isElement', 'Element'],
-  ['isFragment', 'DocumentFragment']
+  ['isDocumentFragment', 'DocumentFragment']
 ]) {
   test(`${name} follows the currently available local constructor and propagates instance-hook errors`, () => {
     inHost(

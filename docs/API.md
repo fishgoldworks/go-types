@@ -28,7 +28,7 @@ Conversion behaviour is also summarised in the [conversion guide](conversions.md
 
 ## API summary
 
-All **93 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
+All **91 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
 
 Examples assume the named functions have been imported from `go-types`, unless an import is shown. DOM examples run in a web browser. `// =>` comments show expected results or exceptions.
 
@@ -54,9 +54,9 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isNullish(value)`](#isnullishvalue) | Checks whether a value is `null` or `undefined`. | **`boolean`**<br><br>`true` if the value is `null` or `undefined`; otherwise `false`. |
-| [`isNonNullish(value)`](#isnonnullishvalue) | Checks whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
-| [`isEmpty(value)`](#isemptyvalue) | Checks whether a value is nullish or a supported string or container has no items. | **`boolean`**<br><br>`true` if the value is nullish or a supported string or container with no items; otherwise `false`. |
-| [`isBlank(value)`](#isblankvalue) | Checks whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`. |
+| [`isNotNullish(value)`](#isnotnullishvalue) | Checks whether a value is neither `null` nor `undefined`. | **`boolean`**<br><br>`true` if the value is neither `null` nor `undefined`; otherwise `false`. |
+| [`isEmpty(value)`](#isemptyvalue) | Checks whether a value is nullish, an empty string, or an empty supported collection. | **`boolean`**<br><br>`true` if the value is nullish, an empty string, or an empty supported collection; otherwise `false`. |
+| [`isBlank(value)`](#isblankvalue) | Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values. | **`boolean`**<br><br>`true` if the value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values; otherwise `false`. |
 | [`isTruthy(value)`](#istruthyvalue) | Checks whether JavaScript treats a value as `true` in a condition. | **`boolean`**<br><br>`true` if the value is truthy under JavaScript boolean coercion; otherwise `false`. |
 | [`isFalsy(value)`](#isfalsyvalue) | Checks whether JavaScript treats a value as `false` in a condition. | **`boolean`**<br><br>`true` if the value is falsy under JavaScript boolean coercion; otherwise `false`. |
 | [`isJson(value)`](#isjsonvalue) | Checks whether primitive or boxed string text is valid JSON. | **`boolean`**<br><br>`true` if the value is primitive or boxed string text that parses as JSON; otherwise `false`. |
@@ -78,14 +78,11 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isObject(value)`](#isobjectvalue) | Checks whether a value is a non-null object or function. | **`boolean`**<br><br>`true` if the value is a non-null object or function; otherwise `false`. |
-| [`isObjectLike(value)`](#isobjectlikevalue) | Checks whether a value is a non-null object, excluding functions. | **`boolean`**<br><br>`true` if the value is a non-null object other than a function; otherwise `false`. |
 | [`isPlainObject(value)`](#isplainobjectvalue) | Checks whether a value has a null or ordinary `Object` prototype. | **`boolean`**<br><br>`true` if the value has a null or ordinary `Object` prototype; otherwise `false`. |
-| [`isCyclic(value)`](#iscyclicvalue) | Checks whether following enumerable string-keyed properties leads back to an ancestor. | **`boolean`**<br><br>`true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`. |
+| [`isCircular(value)`](#iscircularvalue) | Checks whether a value contains a circular reference through enumerable string-keyed properties, Map keys and values, or Set members. | **`boolean`**<br><br>`true` if following the supported references leads back to an object already on the current path; otherwise `false`. |
 | [`isIterable(value)`](#isiterablevalue) | Checks whether a value exposes a synchronous iterator method. | **`boolean`**<br><br>`true` if the value has a callable `Symbol.iterator` method; otherwise `false`. |
 | [`isAsyncIterable(value)`](#isasynciterablevalue) | Checks whether a value exposes an asynchronous iterator method. | **`boolean`**<br><br>`true` if the async-iterator symbol is available and the value has a callable `Symbol.asyncIterator` method; otherwise `false`. |
 | [`isIteratorLike(value)`](#isiteratorlikevalue) | Checks whether a value is an object or function with a callable `next` method. | **`boolean`**<br><br>`true` if the value is a non-null object or function with a callable `next` method; otherwise `false`. |
-| [`isEmptyIterable(value)`](#isemptyiterablevalue) | Checks whether a synchronous iterable is empty by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items; otherwise `false`. |
-| [`isBlankIterable(value)`](#isblankiterablevalue) | Checks whether every item yielded by a synchronous iterable is nullish by advancing its iterator. | **`boolean`**<br><br>`true` if the synchronous iterable yields no items or only nullish items; otherwise `false`. |
 | [`isFunction(value)`](#isfunctionvalue) | Checks whether JavaScript reports a value as a function. | **`boolean`**<br><br>`true` if `typeof value` is `"function"`; otherwise `false`. |
 | [`isDate(value)`](#isdatevalue) | Checks whether a value is a genuine `Date`, valid or invalid. | **`boolean`**<br><br>`true` if the value is a genuine `Date`, valid or invalid; otherwise `false`. |
 | [`isValidDate(value)`](#isvaliddatevalue) | Checks whether a genuine `Date` contains a finite timestamp. | **`boolean`**<br><br>`true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`. |
@@ -100,7 +97,6 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | API | Description | Returns |
 | --- | --- | --- |
 | [`isArray(value)`](#isarrayvalue) | Checks whether a value is an array, including from another realm. | **`boolean`**<br><br>`true` if the value passes native `Array.isArray`; otherwise `false`. |
-| [`isNonEmptyArray(value)`](#isnonemptyarrayvalue) | Checks whether a value is an array with a valid length greater than zero. | **`boolean`**<br><br>`true` if the value is an array with a valid length greater than zero; otherwise `false`. |
 | [`isArrayOf(value, matcher)`](#isarrayofvalue-matcher) | Checks whether a value is an array whose items match a type-name string or predicate. | **`boolean`**<br><br>`true` if the value is an array and every element matches the matcher, including an empty array; otherwise `false`. |
 | [`isArrayLike(value)`](#isarraylikevalue) | Checks whether a non-function value has a valid numeric length. | **`boolean`**<br><br>`true` if the value is not a function and has a numeric integer length from `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`. |
 | [`isArrayLikeOf(value, matcher)`](#isarraylikeofvalue-matcher) | Checks whether an array-like value contains only items matching a type-name string or predicate. | **`boolean`**<br><br>`true` if the value is array-like and every indexed value matches the matcher, including an empty input; otherwise `false`. |
@@ -123,7 +119,7 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | --- | --- | --- |
 | [`isNode(value)`](#isnodevalue) | Checks whether a value is an instance of the local DOM `Node` constructor. | **`boolean`**<br><br>`true` if a local `Node` constructor is available and the value passes its instance check; otherwise `false`. |
 | [`isElement(value)`](#iselementvalue) | Checks whether a value is an instance of the local DOM `Element` constructor. | **`boolean`**<br><br>`true` if a local `Element` constructor is available and the value passes its instance check; otherwise `false`. |
-| [`isFragment(value)`](#isfragmentvalue) | Checks whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
+| [`isDocumentFragment(value)`](#isdocumentfragmentvalue) | Checks whether a value is an instance of the local DOM `DocumentFragment` constructor. | **`boolean`**<br><br>`true` if a local `DocumentFragment` constructor is available and the value passes its instance check; otherwise `false`. |
 
 **Binary**
 
@@ -144,6 +140,7 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | [`toRegExp(value?, flags?)`](#toregexpvalue-flags) | Converts a native pattern and optional `flags` to a genuine `RegExp`. | **`RegExp`**<br><br>A genuine `RegExp`, which may retain input identity under native rules. |
 | [`toPromise(value?)`](#topromisevalue) | Converts a value to a native `Promise`, adopting thenables and preserving ordinary local promises. | **`Promise<Awaited<T>>`**<br><br>A native `Promise` that adopts the input; ordinary local promises retain identity. |
 | [`toArray(value)`](#toarrayvalue) | Converts a synchronous iterable, plain object or supported array-like input to a new shallow array. | **`ArrayElement<T>[]`**<br><br>A new shallow array containing iterable items, plain object property values or indexed array-like values. |
+| [`ensureArray(value?)`](#ensurearrayvalue) | Returns an existing array unchanged or wraps a supplied value as one item. Without arguments, returns an empty array. | **`EnsuredArray<T>`**<br><br>A new empty array when no value is supplied; otherwise the original array or a new array containing the supplied value. |
 | [`toBigInt(value?)`](#tobigintvalue) | Converts a value to a primitive bigint using native conversion. | **`bigint`**<br><br>The converted primitive bigint. |
 | [`toBoolean(value?)`](#tobooleanvalue) | Converts a value to a boolean using JavaScript truthiness. | **`boolean`**<br><br>`true` if the input is truthy under JavaScript boolean coercion; otherwise `false`. |
 | [`toDate(value?)`](#todatevalue) | Converts a value to a `Date`, returning genuine `Date` objects unchanged. The result can be invalid. | **`Date`**<br><br>The original genuine `Date`, or a new `Date` constructed from the input; it may be invalid. |
@@ -154,6 +151,7 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | [`toNumber(value?)`](#tonumbervalue) | Converts a value to a primitive number using JavaScript’s `Number` conversion. | **`number`**<br><br>The converted primitive number; it may be `NaN` or infinite. |
 | [`toPlainObject(value)`](#toplainobjectvalue) | Creates a plain object from key/value pairs, or makes a shallow copy of an existing plain object. | **`ConvertedPlainObject<T>`**<br><br>A fresh ordinary object containing the copied enumerable properties or supplied entries. |
 | [`toSet(value?)`](#tosetvalue) | Converts a synchronous iterable, plain object or supported array-like input to a new shallow Set. | **`ConvertedSet<T>`**<br><br>A new Set of iterable items, plain object property values or indexed array-like values, or an empty Set for omitted or nullish input. |
+| [`ensureSet(value?)`](#ensuresetvalue) | Returns an existing Set unchanged, creates a Set from array items, or treats another supplied value as one member. | **`EnsuredSet<T>`**<br><br>The original Set, or a new Set containing array items or one supplied member. With no arguments, a new empty Set. |
 | [`toString(value?)`](#tostringvalue) | Converts a value to a primitive string using JavaScript’s `String` conversion. | **`string`**<br><br>The converted primitive string; nullish inputs become their literal text. |
 | [`toSymbol(value?)`](#tosymbolvalue) | Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol wrappers. | **`symbol`**<br><br>The original or unboxed symbol, or a new symbol created from the description. |
 
@@ -433,7 +431,7 @@ Uses strict comparisons with `null` and `undefined`. The browser object `documen
 
 ---
 
-### `isNonNullish(value)`
+### `isNotNullish(value)`
 
 Checks whether a value is neither `null` nor `undefined`.
 
@@ -450,9 +448,9 @@ Use this check to retain present values, including `0`, `false` and the empty st
 **Examples**
 
 ```javascript
-isNonNullish(0);               // => true
-isNonNullish(false);           // => true
-isNonNullish(null);            // => false
+isNotNullish(0);               // => true
+isNotNullish(false);           // => true
+isNotNullish(null);            // => false
 ```
 
 **Notes**
@@ -463,9 +461,9 @@ The generic declaration narrows to `NonNullable<T>`. Values such as `0`, `false`
 
 ### `isEmpty(value)`
 
-Checks whether a value is nullish or a supported string or container has no items.
+Checks whether a value is nullish, an empty string, or an empty supported collection.
 
-Checks strings, arrays, array-like values, native Maps and Sets, and plain dictionaries without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption.
+Checks strings and [supported collections](#empty-and-blank-values) without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption.
 
 **Parameters**
 
@@ -473,7 +471,7 @@ Checks strings, arrays, array-like values, native Maps and Sets, and plain dicti
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
 
-**Returns:** `boolean` — `true` if the value is nullish or a supported string or container with no items; otherwise `false`.
+**Returns:** `boolean` — `true` if the value is nullish, an empty string, or an empty supported collection; otherwise `false`.
 
 **Errors**
 
@@ -497,15 +495,15 @@ Strings, genuine Maps and Sets, and validated array-like lengths are checked fir
 
 Remaining plain dictionaries are empty when they have no own enumerable string keys. Unsupported values, such as numbers or Dates, return `false`. Property getters and proxy traps can still run: avoiding iteration does not guarantee a check without side effects.
 
-Use `isEmptyIterable` to consume a synchronous iterable. A `next`-only iterator needs an iterable adapter; asynchronous iteration must be handled by the caller. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.
+Handle iteration explicitly when consumption is intended. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.
 
 ---
 
 ### `isBlank(value)`
 
-Checks whether a value is nullish, an empty or whitespace-only string, or a supported container containing only nullish values.
+Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values.
 
-Accepts nullish values, empty or whitespace-only strings, and supported containers whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[""]` is not. Unsized iterators and iterables throw instead of being consumed.
+Accepts nullish values, empty or whitespace-only strings, and [supported collections](#empty-and-blank-values) whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[""]` is not. Unsized iterators and iterables throw instead of being consumed.
 
 **Parameters**
 
@@ -513,7 +511,7 @@ Accepts nullish values, empty or whitespace-only strings, and supported containe
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
 
-**Returns:** `boolean` — `true` if the value is nullish, a whitespace-only string, or a supported container containing only nullish values; otherwise `false`.
+**Returns:** `boolean` — `true` if the value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values; otherwise `false`.
 
 **Errors**
 
@@ -535,7 +533,7 @@ isBlank(0);                        // => false
 
 Uses the same input order and unsized-input errors as `isEmpty`. Map checks examine values, Set checks examine items, and dictionary checks examine own enumerable string-keyed values. Iterator capabilities take precedence over plain-dictionary handling.
 
-The check is shallow: every inspected value must be `null` or `undefined`. Empty strings and empty objects inside a container are not nullish. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.
+The check is shallow: every inspected value must be `null` or `undefined`. Empty strings and empty objects inside a collection are not nullish. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.
 
 ---
 
@@ -854,34 +852,6 @@ Uses the JavaScript object/function boundary, so objects from another realm pass
 
 ---
 
-### `isObjectLike(value)`
-
-Checks whether a value is a non-null object, excluding functions.
-
-Use this check when functions should be excluded from the object category. Arrays, dates and wrapper objects still pass; use `isPlainObject` for plain dictionaries.
-
-**Parameters**
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `value` | `unknown` | The value to check. |
-
-**Returns:** `boolean` — `true` if the value is a non-null object other than a function; otherwise `false`.
-
-**Examples**
-
-```javascript
-isObjectLike([]);              // => true
-isObjectLike(() => {});        // => false
-isObjectLike(null);            // => false
-```
-
-**Notes**
-
-Includes browser `document.all`, but does not require a plain dictionary. The declaration returns `boolean` because TypeScript’s `object` type also includes functions.
-
----
-
 ### `isPlainObject(value)`
 
 Checks whether a value has a null or ordinary `Object` prototype.
@@ -914,11 +884,11 @@ An own `constructor` field is ordinary data and is not read. Assigning `null` or
 
 ---
 
-### `isCyclic(value)`
+### `isCircular(value)`
 
-Checks whether following enumerable string-keyed properties leads back to an ancestor.
+Checks whether a value contains a circular reference through enumerable string-keyed properties, Map keys and values, or Set members.
 
-Detects a cycle in an object graph, including through inherited enumerable properties. Two properties sharing the same acyclic child do not form a cycle. Getters and proxy traps may run as properties are inspected.
+Includes inherited enumerable properties and follows genuine Map keys and values and Set members. Shared references without a cycle are allowed. Ordinary properties are inspected before collection contents.
 
 **Parameters**
 
@@ -926,11 +896,12 @@ Detects a cycle in an object graph, including through inherited enumerable prope
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
 
-**Returns:** `boolean` — `true` if enumerable string-keyed property traversal reaches an active ancestor; otherwise `false`.
+**Returns:** `boolean` — `true` if following the supported references leads back to an object already on the current path; otherwise `false`.
 
 **Errors**
 
-- Property getters or proxy traps may throw; their errors propagate.
+- Property getters and proxy traps may throw; their errors propagate.
+- Requested Map/Set content inspection throws `TypeError` when native traversal support is unavailable.
 
 **Examples**
 
@@ -938,25 +909,39 @@ Detects a cycle in an object graph, including through inherited enumerable prope
 const value = {};
 value.self = value;
 
-isCyclic(value);                                     // => true
-isCyclic({ a: 1, b: { c: 1 } });                     // => false
+isCircular(value);                                     // => true
+isCircular({ a: 1, b: { c: 1 } });                     // => false
 
 const shared = {};
-isCyclic({ a: shared, b: shared });                  // => false
+isCircular({ a: shared, b: shared });                  // => false
+
+const team = { members: new Set() };
+team.members.add({ team });
+isCircular(team);                                      // => true
+
+const lookup = new Map();
+lookup.set(lookup, "self");
+isCircular(lookup);                                    // => true
 ```
 
 **Additional examples**
 
 ```javascript
-isCyclic({a:1,b:{c:1}});                             // => false
-isCyclic((()=>{const x={};x.self=x;return x;})());   // => true
+isCircular({a:1,b:{c:1}});                             // => false
+isCircular((()=>{const x={};x.self=x;return x;})());   // => true
+isCircular(new Map([["item", {}]]));                   // => false
+isCircular(new Set([{}]));                             // => false
 ```
 
 **Notes**
 
-A cycle must lead back to a value on the current traversal path; shared acyclic children do not count. Traversal is iterative, and completed shared nodes are visited once. Symbols, non-enumerable properties and Map/Set entries are ignored.
+A cycle must lead back to an object on the current path. Shared acyclic objects are allowed; a `false` result does not establish that objects are independently copied or detached from another model. Symbols, non-enumerable properties, WeakMap/WeakSet entries and arbitrary iterable contents are excluded.
 
-The graph is expected to remain stable during the check. Getters and proxy traps can mutate it or throw. Internal reference tracking falls back to local arrays when weak collections are unavailable; no platform globals are changed.
+Property keys are captured when an object is first visited; their values are read as traversal proceeds. Map keys precede their corresponding values. Stored collection references are collected through captured native `forEach` operations after ordinary properties. Application iterators and method overrides do not select collection contents; their eligible ordinary properties are still inspected.
+
+Keep the graph stable during inspection, including from getters. The result concerns references observed during the call, not an immutable snapshot. Iterative traversal avoids recursive stack growth, and completed shared objects are inspected once. Internal reference tracking falls back to local arrays when weak collections are unavailable; no platform globals are changed.
+
+Native collection recognition uses available captured local operations and supports genuine foreign instances. If native detection is unavailable, only ordinary properties are inspected. A recognised Map or Set without native `forEach` support throws `TypeError` when its contents are reached. Missing optional capabilities do not prevent package loading or checks of unrelated objects. This check does not establish JSON serialisability or safety for an operation that follows different references.
 
 ---
 
@@ -1078,97 +1063,6 @@ isIteratorLike({next:1});        // => false
 **Notes**
 
 Reads `next` without calling it. This cannot distinguish synchronous from asynchronous iteration or guarantee a valid `IteratorResult` object.
-
----
-
-### `isEmptyIterable(value)`
-
-Checks whether a synchronous iterable is empty by advancing its iterator.
-
-Advances the iterable until the first item or completion. An item produces `false` and closes the iterator early; completion without an item produces `true`. This can consume or close a one-shot iterator, so do not reuse it after inspection.
-
-**Parameters**
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `value` | `unknown` | The value to check. |
-
-**Returns:** `boolean` — `true` if the synchronous iterable yields no items; otherwise `false`.
-
-**Errors**
-
-- `TypeError` for non-iterable input.
-- Iterator and iterator-closing errors propagate.
-
-**Examples**
-
-```javascript
-function* values() {
-  yield 1;
-}
-
-isEmptyIterable([]);                         // => true
-isEmptyIterable(values());                   // => false
-isEmptyIterable(null);                       // => throws TypeError
-```
-
-**Additional examples**
-
-```javascript
-isEmptyIterable([]);                         // => true
-isEmptyIterable((function*(){yield 1;})());  // => false
-```
-
-**Notes**
-
-A non-iterable input throws `TypeError`. Finding an item produces an early `false` and closes the iterator using native `for...of` rules. Closing can call `return()` or run generator `finally` blocks. Do not reuse a one-shot iterator after inspection.
-
----
-
-### `isBlankIterable(value)`
-
-Checks whether every item yielded by a synchronous iterable is nullish by advancing its iterator.
-
-Returns `true` for an empty iterable or one yielding only `null` and `undefined`. Stops and closes the iterator at the first other item. The check is shallow and can consume or close one-shot input.
-
-**Parameters**
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `value` | `unknown` | The value to check. |
-
-**Returns:** `boolean` — `true` if the synchronous iterable yields no items or only nullish items; otherwise `false`.
-
-**Errors**
-
-- `TypeError` for non-iterable input.
-- Iterator and iterator-closing errors propagate.
-
-**Examples**
-
-```javascript
-function* values() {
-  yield null;
-  yield undefined;
-}
-
-isBlankIterable(values());                                       // => true
-isBlankIterable([0]);                                            // => false
-isBlankIterable(new Map([['key', null]]));                       // => false
-```
-
-**Additional examples**
-
-```javascript
-isBlankIterable((function*(){yield null;yield undefined;})());   // => true
-isBlankIterable([0]);                                            // => false
-```
-
-**Notes**
-
-Checks yielded items themselves. A non-empty Map yields entry arrays, so it returns `false` even when every Map value is nullish; `isBlank(map)` instead checks the Map’s values.
-
-Finding a non-nullish item closes the iterator early, which can run cleanup code. Iteration and closing errors propagate. A nullish-only infinite iterable never completes.
 
 ---
 
@@ -1435,39 +1329,6 @@ isArray(Object.create(Array.prototype));   // => false
 **Notes**
 
 Uses the `Array.isArray` function captured when the module loads. This retains native behaviour for arrays from another realm and proxies, including `TypeError` for a revoked proxy.
-
----
-
-### `isNonEmptyArray(value)`
-
-Checks whether a value is an array with a valid length greater than zero.
-
-Checks array identity and length without validating the elements. A hole contributes to length, so `Array(1)` is non-empty even though it has no stored element.
-
-**Parameters**
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `value` | `unknown` | The value to check. |
-
-**Returns:** `boolean` — `true` if the value is an array with a valid length greater than zero; otherwise `false`.
-
-**Errors**
-
-- Property getters or proxy traps may throw; their errors propagate.
-- Native `Array.isArray` also throws `TypeError` for a revoked proxy.
-
-**Examples**
-
-```javascript
-isNonEmptyArray([null]);         // => true
-isNonEmptyArray(new Array(1));   // => true
-isNonEmptyArray([]);             // => false
-```
-
-**Notes**
-
-A hole contributes to array length without storing a value. Element types are not checked. An invalid exposed array length, for example through a proxy, returns `false`.
 
 ---
 
@@ -1869,7 +1730,7 @@ Positive examples require a browser with the corresponding DOM constructor. The 
 
 ---
 
-### `isFragment(value)`
+### `isDocumentFragment(value)`
 
 Checks whether a value is an instance of the local DOM `DocumentFragment` constructor.
 
@@ -1890,8 +1751,8 @@ Use this for DOM objects from the current browser realm. Returns `false` when th
 **Examples**
 
 ```javascript
-isFragment(document.createDocumentFragment());   // => true
-isFragment({nodeType:1});                        // => false
+isDocumentFragment(document.createDocumentFragment());   // => true
+isDocumentFragment({nodeType:1});                        // => false
 ```
 
 **Notes**
@@ -2041,7 +1902,7 @@ Custom tags are ignored; proxies and prototype imitations return `false`. Detach
 
 ## Conversion
 
-These functions explicitly convert values. Native coercion rules, exceptions, and observable side effects are part of their documented contracts.
+These functions convert or normalise values. Each function documents its input, copying and coercion rules.
 
 ### `box(value?)`
 
@@ -2209,9 +2070,61 @@ Plain objects include null-prototype and foreign-realm objects. Own string and s
 
 Only non-plain array-like inputs use indexed fallback. Their length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike; strings, fractions and coercible objects are rejected. Length is read once and indexed values are read live. Missing slots become explicit undefined and inherited numeric values are included. Strings iterate by Unicode code point. Nested values retain identity.
 
-Ordinary promises and native async-only containers without a supported synchronous source are rejected. No input is awaited. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value. Finite one-shot iterators are consumed; infinite iterables do not finish and very large inputs can exhaust memory. Requires native Array.from. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; if both are missing it throws instead of silently discarding possible symbol keys.
+Ordinary promises and native async-only collections without a supported synchronous source are rejected. No input is awaited. A plain async-only object is copied as data, including an enumerable async-iterator symbol and its value. Finite one-shot iterators are consumed; infinite iterables do not finish and very large inputs can exhaust memory. Requires native Array.from. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; if both are missing it throws instead of silently discarding possible symbol keys.
 
 If a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
+
+---
+
+### `ensureArray(value?)`
+
+Returns an existing array unchanged or wraps a supplied value as one item. Without arguments, returns an empty array.
+
+Use this for inputs that accept one item or an array. Omission differs from an explicitly supplied undefined value. Use [toArray](#toarrayvalue) to extract supported input contents into a new shallow array.
+
+**Parameters**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `value?` | `T` | The value to normalise. Omit to create an empty array; explicit undefined or null remains one item. |
+
+**Returns:** `EnsuredArray<T>` — A new empty array when no value is supplied; otherwise the original array or a new array containing the supplied value.
+
+**Errors**
+
+- Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
+
+**Examples**
+
+```javascript
+ensureArray();                                                               // => []
+ensureArray(1);                                                              // => [1]
+ensureArray('hello');                                                        // => ['hello']
+ensureArray(null);                                                           // => [null]
+ensureArray(undefined);                                                      // => [undefined]
+
+const items = [1, 2];
+ensureArray(items) === items;                                                // => true
+```
+
+**Additional examples**
+
+```javascript
+ensureArray();                                                               // => []
+ensureArray(1);                                                              // => [1]
+ensureArray("hello");                                                        // => ["hello"]
+ensureArray({id: 1});                                                        // => [{"id":1}]
+ensureArray(null);                                                           // => [null]
+ensureArray(undefined)[0] === undefined;                                     // => true
+(()=>{const items=[1,2];return ensureArray(items)===items;})();              // => true
+(()=>{const value=new Set([1,2]);return ensureArray(value)[0]===value;})();  // => true
+```
+
+**Notes**
+
+Arrays retain their identity, including empty, sparse, frozen, subclassed and foreign arrays. Other supplied values, including `null` and `undefined`, are single items; strings and other collections are not expanded. A preserved array is not an independent copy. Omitting the argument creates a fresh empty array. Additional callback arguments are ignored.
+
+TypeScript infers item, array and tuple types while preserving readonly restrictions. It does not promise custom array-subtype properties. Inputs typed only as `object`, `unknown` or `{}` have conservative `readonly unknown[]` results because they may hide arrays. Inference follows declared array structure; TypeScript cannot prove native array identity for fabricated array-shaped objects. Pass such inputs as `unknown` when their native identity is uncertain. Direct `map(ensureArray)` calls work but infer broad results; use `map(value => ensureArray(value))` for precise element inference. A zero-argument call can select the element type, for example `ensureArray<number>()`.
 
 ---
 
@@ -2496,7 +2409,7 @@ toMap(null).size;                                                              /
 
 Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. Plain objects include null-prototype and foreign-realm objects. Own string and symbol keys are captured once in property order; each current descriptor is checked before its enumerable value is read once. Inherited and non-enumerable properties are excluded, deleted or newly hidden keys are skipped, newly added keys are excluded, and nested values retain identity. Numeric property names become string keys; symbol keys stay symbols. An own constructor or length field is ordinary data.
 
-A synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits object conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only containers without a supported synchronous source are rejected.
+A synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits object conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only collections without a supported synchronous source are rejected.
 
 Each iterable entry must be an actual array of length exactly two, with own properties at both indices 0 and 1. Explicit undefined keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Any key type is allowed, without string coercion. Non-empty strings yield primitive entries and throw; an empty string yields no entries. There is no array-like source fallback.
 
@@ -2636,9 +2549,68 @@ Only non-plain array-like inputs use indexed fallback. Length must be a primitiv
 
 Native SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a fresh local Set.
 
-Ordinary promises and native async-only containers without a supported synchronous source are rejected. Plain async-only objects are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.
+Ordinary promises and native async-only collections without a supported synchronous source are rejected. Plain async-only objects are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.
 
 If a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.
+
+---
+
+### `ensureSet(value?)`
+
+Returns an existing Set unchanged, creates a Set from array items, or treats another supplied value as one member.
+
+Use this for inputs that accept one item, an array or a Set. Strings remain whole. Use [toSet](#tosetvalue) to extract other supported collection contents into a new Set.
+
+**Parameters**
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `value?` | `T` | The value to normalise. Omit to create an empty Set; explicit undefined or null remains one member. |
+
+**Returns:** `EnsuredSet<T>` — The original Set, or a new Set containing array items or one supplied member. With no arguments, a new empty Set.
+
+**Errors**
+
+- Missing native Set support throws TypeError before input inspection.
+- Opaque object inputs throw when all captured native identity checks are unavailable.
+- Native construction, revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member fails.
+
+**Examples**
+
+```javascript
+ensureSet().size;                                                          // => 0
+ensureSet("read").has("read");                                             // => true
+Array.from(ensureSet([1, 2, 1]));                                          // => [1, 2]
+ensureSet(null).has(null);                                                 // => true
+ensureSet(undefined).has(undefined);                                       // => true
+
+const permissions = new Set(["read", "write"]);
+ensureSet(permissions) === permissions;                                    // => true
+```
+
+**Additional examples**
+
+```javascript
+ensureSet().size;                                                          // => 0
+ensureSet("read").has("read");                                             // => true
+Array.from(ensureSet([1, 2, 1]));                                          // => [1,2]
+ensureSet(null).has(null);                                                 // => true
+ensureSet(undefined).has(undefined);                                       // => true
+(()=>{const values=new Set([1,2]);return ensureSet(values)===values;})();  // => true
+(()=>{const value={id:1};return ensureSet(value).has(value);})();          // => true
+```
+
+**Notes**
+
+Existing Sets retain their identity, including empty, frozen, subclassed and foreign Sets. Own properties and iterator overrides are not read when preserving a Set. Changes through a mutable result also affect the original Set. `Object.freeze` does not prevent adding or removing Set members.
+
+Arrays produce a new local Set using native array iteration. Duplicate values are removed using native Set equality; nested arrays and objects remain references. Sparse array slots normally supply `undefined`. Custom array iterators are honoured and may run application code or throw. Other inputs, including strings, Maps, typed arrays, generators, functions and promises, are stored as single members without iteration, coercion or awaiting.
+
+Omitting the argument creates a fresh empty Set. Explicit `null` and `undefined` create one member. Additional callback arguments are ignored. Native construction and iterator-closing errors propagate unchanged.
+
+Requires native `Set`. Captured native receiver checks recognise existing Sets without consuming their members. If none remain, opaque non-array object inputs throw rather than risk nesting an existing Set. Empty construction, primitive members and array input remain usable where native construction permits them. Missing `Set.prototype.add` prevents construction from supplied members, but preserving a recognised Set and creating an empty Set remain available. See the [runtime guide](runtime.md#optional-capabilities) for the supported receiver checks.
+
+TypeScript infers declared Set and array members, preserves `ReadonlySet` restrictions, and does not promise custom subtype properties. Broad `object` and `unknown` inputs remain conservative. Structural types cannot prove native Set or array identity; treat uncertain imitations as `unknown`. Direct `map(ensureSet)` calls infer broad results; use `map(value => ensureSet(value))` for precise inference.
 
 ---
 
@@ -3396,11 +3368,13 @@ Protocol method checks test callability without invoking the method. This includ
 
 ### Empty and blank values
 
+For these checks, **supported collections** are arrays, array-like values, Maps, Sets and plain objects.
+
 `isEmpty` and `isBlank` inspect sized inputs without consuming unsized iterators. They handle strings, native Maps and Sets, and valid array-like lengths before protocol checks. Unsized iterator or iterable capabilities throw `TypeError`; remaining plain dictionaries use own enumerable string keys.
 
-Use `isEmptyIterable` or `isBlankIterable` when consuming a synchronous iterable is intended. These operations can close an iterator early. Do not reuse a one-shot iterator after inspection; a nullish-only infinite iterable never finishes a blankness check. Native early closing requests cleanup once. It does not drain a generator that yields from `finally`, await asynchronous cleanup, or guarantee resource release when the iterator itself does not complete cleanup.
+Handle iteration explicitly when consumption is intended.
 
-Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values, whereas iterating a Map yields entry arrays.
+Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values; Set blankness checks items.
 
 ### Type specifications
 
@@ -3424,7 +3398,7 @@ isArrayOf([new Account()], value => value instanceof Account);   // => true
 
 Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise genuine Dates from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
 
-Invalid or missing matchers throw `TypeError` before the collection is inspected, including empty and wrong-container inputs. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
+Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
 
 See [Matcher specification contract](#matcher-specification-contract) for traversal and callback rules.
 
@@ -3443,7 +3417,11 @@ if (typeof value === 'string') {
 }
 ```
 
-Use native `typeof` checks for primitive narrowing. `isNonNullish` also narrows filtered values. Collection-content checks return `boolean`, even when passed a type guard: sparse arrays and native identity cannot be proved by structural TypeScript types.
+Use native `typeof` checks for primitive narrowing. `isNotNullish` also narrows filtered values. Collection-content checks return `boolean`, even when passed a type guard: sparse arrays and native identity cannot be proved by structural TypeScript types.
+
+`ensureArray` infers item and array element types and retains readonly tuple shapes. Broad `object` and `unknown` inputs remain conservative. Declarations follow TypeScript array structure and do not promise native identity or custom subtype properties; see [`ensureArray`](#ensurearrayvalue) for the boundaries and callback inference.
+
+`ensureSet` infers Set or array members and preserves `ReadonlySet` restrictions; it wraps other declared inputs as members. Broad inputs remain conservative and custom subtype properties are not promised. See [`ensureSet`](#ensuresetvalue) for native identity and callback inference boundaries.
 
 `unbox` retains the original object type plus possible primitive payloads because structural properties cannot prove a native wrapper brand. `box` uses `Boxed<T>`; `toPromise` uses `Promise<Awaited<T>>`.
 

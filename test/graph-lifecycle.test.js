@@ -66,7 +66,7 @@ test('cycle detection agrees with a reachable topological oracle across property
         const nodes = buildGraph(edges, inherited, reverse);
         for (let start = 0; start < 3; start++) {
           assert.equal(
-            T.isCyclic(nodes[start]),
+            T.isCircular(nodes[start]),
             hasReachableCycle(edges, start),
             JSON.stringify({ mask, inherited, reverse, start })
           );
@@ -91,12 +91,12 @@ test('inherited edge getters use the original receiver and hidden shadows are no
   });
   const cycle = Object.create(proto);
   Object.defineProperty(cycle, 'destination', { value: cycle });
-  assert.equal(T.isCyclic(cycle), true);
+  assert.equal(T.isCircular(cycle), true);
   assert.deepEqual(receivers, [cycle]);
 
   const acyclic = Object.create(proto);
   Object.defineProperty(acyclic, 'destination', { value: 0 });
-  assert.equal(T.isCyclic(acyclic), false);
+  assert.equal(T.isCircular(acyclic), false);
   assert.deepEqual(receivers, [cycle, acyclic]);
 
   const masked = Object.create(proto, {
@@ -107,25 +107,25 @@ test('inherited edge getters use the original receiver and hidden shadows are no
     },
     destination: { value: cycle }
   });
-  assert.equal(T.isCyclic(masked), false);
+  assert.equal(T.isCircular(masked), false);
   assert.deepEqual(receivers, [cycle, acyclic]);
 });
 
-test('collection membership is excluded but enumerable string expandos remain graph edges', () => {
+test('weak membership stays excluded and ordinary collection properties remain graph edges', () => {
   const map = new Map();
   const set = new Set();
   const weakMap = new WeakMap();
   const weakSet = new WeakSet();
-  map.set(map, map);
-  set.add(set);
+  map.set(1, 2);
+  set.add(1);
   weakMap.set(weakMap, weakMap);
   weakSet.add(weakSet);
   for (const value of [map, set, weakMap, weakSet]) {
-    assert.equal(T.isCyclic(value), false);
+    assert.equal(T.isCircular(value), false);
     Object.defineProperty(value, '__proto__', { value, configurable: true, enumerable: true });
-    assert.equal(T.isCyclic(value), true, 'special property names are still edges');
+    assert.equal(T.isCircular(value), true, 'special property names are still edges');
     Object.defineProperty(value, '__proto__', { enumerable: false });
-    assert.equal(T.isCyclic(value), false);
+    assert.equal(T.isCircular(value), false);
   }
 });
 
@@ -146,7 +146,7 @@ test('completed descendants are read once per traversal, not cached between call
   ]) {
     destination = next; // Only changes between checks: each traversed graph is stable.
     reads = 0;
-    assert.equal(T.isCyclic(root), expected);
+    assert.equal(T.isCircular(root), expected);
     assert.equal(reads, 1);
   }
 });
@@ -161,7 +161,7 @@ test('a confirmed cycle short-circuits later value reads but earlier getter fail
       throw error;
     }
   });
-  assert.equal(T.isCyclic(loopFirst), true);
+  assert.equal(T.isCircular(loopFirst), true);
 
   const errorFirst = {};
   let broken = true;
@@ -174,13 +174,13 @@ test('a confirmed cycle short-circuits later value reads but earlier getter fail
   });
   errorFirst.loop = errorFirst;
   assert.throws(
-    () => T.isCyclic(errorFirst),
+    () => T.isCircular(errorFirst),
     (caught) => caught === error
   );
   broken = false;
-  assert.equal(T.isCyclic(errorFirst), true);
+  assert.equal(T.isCircular(errorFirst), true);
   delete errorFirst.loop;
-  assert.equal(T.isCyclic(errorFirst), false, 'abrupt exits do not retain traversal state');
+  assert.equal(T.isCircular(errorFirst), false, 'abrupt exits do not retain traversal state');
 });
 
 test('enumeration and read failures propagate without poisoning later checks of the same proxy', () => {
@@ -195,20 +195,20 @@ test('enumeration and read failures propagate without poisoning later checks of 
       }
     });
     assert.throws(
-      () => T.isCyclic(value),
+      () => T.isCircular(value),
       (caught) => caught === error,
       method
     );
     broken = false;
-    assert.equal(T.isCyclic(value), false, method);
+    assert.equal(T.isCircular(value), false, method);
     target.edge = value;
-    assert.equal(T.isCyclic(value), true, method);
+    assert.equal(T.isCircular(value), true, method);
     target.edge = undefined;
-    assert.equal(T.isCyclic(value), false, method);
+    assert.equal(T.isCircular(value), false, method);
   }
   const revoked = Proxy.revocable({}, {});
   revoked.revoke();
-  assert.throws(() => T.isCyclic(revoked.proxy), TypeError);
+  assert.throws(() => T.isCircular(revoked.proxy), TypeError);
 });
 
 test('reentrant checks and caught inner errors keep the outer traversal independent', () => {
@@ -226,9 +226,9 @@ test('reentrant checks and caught inner errors keep the outer traversal independ
       if (!checkingInner) {
         checkingInner = true;
         try {
-          assert.equal(T.isCyclic(root), false);
+          assert.equal(T.isCircular(root), false);
           assert.throws(
-            () => T.isCyclic(broken),
+            () => T.isCircular(broken),
             (caught) => caught === innerError
           );
         } finally {
@@ -239,9 +239,9 @@ test('reentrant checks and caught inner errors keep the outer traversal independ
     }
   };
   const root = Object.freeze({ left: shared, right: shared });
-  assert.equal(T.isCyclic(root), false);
+  assert.equal(T.isCircular(root), false);
   assert.equal(reads, 2);
-  assert.equal(T.isCyclic(root), false);
+  assert.equal(T.isCircular(root), false);
   assert.equal(reads, 4);
 });
 
@@ -258,11 +258,11 @@ test('different proxies over the same target remain distinct graph vertices', ()
     getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
     get: () => first
   });
-  assert.equal(T.isCyclic(first), false);
+  assert.equal(T.isCircular(first), false);
   backEdge = true;
-  assert.equal(T.isCyclic(first), true);
+  assert.equal(T.isCircular(first), true);
   backEdge = false;
-  assert.equal(T.isCyclic(first), false);
+  assert.equal(T.isCircular(first), false);
 });
 
 test('cross-realm frozen graphs are inspected without marking or coercing their objects', () => {
@@ -284,12 +284,12 @@ test('cross-realm frozen graphs are inspected without marking or coercing their 
   Object.defineProperty(foreign.leaf, Symbol.toPrimitive, { value: failure });
   Object.freeze(foreign.leaf);
   Object.freeze(foreign.root);
-  assert.equal(T.isCyclic(guarded), false);
+  assert.equal(T.isCircular(guarded), false);
 
   const cycle = vm.runInNewContext('(() => { const x = {}; x.edge = x; return Object.freeze(x); })()');
-  assert.equal(T.isCyclic(cycle), true);
+  assert.equal(T.isCircular(cycle), true);
   const primitive = Symbol('not a graph');
-  assert.equal(T.isCyclic(primitive), false);
+  assert.equal(T.isCircular(primitive), false);
 });
 
 test('hidden own data and getter shadows remain excluded on dictionary objects', () => {
@@ -298,7 +298,7 @@ test('hidden own data and getter shadows remain excluded on dictionary objects',
       const value = nullPrototype ? Object.create(null) : { temporary: 1 };
       delete value.temporary;
       Object.setPrototypeOf(value, { edge: value });
-      assert.equal(T.isCyclic(value), true, 'visible inherited edge');
+      assert.equal(T.isCircular(value), true, 'visible inherited edge');
       let reads = 0;
       const descriptor = accessor
         ? {
@@ -309,11 +309,42 @@ test('hidden own data and getter shadows remain excluded on dictionary objects',
           }
         : { value };
       Object.defineProperty(value, 'edge', { ...descriptor, configurable: true, enumerable: false });
-      assert.equal(T.isCyclic(value), false, 'hidden own edge shadows inherited edge');
+      assert.equal(T.isCircular(value), false, 'hidden own edge shadows inherited edge');
       assert.equal(reads, 0);
       Object.defineProperty(value, 'edge', { enumerable: true });
-      assert.equal(T.isCyclic(value), true, 'visible own edge');
+      assert.equal(T.isCircular(value), true, 'visible own edge');
       assert.equal(reads, accessor ? 1 : 0);
     }
   }
+});
+
+test('mixed object, Map and Set graphs agree with the independent reachable-cycle oracle', () => {
+  let comparisons = 0;
+  for (let mask = 0; mask < 512; mask++) {
+    const edges = [[], [], []];
+    for (let parent = 0; parent < 3; parent++) {
+      for (let child = 0; child < 3; child++) if (mask & (1 << (parent * 3 + child))) edges[parent].push(child);
+    }
+    for (const mapKeys of [false, true]) {
+      const nodes = [Object.create(null), new Map(), new Set()];
+      for (let parent = 0; parent < 3; parent++) {
+        for (const child of edges[parent]) {
+          if (parent === 0) nodes[parent]['edge' + child] = nodes[child];
+          else if (parent === 1) {
+            if (mapKeys) nodes[parent].set(nodes[child], child);
+            else nodes[parent].set(child, nodes[child]);
+          } else nodes[parent].add(nodes[child]);
+        }
+      }
+      for (let start = 0; start < 3; start++) {
+        assert.equal(
+          T.isCircular(nodes[start]),
+          hasReachableCycle(edges, start),
+          JSON.stringify({ mask, mapKeys, start })
+        );
+        comparisons++;
+      }
+    }
+  }
+  assert.equal(comparisons, 3072);
 });

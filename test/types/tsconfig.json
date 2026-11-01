@@ -38,6 +38,10 @@
     "from-json-conversion.cts",
     "from-json-conversion.mts",
     "private-matcher.cts",
-    "private-matcher.mts"
+    "private-matcher.mts",
+    "ensureArray.cts",
+    "ensureArray.mts",
+    "ensureSet.cts",
+    "ensureSet.mts"
   ]
 }

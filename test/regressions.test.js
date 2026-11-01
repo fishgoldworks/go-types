@@ -132,54 +132,54 @@ test('plain object: own constructor getter is not invoked', () => {
 });
 test('blank object: constructor is ordinary nullish data', () => assert.equal(T.isBlank({ constructor: null }), true));
 // Cycle identity and active-path traversal.
-test('cycles: repeated primitive is not a cycle', () => assert.equal(T.isCyclic({ a: 1, b: { c: 1 } }), false));
+test('cycles: repeated primitive is not a cycle', () => assert.equal(T.isCircular({ a: 1, b: { c: 1 } }), false));
 test('cycles: nested shared descendants are not cycles', () => {
   const leaf = {};
-  assert.equal(T.isCyclic({ a: leaf, b: { c: leaf } }), false);
+  assert.equal(T.isCircular({ a: leaf, b: { c: leaf } }), false);
 });
 test('cycles: key order does not change result', () =>
-  assert.equal(T.isCyclic({ a: 1, b: { c: 1 } }), T.isCyclic({ b: { c: 1 }, a: 1 })));
+  assert.equal(T.isCircular({ a: 1, b: { c: 1 } }), T.isCircular({ b: { c: 1 }, a: 1 })));
 test('cycles: null-prototype cycle', () => {
   const x = Object.create(null);
   x.self = x;
-  assert.equal(T.isCyclic(x), true);
+  assert.equal(T.isCircular(x), true);
 });
-test('cycles: foreign cycle', () => assert.equal(T.isCyclic(foreign('var x = {}; x.self = x; x')), true));
+test('cycles: foreign cycle', () => assert.equal(T.isCircular(foreign('var x = {}; x.self = x; x')), true));
 test('cycles: mutual reference', () => {
   const a = {},
     b = { a };
   a.b = b;
-  assert.equal(T.isCyclic(a), true);
+  assert.equal(T.isCircular(a), true);
 });
 test('cycles: function-owned enumerable cycle', () => {
   function fn() {}
   fn.self = fn;
-  assert.equal(T.isCyclic(fn), true);
+  assert.equal(T.isCircular(fn), true);
 });
 test('cycles: non-enumerable and symbol properties remain excluded', () => {
   const value = {};
   Object.defineProperty(value, 'self', { value });
   value[Symbol('self')] = value;
-  assert.equal(T.isCyclic(value), false);
+  assert.equal(T.isCircular(value), false);
 });
 test('cycles: inherited enumerable properties remain included', () => {
   const parent = {},
     child = Object.create(parent);
   parent.self = child;
-  assert.equal(T.isCyclic(child), true);
+  assert.equal(T.isCircular(child), true);
 });
-test('cycles: Map entries remain outside enumerable-property scope', () => {
+test('cycles: native Map entries participate in reference traversal', () => {
   const m = new Map();
   m.set('self', m);
-  assert.equal(T.isCyclic(m), false);
+  assert.equal(T.isCircular(m), true);
 });
 test('cycles: deep chain avoids call-stack overflow', () => {
   const root = {};
   let tail = root;
   for (let i = 0; i < 20000; i++) tail = tail.next = {};
-  assert.equal(T.isCyclic(root), false);
+  assert.equal(T.isCircular(root), false);
   tail.next = root;
-  assert.equal(T.isCyclic(root), true);
+  assert.equal(T.isCircular(root), true);
 });
 test('cycles: completed shared nodes are not re-read', () => {
   let reads = 0;
@@ -189,14 +189,14 @@ test('cycles: completed shared nodes are not re-read', () => {
       return {};
     }
   };
-  assert.equal(T.isCyclic({ a: leaf, b: leaf }), false);
+  assert.equal(T.isCircular({ a: leaf, b: leaf }), false);
   assert.equal(reads, 1);
 });
 test('cycles: getters that throw are not silently treated as acyclic', () => {
   const error = Error('get');
   assert.throws(
     () =>
-      T.isCyclic({
+      T.isCircular({
         get x() {
           throw error;
         }
@@ -222,7 +222,7 @@ test('cycles: deterministic random graphs match an independent active-path oracl
     for (const node of nodes)
       for (let edge = 0; edge < 3; edge++)
         node['k' + edge] = random() < 0.55 ? nodes[Math.floor(random() * nodes.length)] : Math.floor(random() * 3);
-    assert.equal(T.isCyclic(nodes[0]), oracle(nodes[0], []), 'graph ' + run);
+    assert.equal(T.isCircular(nodes[0]), oracle(nodes[0], []), 'graph ' + run);
   }
 });
 // Iteration: no double peek; native iterator completion and closing semantics.
@@ -250,115 +250,6 @@ test('iterable: detection does not execute an iterator method', () => {
   assert.equal(T.isIterable(value), true);
   assert.equal(calls, 0);
 });
-test('blank iterable: first non-nullish generator item is inspected', () =>
-  assert.equal(
-    T.isBlankIterable(
-      (function* () {
-        yield 42;
-      })()
-    ),
-    false
-  ));
-test('blank iterable: first non-nullish item before null is inspected', () =>
-  assert.equal(
-    T.isBlankIterable(
-      (function* () {
-        yield 42;
-        yield null;
-      })()
-    ),
-    false
-  ));
-test('blank iterable: nullish-only and empty generators remain blank', () => {
-  assert.equal(
-    T.isBlankIterable(
-      (function* () {
-        yield null;
-        yield undefined;
-      })()
-    ),
-    true
-  );
-  assert.equal(T.isBlankIterable((function* () {})()), true);
-});
-for (const fn of ['isEmptyIterable', 'isBlankIterable']) {
-  test('iterable: ' + fn + ' closes on early false', () => {
-    let closed = false;
-    const generator = (function* () {
-      try {
-        yield 1;
-        yield 2;
-      } finally {
-        closed = true;
-      }
-    })();
-    assert.equal(T[fn](generator), false);
-    assert.equal(closed, true);
-    assert.equal(generator.next().done, true);
-  });
-  test('iterable: ' + fn + ' coerces done with normal iterator semantics', () => {
-    class Values {
-      [Symbol.iterator]() {
-        return {
-          next() {
-            return { done: 1, value: 42 };
-          }
-        };
-      }
-    }
-    assert.equal(T[fn](new Values()), true);
-  });
-  test('iterable: ' + fn + ' rejects a primitive iterator result', () => {
-    class Bad {
-      [Symbol.iterator]() {
-        let calls = 0;
-        return {
-          next() {
-            return calls++ === 0 ? 1 : { done: true };
-          }
-        };
-      }
-    }
-    assert.throws(() => T[fn](new Bad()), TypeError);
-  });
-  test('iterable: ' + fn + ' does not call return after natural completion', () => {
-    let returns = 0;
-    class Empty {
-      [Symbol.iterator]() {
-        return {
-          next() {
-            return { done: true };
-          },
-          return() {
-            returns++;
-            return { done: true };
-          }
-        };
-      }
-    }
-    assert.equal(T[fn](new Empty()), true);
-    assert.equal(returns, 0);
-  });
-  test('iterable: ' + fn + ' propagates iterator close errors', () => {
-    const error = Error('close');
-    class Values {
-      [Symbol.iterator]() {
-        return {
-          next() {
-            return { done: false, value: 42 };
-          },
-          return() {
-            throw error;
-          }
-        };
-      }
-    }
-    assert.throws(
-      () => T[fn](new Values()),
-      (e) => e === error
-    );
-  });
-}
 test('blankness: documented ordinary values are preserved', () => {
   for (const x of [undefined, null, '', ' \t\n ', [], [null, undefined], {}, { a: null }, new Set([null])])
     assert.equal(T.isBlank(x), true);

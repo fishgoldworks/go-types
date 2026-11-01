@@ -64,9 +64,6 @@ assert(T.toDateIf(tagged, false) === tagged);
 // Structural array/object declarations must not erase values on failed identity checks.
 const copiedArrayInterface: string[] = Object.assign({}, ['x']);
 assert(!T.isArray(copiedArrayInterface));
-const emptiedTuple: [number] = [1];
-emptiedTuple.pop();
-assert(!T.isNonEmptyArray(emptiedTuple));
 function objectOrText(value: Number | string): string {
   if (T.isObject(value)) return 'object';
   return typeof value === 'string' ? value.toUpperCase() : String(value.valueOf());

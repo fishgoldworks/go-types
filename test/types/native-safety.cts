@@ -183,18 +183,6 @@ export function isArraySafety(value: unknown[] | string) {
   return accepted;
 }
 
-export function isNonEmptyArraySafety(value: [number, ...number[]] | string) {
-  const accepted: boolean = T.isNonEmptyArray(value);
-  if (T.isNonEmptyArray(value)) {
-    expectType<[number, ...number[]] | string>(value);
-  } else {
-    expectType<[number, ...number[]] | string>(value);
-    // @ts-expect-error a rejected structural/native-looking object is still possible.
-    value.toUpperCase();
-  }
-  return accepted;
-}
-
 export function isObjectSafety(value: Number | string) {
   const accepted: boolean = T.isObject(value);
   if (T.isObject(value)) {
@@ -225,4 +213,4 @@ const conditional: Date = T.toDateIf(wrapper, true);
 void T.toDateIf(wrapper, true).label;
 // Exact primitive checking and nullish filtering retain narrowing.
 const values: number[] = [1, 'x', null].filter((value: unknown): value is number => typeof value === 'number');
-const present: (number | string)[] = [1, 'x', null, undefined].filter(T.isNonNullish);
+const present: (number | string)[] = [1, 'x', null, undefined].filter(T.isNotNullish);

@@ -42,11 +42,13 @@ Protocol method checks test callability without invoking the method. This includ
 
 ### Empty and blank values
 
+For these checks, **supported collections** are arrays, array-like values, Maps, Sets and plain objects.
+
 `isEmpty` and `isBlank` inspect sized inputs without consuming unsized iterators. They handle strings, native Maps and Sets, and valid array-like lengths before protocol checks. Unsized iterator or iterable capabilities throw `TypeError`; remaining plain dictionaries use own enumerable string keys.
 
-Use `isEmptyIterable` or `isBlankIterable` when consuming a synchronous iterable is intended. These operations can close an iterator early. Do not reuse a one-shot iterator after inspection; a nullish-only infinite iterable never finishes a blankness check. Native early closing requests cleanup once. It does not drain a generator that yields from `finally`, await asynchronous cleanup, or guarantee resource release when the iterator itself does not complete cleanup.
+Handle iteration explicitly when consumption is intended.
 
-Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values, whereas iterating a Map yields entry arrays.
+Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values; Set blankness checks items.
 
 ### Type specifications
 
@@ -70,7 +72,7 @@ isArrayOf([new Account()], value => value instanceof Account);   // => true
 
 Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise genuine Dates from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
 
-Invalid or missing matchers throw `TypeError` before the collection is inspected, including empty and wrong-container inputs. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
+Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
 
 See [Matcher specification contract](#matcher-specification-contract) for traversal and callback rules.
 
@@ -89,7 +91,11 @@ if (typeof value === 'string') {
 }
 ```
 
-Use native `typeof` checks for primitive narrowing. `isNonNullish` also narrows filtered values. Collection-content checks return `boolean`, even when passed a type guard: sparse arrays and native identity cannot be proved by structural TypeScript types.
+Use native `typeof` checks for primitive narrowing. `isNotNullish` also narrows filtered values. Collection-content checks return `boolean`, even when passed a type guard: sparse arrays and native identity cannot be proved by structural TypeScript types.
+
+`ensureArray` infers item and array element types and retains readonly tuple shapes. Broad `object` and `unknown` inputs remain conservative. Declarations follow TypeScript array structure and do not promise native identity or custom subtype properties; see [`ensureArray`](#ensurearrayvalue) for the boundaries and callback inference.
+
+`ensureSet` infers Set or array members and preserves `ReadonlySet` restrictions; it wraps other declared inputs as members. Broad inputs remain conservative and custom subtype properties are not promised. See [`ensureSet`](#ensuresetvalue) for native identity and callback inference boundaries.
 
 `unbox` retains the original object type plus possible primitive payloads because structural properties cannot prove a native wrapper brand. `box` uses `Boxed<T>`; `toPromise` uses `Promise<Awaited<T>>`.
 

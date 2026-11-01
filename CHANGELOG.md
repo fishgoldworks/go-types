@@ -2,21 +2,25 @@
 
 ## 2.0.0 — Unreleased
 
-This major update removes `isTypeOf` and `isThenable`, retains the other 43 root exports from 1.3.1 and adds 50 functions. Read the [migration guide](docs/migration.md) before upgrading.
+This major update removes `isTypeOf` and `isThenable`, renames `isCyclic` to `isCircular` and `isFragment` to `isDocumentFragment`, retains the other 41 root exports from 1.3.1 and adds 48 functions. Read the [migration guide](docs/migration.md) before upgrading.
 
 ### Breaking changes
 
+- Renamed `isCyclic` to `isCircular`, including function subpaths. `isCircular` now follows Map keys and values and Set members alongside enumerable string-keyed properties. Previously ignored collection cycles can return `true`, and getters reached through their contents can throw.
+- Renamed `isFragment` to `isDocumentFragment`, including function subpaths. The local DOM constructor check is unchanged.
 - Removed `isThenable`; use `isPromiseLike` for the same callable-`then` check. `isPromiseLike` no longer requires or reads `catch`.
 - Removed `isTypeOf`. Collection matchers accept only required type-name strings or predicates; use an explicit predicate for `instanceof`. Predicate results must be synchronous primitive booleans.
 - Missing or invalid matchers throw before input inspection, including empty and wrong-container inputs. Boxed names, matcher arrays and descriptors are no longer accepted.
 - Empty arrays and array-like values pass valid element constraints. Array-like lengths must be non-negative safe integers.
 - Null-prototype dictionaries qualify as plain objects, and whitespace-only strings are no longer numeric.
-- `isEmpty` and `isBlank` reject unsized iterators and iterables without advancing them. Use the explicit consuming helpers when iteration is intended.
+- `isEmpty` and `isBlank` reject unsized iterators and iterables without advancing them. Handle iteration explicitly when consumption is intended.
 - Private implementation imports are no longer public entry points. The supported CommonJS runtime minimum is Node.js 8.0.0; see the runtime guide for ESM and browser requirements.
 
 ### Added
 
-- Map/Set content checks, safe-integer and non-nullish helpers, binary-data checks, iterator/async-iterable checks and explicit consuming iterable checks. `isJson` is now exported from the root.
+- `ensureSet` preserves existing Sets, creates Sets from array items and keeps strings or other supplied values as single members. Omission creates an empty Set; explicit nullish values remain members.
+- `ensureArray` normalises a single item or an array while preserving existing array identity. Calling without arguments creates an empty array; explicit `null` and `undefined` remain single items. `isNotNullish` retains present values and narrows TypeScript filter results.
+- Map/Set content checks, safe-integer and non-nullish helpers, binary-data checks, iterator/async-iterable checks. `isJson` is now exported from the root.
 - Seventeen conversions with matching conditional variants: primitive values, arrays, maps, sets, plain objects, JSON parsing/serialisation, boxing/unboxing, regular expressions and promises. See the [conversion guide](docs/conversions.md) for input, identity, precision and error rules.
 - Default and named ES module imports at the package root and every function subpath, direct CommonJS function imports and TypeScript declarations. Legacy CommonJS declarations support TypeScript 4.5; Node16/NodeNext requires 4.9 and Bundler requires 5.0.
 - Readable, minified and standalone ES module browser bundles with source maps and MIT notices.

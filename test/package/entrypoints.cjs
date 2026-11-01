@@ -3,6 +3,24 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const T = require('go-types');
 const names = require('./exports.json');
+const excludedHelpers = [
+  'asArray',
+  'isNonNullish',
+  'isObjectLike',
+  'isNonFunctionObject',
+  'ensureArrayIf',
+  'ensureSetIf',
+  'ensureMap',
+  'ensurePlainObject',
+  'isCyclic',
+  'isFragment',
+  'isEmptyIterable',
+  'isBlankIterable',
+  'isNonEmptyArray',
+  'isNonEmptyMap',
+  'isNonEmptySet',
+  'isNonEmptyPlainObject'
+];
 for (const name of names) {
   test('CommonJS public subpath ' + name, () => assert.equal(require('go-types/' + name), T[name]));
   test('legacy public source subpaths ' + name, () => {
@@ -28,7 +46,31 @@ test('ESM root shares the exact CommonJS API', async () => {
   for (const name of names) assert.equal(esm[name], T[name]);
 });
 test('private and unknown imports are not public entry points', () => {
+  for (const name of excludedHelpers) assert.equal(Object.hasOwn(T, name), false, name);
   for (const name of [
+    ...excludedHelpers,
+    'src/asArray',
+    'src/asArray.js',
+    'src/isNonNullish',
+    'src/isNonNullish.js',
+    'src/isObjectLike',
+    'src/isObjectLike.js',
+    'src/isNonFunctionObject',
+    'src/isNonFunctionObject.js',
+    'src/ensureArrayIf',
+    'src/ensureArrayIf.js',
+    'src/util/isNonFunctionObject',
+    'src/util/isNonFunctionObject.js',
+    'src/isCyclic',
+    'src/isCyclic.js',
+    'src/isFragment',
+    'src/isFragment.js',
+    'src/isEmptyIterable',
+    'src/isEmptyIterable.js',
+    'src/isBlankIterable',
+    'src/isBlankIterable.js',
+    'src/isNonEmptyArray',
+    'src/isNonEmptyArray.js',
     'isThenable',
     'src/isThenable',
     'src/isThenable.js',
@@ -76,12 +118,22 @@ test('pre-exports CommonJS aliases exist physically and share implementations', 
   }
 });
 
-test('ESM rejects retired matcher entries and private compilation modules', async () => {
+test('ESM rejects unsupported helpers and private compilation modules', async () => {
   const root = await import('go-types');
+  for (const name of excludedHelpers) assert.equal(Object.hasOwn(root, name), false, name);
   assert.equal(Object.hasOwn(root, 'isTypeOf'), false);
   assert.equal(Object.hasOwn(root, 'isInstanceOf'), false);
   assert.equal(Object.hasOwn(root, 'createTypeChecker'), false);
   for (const name of [
+    ...excludedHelpers,
+    'src/isFragment',
+    'src/isFragment.js',
+    'src/isEmptyIterable',
+    'src/isEmptyIterable.js',
+    'src/isBlankIterable',
+    'src/isBlankIterable.js',
+    'src/isNonEmptyArray',
+    'src/isNonEmptyArray.js',
     'isThenable',
     'src/isThenable',
     'src/isThenable.js',
