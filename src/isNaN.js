@@ -3,7 +3,7 @@ const getNumberValue = require('./util/getNumberValue');
 /**
  * Checks whether a primitive or boxed number is `NaN`.
  *
- * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+ * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is primitive or boxed `NaN`; otherwise `false`.

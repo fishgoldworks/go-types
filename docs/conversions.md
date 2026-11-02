@@ -45,7 +45,7 @@ Conversions propagate application errors. Object conversion methods, getters and
 | [`toDate`](API.md#todatevalue)                | [`toDateIf`](API.md#todateifvalue-condition)                | A `Date`, which may be invalid.                                |
 | [`toInteger`](API.md#tointegervalue)          | [`toIntegerIf`](API.md#tointegerifvalue-condition)          | Number conversion truncated towards zero.                      |
 | [`toJson`](API.md#tojsonvalue-replacer-space) | [`toJsonIf`](API.md#tojsonifvalue-condition-replacer-space) | Native JSON text, or `undefined`.                              |
-| [`fromJson`](API.md#fromjsonvalue-reviver)    | [`fromJsonIf`](API.md#fromjsonifvalue-condition-reviver)    | Parsed or revived value, typed as `unknown`.                   |
+| [`parseJson`](API.md#parsejsonvalue-reviver)  | [`parseJsonIf`](API.md#parsejsonifvalue-condition-reviver)  | Parsed or revived value, typed as `unknown`.                   |
 | [`toMap`](API.md#tomapvalue)                  | [`toMapIf`](API.md#tomapifvalue-condition)                  | A new shallow Map from a plain object or iterable entries.     |
 | [`toNumber`](API.md#tonumbervalue)            | [`toNumberIf`](API.md#tonumberifvalue-condition)            | A primitive number, potentially `NaN` or infinite.             |
 | [`toPlainObject`](API.md#toplainobjectvalue)  | [`toPlainObjectIf`](API.md#toplainobjectifvalue-condition)  | A shallow object copy or an object built from key/value pairs. |
@@ -53,8 +53,8 @@ Conversions propagate application errors. Object conversion methods, getters and
 | [`toString`](API.md#tostringvalue)            | [`toStringIf`](API.md#tostringifvalue-condition)            | A primitive string.                                            |
 | [`toSymbol`](API.md#tosymbolvalue)            | [`toSymbolIf`](API.md#tosymbolifvalue-condition)            | A primitive symbol.                                            |
 | [`box`](API.md#boxvalue)                      | [`boxIf`](API.md#boxifvalue-condition)                      | Native primitive wrapper, or unchanged object/nullish input.   |
-| [`unbox`](API.md#unboxvalue)                  | [`unboxIf`](API.md#unboxifvalue-condition)                  | Genuine wrapper payload, or unchanged input.                   |
-| [`toRegExp`](API.md#toregexpvalue-flags)      | [`toRegExpIf`](API.md#toregexpifvalue-condition-flags)      | Genuine native RegExp.                                         |
+| [`unbox`](API.md#unboxvalue)                  | [`unboxIf`](API.md#unboxifvalue-condition)                  | Primitive value from a wrapper, or unchanged input.            |
+| [`toRegExp`](API.md#toregexpvalue-flags)      | [`toRegExpIf`](API.md#toregexpifvalue-condition-flags)      | A RegExp object.                                               |
 | [`toPromise`](API.md#topromisevalue)          | [`toPromiseIf`](API.md#topromiseifvalue-condition)          | Native Promise adopting the input.                             |
 
 See the **[full API documentation](API.md)** for parameters, return values, errors and examples for each function. The additional examples below illustrate the shared rules and important distinctions.
@@ -171,31 +171,32 @@ String conversion can call object hooks. Primitive symbols have a special descri
 
 ## JSON parsing
 
-`fromJson(value, reviver?)` parses any JSON value through captured native `JSON.parse`. Objects, arrays, strings, numbers, booleans and null are supported. `fromJsonIf(value, condition?, reviver?)` uses the same parsing when requested; skipped calls return the original input without inspecting it or the reviver.
+`parseJson(value, reviver?)` parses any JSON value through captured native `JSON.parse`. Objects, arrays, strings, numbers, booleans and null are supported. `parseJsonIf(value, condition?, reviver?)` uses the same parsing when requested; skipped calls return the original input without inspecting it or the reviver.
 
 <!-- prettier-ignore -->
 ```javascript
-fromJson('{"a":1}');           // => ({ a: 1 })
-fromJson('[1,2]');             // => [1, 2]
-fromJson('"hello"');           // => 'hello'
-fromJson('42');                // => 42
-fromJson('false');             // => false
-fromJson('null');              // => null
-fromJson('invalid');           // => throws SyntaxError
-fromJson();                    // => throws SyntaxError
-fromJsonIf('invalid', false);  // => 'invalid'
-fromJsonIf('42', true);        // => 42
+parseJson('{"a":1}');            // => ({ a: 1 })
+parseJson('[1,2]');              // => [1, 2]
+parseJson('"hello"');            // => 'hello'
+parseJson('42');                 // => 42
+parseJson('false');              // => false
+parseJson('null');               // => null
+parseJson('invalid');            // => throws SyntaxError
+parseJson();                     // => throws SyntaxError
+
+parseJsonIf('invalid', false);   // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
+parseJsonIf('42', true);         // => 42
 ```
 
-Native coercion applies to non-string input: `fromJson(42)` returns `42` and `fromJson(null)` returns `null`. Undefined input cannot be parsed; symbols throw `TypeError`. Parsing is not schema validation or a precision guarantee. Duplicate names use the last value, and numbers follow native Number precision and range. Nested JSON-looking strings remain strings.
+Native coercion applies to non-string input: `parseJson(42)` returns `42` and `parseJson(null)` returns `null`. Undefined input cannot be parsed; symbols throw `TypeError`. Parsing is not schema validation or a precision guarantee. Duplicate names use the last value, and numbers follow native Number precision and range. Nested JSON-looking strings remain strings.
 
 A reviver visits children before their parents and finally the root with key `""`. Its `this` value is the containing object. Returning `undefined` deletes an object property, leaves a hole in an array, or replaces the root with `undefined`. Other values, including promises, are retained without awaiting. Non-callable revivers are ignored by the native parser.
 
 <!-- prettier-ignore -->
 ```javascript
-fromJson('{"a":1,"b":2}', (key, value) => key === 'b' ? undefined : value);  // => ({ a: 1 })
-fromJson('42', () => 'replacement');                                         // => 'replacement'
-fromJson('42', () => undefined);                                             // => undefined
+parseJson('{"a":1,"b":2}', (key, value) => key === 'b' ? undefined : value);   // => ({ a: 1 })
+parseJson('42', () => 'replacement');                                          // => 'replacement'
+parseJson('42', () => undefined);                                              // => undefined
 ```
 
 Input coercion and reviver exceptions propagate unchanged. Native parsing treats `__proto__` as an own data property; the library adds no unsafe property copying. Newer runtimes can supply source context to a reviver's third argument; Node 8 does not. Declarations therefore make both the context and `context.source` optional. The parsed or revived result is `unknown`, and callers must validate it before accessing application-specific properties. Use `isPlainObject` to check the parsed result when a plain object is required.
@@ -239,7 +240,7 @@ The return type is `string | undefined`, even for object input, because hooks an
 
 ## Plain-object conversion
 
-`toPlainObject(value)` creates a fresh object with the local `Object.prototype`. It accepts plain objects (including null-prototype and foreign objects), Maps and synchronous iterables of entry pairs. Strings are not parsed or converted; use `fromJson` to parse JSON text.
+`toPlainObject(value)` creates a fresh object with the local `Object.prototype`. It accepts plain objects (including null-prototype and foreign objects), Maps and synchronous iterables of entry pairs. Strings are not parsed or converted; use `parseJson` to parse JSON text.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -255,7 +256,7 @@ toPlainObject('[1,2]');                // => throws TypeError
 toPlainObject('{"a":1}');              // => throws TypeError
 ```
 
-All strings throw `TypeError`, including valid JSON, malformed text, empty strings and whitespace. To require a JSON object, parse with `fromJson` and validate the result with `isPlainObject`; parsing alone can also produce arrays, primitives or `null`.
+All strings throw `TypeError`, including valid JSON, malformed text, empty strings and whitespace. To require a JSON object, parse with `parseJson` and validate the result with `isPlainObject`; parsing alone can also produce arrays, primitives or `null`.
 
 Object copying includes own enumerable string and symbol properties, excludes inherited and non-enumerable properties, and retains nested references. The key list is captured first; each current descriptor is checked and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Getters may run, mutate the input or throw. The output contains writable, enumerable, configurable data properties, including safe own `__proto__`, `constructor`, `prototype` and `toString` keys. It never invokes inherited setters when creating properties.
 
@@ -271,7 +272,7 @@ The function does not depend on native `Object.fromEntries`, `Object.entries`, `
 
 ## Date conversion
 
-`toDate(value)` preserves a genuine Date object, including one from another realm, a subclass or an invalid Date. Their overridden conversion methods are not used. Other inputs are passed to `new Date(value)`.
+`toDate(value)` preserves an existing Date object, including one from another realm, a subclass or an invalid Date. Their overridden conversion methods are not used. Other inputs are passed to `new Date(value)`.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -284,11 +285,11 @@ isInvalidDate(toDate(undefined));      // => true
 
 Numeric values are millisecond timestamps. Prefer ISO date-time strings with an explicit timezone for portable string input. Standard date-only strings use UTC; date-time strings without a timezone use local time. Non-ISO parsing is runtime-dependent. Symbols, bigints and failed coercions can throw. Invalid text and out-of-range timestamps produce invalid Dates. The operation neither supplies the current time for missing input nor guarantees a valid date.
 
-TypeScript returns `Date` conservatively. A structurally Date-compatible input, such as a typed Proxy, may be converted to a new Date without additional input properties. Genuine Date/subclass identity is still preserved at runtime. A skipped `toDateIf(value, false)` preserves the exact input type.
+TypeScript returns `Date` conservatively. A structurally Date-compatible input, such as a typed Proxy, may be converted to a new Date without additional input properties. Date objects, including subclass instances, still retain identity at runtime. A skipped `toDateIf(value, false)` preserves the exact input type.
 
 ## Symbol conversion
 
-`toSymbol(value)` preserves primitive symbols and intrinsically unboxes genuine Symbol wrappers, including foreign wrappers. Other inputs are descriptions passed to the captured `Symbol` constructor.
+`toSymbol(value)` preserves primitive symbols and intrinsically unboxes Symbol wrappers, including foreign wrappers. Other inputs are descriptions passed to the captured `Symbol` constructor.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -405,7 +406,7 @@ These references describe platform semantics. Tests exercise the specific librar
 
 ## Boxing and unboxing
 
-`box(value)` wraps primitives with native `Object(value)` behaviour, except that `null`, `undefined` and omitted input stay unchanged. Existing objects and functions retain identity. `unbox(value)` extracts genuine Boolean, Number, String, Symbol and BigInt wrapper payloads, including foreign wrappers and subclasses. It leaves other input unchanged and never calls custom `valueOf`, `toString` or `Symbol.toPrimitive` hooks.
+`box(value)` wraps primitives with native `Object(value)` behaviour, except that `null`, `undefined` and omitted input stay unchanged. Existing objects and functions retain identity. `unbox(value)` extracts the primitive values from Boolean, Number, String, Symbol and BigInt wrapper objects, including foreign wrappers and subclasses. It leaves other input unchanged and never calls custom `valueOf`, `toString` or `Symbol.toPrimitive` hooks.
 
 <!-- prettier-ignore -->
 ```javascript

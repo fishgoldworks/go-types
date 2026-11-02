@@ -382,7 +382,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       (error) => error.name === 'TypeError'
     );
   const revivedKeys = [];
-  const revivedJson = T.fromJson('{"a":1}', function (key, value, context) {
+  const revivedJson = T.parseJson('{"a":1}', function (key, value, context) {
     assert.strictEqual(this[key], value);
     revivedKeys.push(key);
     if (Number(process.versions.node.split('.')[0]) === 8) assert.strictEqual(context, undefined);
@@ -391,12 +391,12 @@ module.exports = function assertAPI(T, PromiseConstructor) {
   assert.strictEqual(revivedJson.a, 2);
   assert.strictEqual(revivedKeys.join(','), 'a,');
   assert.throws(
-    () => T.fromJson('['),
+    () => T.parseJson('['),
     (error) => error.name === 'SyntaxError'
   );
   const promiseInput = LocalPromise.resolve(3);
   const conversions = [
-    ['fromJson', '{"a":1}', (value) => value.a, 1],
+    ['parseJson', '{"a":1}', (value) => value.a, 1],
     ['box', 3, (value) => Number.prototype.valueOf.call(value), 3],
     ['unbox', Object(3), (value) => value, 3],
     ['toRegExp', 'a', (value) => value.source, 'a'],

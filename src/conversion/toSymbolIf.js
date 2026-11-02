@@ -10,10 +10,10 @@ const shouldConvert = require('../util/shouldConvert');
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes genuine
- * wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires
- * native `Symbol`; missing support does not prevent loading. Requested conversion throws
- * `TypeError` before inspecting the input when it is unavailable.
+ * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes wrappers.
+ * Other inputs create a new symbol and may invoke description-conversion hooks. Requires native
+ * `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError`
+ * before inspecting the input when it is unavailable.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.

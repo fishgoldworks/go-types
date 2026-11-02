@@ -4,15 +4,15 @@ const NativeDate = Date;
 const isDate = require('../isDate');
 
 /**
- * Converts a value to a `Date`, returning genuine `Date` objects unchanged. The result can be
+ * Converts a value to a `Date`, returning existing `Date` objects unchanged. The result can be
  * invalid.
  *
- * Preserves genuine Date identity. May return an invalid Date; omitted input does not mean the
+ * Preserves existing Date objects. May return an invalid Date; omitted input does not mean the
  * current time. Symbols, bigints and conversion hooks can throw.
  *
  * @param {*} [value] The value to convert.
- * @returns {Date} The original genuine `Date`, or a new `Date` constructed from the input; it may
- * be invalid.
+ * @returns {Date} The original `Date`, or a new `Date` constructed from the input; it may be
+ * invalid.
  * @throws {*} Symbols, bigints and failed object coercion can throw. Invalid date text can instead
  * produce an invalid `Date`; check with `isValidDate`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#todatevalue

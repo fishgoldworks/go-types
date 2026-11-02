@@ -9,13 +9,13 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, has);
 
 /**
- * Checks whether a value is a genuine `WeakSet`.
+ * Checks whether a value is a `WeakSet`.
  *
  * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
  * imitations. Returns `false` when the local native detection capability is unavailable.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is a genuine `WeakSet`; otherwise `false`.
+ * @returns {boolean} `true` if the value is a `WeakSet`; otherwise `false`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweaksetvalue
  * @example isWeakSet(new WeakSet());                      // => true
  * @example isWeakSet(Object.create(WeakSet.prototype));   // => false

@@ -21,8 +21,8 @@ if (!setBrand && prototype) {
  * value as one member.
  *
  * Without arguments, creates a fresh empty Set; explicit `null` and `undefined` remain members.
- * Preserves genuine Sets without consuming their members. Array input follows native Set iteration
- * and equality; other values remain single members. A preserved Set is not a copy.
+ * Preserves Sets without consuming their members. Array input follows native Set iteration and
+ * equality; other values remain single members. A preserved Set is not a copy.
  *
  * @param {*} [value] The value to normalise. Omit to create an empty Set; explicit undefined or
  * null remains one member.

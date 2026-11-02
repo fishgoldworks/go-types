@@ -156,7 +156,7 @@ test('conditional converter tooltips include the requested conversion boundaries
     toNumberIf: /lose bigint precision/,
     toPlainObjectIf: /fresh ordinary object/,
     toStringIf: /including for boxed symbols/,
-    toSymbolIf: /unboxes genuine wrappers/
+    toSymbolIf: /unboxes wrappers/
   };
   const seen = new Set();
   function visit(node) {

@@ -4,7 +4,7 @@ var hasCircularReference = require('./hasCircularReference');
  * Checks whether a value contains a circular reference through enumerable string-keyed properties,
  * Map keys and values, or Set members.
  *
- * Includes inherited enumerable string properties and genuine Map/Set contents. Symbols,
+ * Includes inherited enumerable string properties and Map and Set contents. Symbols,
  * non-enumerable properties and WeakMap/WeakSet entries are excluded. Getters and proxy traps may
  * run and throw; keep the graph stable. Missing native detection limits inspection to ordinary
  * properties; a recognised collection without native traversal support throws `TypeError`.

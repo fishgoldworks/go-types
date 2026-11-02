@@ -10,14 +10,14 @@ const shouldConvert = require('../util/shouldConvert');
  * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
  * conditions or non-boolean predicate results throw `TypeError`.
  *
- * Requested conversion uses `toDate`. Preserves genuine Date identity. May return an invalid Date;
+ * Requested conversion uses `toDate`. Preserves existing Date objects. May return an invalid Date;
  * omitted input does not mean the current time. Symbols, bigints and conversion hooks can throw.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.
  * Omitted or `undefined` skips conversion; a predicate must return a primitive boolean.
- * @returns {Date|*} The original genuine `Date` or a new `Date`, possibly invalid, when conversion
- * is requested; otherwise the original input, unchanged.
+ * @returns {Date|*} The original `Date` or a new `Date`, possibly invalid, when conversion is
+ * requested; otherwise the original input, unchanged.
  * @throws {*} Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate
  * errors propagate. A requested conversion also follows `toDate` error behaviour; a skipped
  * conversion does not inspect or coerce the value.

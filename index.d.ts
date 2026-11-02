@@ -130,37 +130,36 @@ declare namespace Types {
    */
   function isNull(value: unknown): value is null;
   /**
-   * Checks whether a value is a primitive boolean or a genuine boxed `Boolean`.
+   * Checks whether a value is a primitive boolean or a boxed `Boolean`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a primitive boolean or genuine boxed `Boolean`; otherwise
-   * `false`.
+   * @returns `true` if the value is a primitive boolean or boxed `Boolean`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isbooleanvalue
    */
   function isBoolean(value: unknown): boolean;
   /**
-   * Checks whether a value is a primitive number or a genuine boxed `Number`.
+   * Checks whether a value is a primitive number or a boxed `Number`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods. Includes `NaN` and infinities.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a primitive number or genuine boxed `Number`, including `NaN`
-   * and infinities; otherwise `false`.
+   * @returns `true` if the value is a primitive number or boxed `Number`, including `NaN` and
+   * infinities; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnumbervalue
    */
   function isNumber(value: unknown): boolean;
   /**
-   * Checks whether a value is a primitive string or a genuine boxed `String`.
+   * Checks whether a value is a primitive string or a boxed `String`.
    *
    * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
    * wrappers. Does not invoke overridden conversion methods.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a primitive string or genuine boxed `String`; otherwise `false`.
+   * @returns `true` if the value is a primitive string or boxed `String`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isstringvalue
    */
   function isString(value: unknown): boolean;
@@ -254,7 +253,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is an integer.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite integral number; otherwise `false`.
@@ -264,7 +263,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is an integer in JavaScript’s safe-integer range.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed integer within the safe-integer range;
@@ -275,7 +274,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is a finite number with a fractional part.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite non-integer number; otherwise
@@ -286,7 +285,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is a finite number.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite number; otherwise `false`.
@@ -296,7 +295,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is positive or negative infinity.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is primitive or boxed positive or negative infinity; otherwise
@@ -307,7 +306,7 @@ declare namespace Types {
   /**
    * Checks whether a primitive or boxed number is `NaN`.
    *
-   * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+   * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
    *
    * @param value The value to check.
    * @returns `true` if the value is primitive or boxed `NaN`; otherwise `false`.
@@ -350,7 +349,7 @@ declare namespace Types {
    * Checks whether a value contains a circular reference through enumerable string-keyed properties,
    * Map keys and values, or Set members.
    *
-   * Includes inherited enumerable string properties and genuine Map/Set contents. Symbols,
+   * Includes inherited enumerable string properties and Map and Set contents. Symbols,
    * non-enumerable properties and WeakMap/WeakSet entries are excluded. Getters and proxy traps may
    * run and throw; keep the graph stable. Missing native detection limits inspection to ordinary
    * properties; a recognised collection without native traversal support throws `TypeError`.
@@ -444,46 +443,46 @@ declare namespace Types {
    */
   function isPair(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `Map`.
+   * Checks whether a value is a `Map`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `Map`; otherwise `false`.
+   * @returns `true` if the value is a `Map`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapvalue
    */
   function isMap(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `Set`.
+   * Checks whether a value is a `Set`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `Set`; otherwise `false`.
+   * @returns `true` if the value is a `Set`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetvalue
    */
   function isSet(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `WeakMap`.
+   * Checks whether a value is a `WeakMap`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `WeakMap`; otherwise `false`.
+   * @returns `true` if the value is a `WeakMap`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweakmapvalue
    */
   function isWeakMap(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `WeakSet`.
+   * Checks whether a value is a `WeakSet`.
    *
    * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
    * imitations. Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `WeakSet`; otherwise `false`.
+   * @returns `true` if the value is a `WeakSet`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweaksetvalue
    */
   function isWeakSet(value: unknown): boolean;
@@ -498,34 +497,34 @@ declare namespace Types {
    */
   function isFunction(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `Date`, valid or invalid.
+   * Checks whether a value is a `Date`, valid or invalid.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `Date`, valid or invalid; otherwise `false`.
+   * @returns `true` if the value is a `Date`, valid or invalid; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdatevalue
    */
   function isDate(value: unknown): boolean;
   /**
-   * Checks whether a genuine `Date` contains a finite timestamp.
+   * Checks whether a value is a `Date` with a finite timestamp.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `Date` with a finite timestamp; otherwise `false`.
+   * @returns `true` if the value is a `Date` with a finite timestamp; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isvaliddatevalue
    */
   function isValidDate(value: unknown): boolean;
   /**
-   * Checks whether a genuine `Date` contains a `NaN` timestamp.
+   * Checks whether a value is a `Date` with a `NaN` timestamp.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `Date` with a `NaN` timestamp; otherwise `false`.
+   * @returns `true` if the value is a `Date` with a `NaN` timestamp; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinvaliddatevalue
    */
   function isInvalidDate(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine regular-expression object.
+   * Checks whether a value is a `RegExp` object.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `RegExp` instance; otherwise `false`.
+   * @returns `true` if the value is a `RegExp` object; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isregexpvalue
    */
   function isRegExp(value: unknown): boolean;
@@ -612,26 +611,26 @@ declare namespace Types {
    */
   function isDocumentFragment(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `ArrayBuffer`.
+   * Checks whether a value is a `ArrayBuffer`.
    *
    * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
    * Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `ArrayBuffer`; otherwise `false`.
+   * @returns `true` if the value is a `ArrayBuffer`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraybuffervalue
    */
   function isArrayBuffer(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `SharedArrayBuffer`.
+   * Checks whether a value is a `SharedArrayBuffer`.
    *
    * Supports foreign instances and rejects proxies or prototype imitations. Returns `false` when
    * native shared buffers are unavailable. Returns `false` when the local native detection
    * capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if native shared buffers are available and the value is a genuine
-   * `SharedArrayBuffer`; otherwise `false`.
+   * @returns `true` if native shared buffers are available and the value is a `SharedArrayBuffer`;
+   * otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issharedarraybuffervalue
    */
   function isSharedArrayBuffer(value: unknown): boolean;
@@ -662,13 +661,13 @@ declare namespace Types {
    */
   function isTypedArray(value: unknown): boolean;
   /**
-   * Checks whether a value is a genuine `DataView`.
+   * Checks whether a value is a `DataView`.
    *
    * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
    * Returns `false` when the local native detection capability is unavailable.
    *
    * @param value The value to check.
-   * @returns `true` if the value is a genuine `DataView`; otherwise `false`.
+   * @returns `true` if the value is a `DataView`; otherwise `false`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdataviewvalue
    */
   function isDataView(value: unknown): boolean;
@@ -849,15 +848,14 @@ declare namespace Types {
    */
   function toBoolean(value?: unknown): boolean;
   /**
-   * Converts a value to a `Date`, returning genuine `Date` objects unchanged. The result can be
+   * Converts a value to a `Date`, returning existing `Date` objects unchanged. The result can be
    * invalid.
    *
-   * Preserves genuine Date identity. May return an invalid Date; omitted input does not mean the
+   * Preserves existing Date objects. May return an invalid Date; omitted input does not mean the
    * current time. Symbols, bigints and conversion hooks can throw.
    *
    * @param value The value to convert.
-   * @returns The original genuine `Date`, or a new `Date` constructed from the input; it may be
-   * invalid.
+   * @returns The original `Date`, or a new `Date` constructed from the input; it may be invalid.
    * @throws Symbols, bigints and failed object coercion can throw. Invalid date text can instead
    * produce an invalid `Date`; check with `isValidDate`.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#todatevalue
@@ -954,13 +952,13 @@ declare namespace Types {
    */
   function toString(value?: unknown): string;
   /**
-   * Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol
+   * Converts a value to a primitive symbol, preserving existing symbols and unboxing `Symbol`
    * wrappers.
    *
-   * Preserves primitive symbol identity and unboxes genuine wrappers. Other inputs create a new
-   * symbol and may invoke description-conversion hooks. Requires native `Symbol`; missing support
-   * does not prevent loading. Requested conversion throws `TypeError` before inspecting the input
-   * when it is unavailable.
+   * Preserves primitive symbol identity and unboxes wrappers. Other inputs create a new symbol and
+   * may invoke description-conversion hooks. Requires native `Symbol`; missing support does not
+   * prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is
+   * unavailable.
    *
    * @param value The value to convert.
    * @returns The original or unboxed symbol, or a new symbol created from the description.
@@ -1200,14 +1198,14 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toDate`. Preserves genuine Date identity. May return an invalid Date;
+   * Requested conversion uses `toDate`. Preserves existing Date objects. May return an invalid Date;
    * omitted input does not mean the current time. Symbols, bigints and conversion hooks can throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original genuine `Date` or a new `Date`, possibly invalid, when conversion is
-   * requested; otherwise the original input, unchanged.
+   * @returns The original `Date` or a new `Date`, possibly invalid, when conversion is requested;
+   * otherwise the original input, unchanged.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
    * propagate. A requested conversion also follows `toDate` error behaviour; a skipped conversion
    * does not inspect or coerce the value.
@@ -1221,14 +1219,14 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toDate`. Preserves genuine Date identity. May return an invalid Date;
+   * Requested conversion uses `toDate`. Preserves existing Date objects. May return an invalid Date;
    * omitted input does not mean the current time. Symbols, bigints and conversion hooks can throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original genuine `Date` or a new `Date`, possibly invalid, when conversion is
-   * requested; otherwise the original input, unchanged.
+   * @returns The original `Date` or a new `Date`, possibly invalid, when conversion is requested;
+   * otherwise the original input, unchanged.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
    * propagate. A requested conversion also follows `toDate` error behaviour; a skipped conversion
    * does not inspect or coerce the value.
@@ -1242,14 +1240,14 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toDate`. Preserves genuine Date identity. May return an invalid Date;
+   * Requested conversion uses `toDate`. Preserves existing Date objects. May return an invalid Date;
    * omitted input does not mean the current time. Symbols, bigints and conversion hooks can throw.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
    * or `undefined` skips conversion; a predicate must return a primitive boolean.
-   * @returns The original genuine `Date` or a new `Date`, possibly invalid, when conversion is
-   * requested; otherwise the original input, unchanged.
+   * @returns The original `Date` or a new `Date`, possibly invalid, when conversion is requested;
+   * otherwise the original input, unchanged.
    * @throws Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors
    * propagate. A requested conversion also follows `toDate` error behaviour; a skipped conversion
    * does not inspect or coerce the value.
@@ -1643,10 +1641,10 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes genuine
-   * wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires
-   * native `Symbol`; missing support does not prevent loading. Requested conversion throws
-   * `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes wrappers.
+   * Other inputs create a new symbol and may invoke description-conversion hooks. Requires native
+   * `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError`
+   * before inspecting the input when it is unavailable.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1666,10 +1664,10 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes genuine
-   * wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires
-   * native `Symbol`; missing support does not prevent loading. Requested conversion throws
-   * `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes wrappers.
+   * Other inputs create a new symbol and may invoke description-conversion hooks. Requires native
+   * `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError`
+   * before inspecting the input when it is unavailable.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -1689,10 +1687,10 @@ declare namespace Types {
    * Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid
    * conditions or non-boolean predicate results throw `TypeError`.
    *
-   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes genuine
-   * wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires
-   * native `Symbol`; missing support does not prevent loading. Requested conversion throws
-   * `TypeError` before inspecting the input when it is unavailable.
+   * Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes wrappers.
+   * Other inputs create a new symbol and may invoke description-conversion hooks. Requires native
+   * `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError`
+   * before inspecting the input when it is unavailable.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -2009,39 +2007,39 @@ declare namespace Types {
    */
   function box<T>(value: T): Boxed<T>;
   /**
-   * Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+   * Extracts the primitive value from a wrapper object, leaving other values unchanged.
    *
    * Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing
    * `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
    *
    * @param value The value to convert.
-   * @returns The genuine wrapper’s primitive payload when its native unboxing operation is
-   * available; otherwise the original input.
+   * @returns The wrapper’s primitive value when its native unboxing operation is available;
+   * otherwise the original input.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
    */
   function unbox(): undefined;
   /**
-   * Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+   * Extracts the primitive value from a wrapper object, leaving other values unchanged.
    *
    * Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing
    * `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
    *
    * @param value The value to convert.
-   * @returns The genuine wrapper’s primitive payload when its native unboxing operation is
-   * available; otherwise the original input.
+   * @returns The wrapper’s primitive value when its native unboxing operation is available;
+   * otherwise the original input.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
    */
   function unbox<T>(value: T): Unboxed<T>;
   /**
-   * Converts a native pattern and optional `flags` to a genuine `RegExp`.
+   * Converts a pattern and optional flags to a `RegExp`.
    *
-   * Uses native `RegExp` syntax and `flags`. May reuse a genuine local `RegExp` without explicit
+   * Uses native `RegExp` syntax and `flags`. May reuse a local `RegExp` object without explicit
    * `flags`; copied expressions start with `lastIndex` zero.
    *
    * @param value The value to convert.
    * @param flags Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags;
    * explicit flags replace them.
-   * @returns A genuine `RegExp`, which may retain input identity under native rules.
+   * @returns A `RegExp`, which may retain input identity under native rules.
    * @throws Invalid patterns or `flags` throw `SyntaxError`. Native coercion, getters and proxy
    * errors propagate unchanged.
    * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpvalue-flags
@@ -2133,8 +2131,8 @@ declare namespace Types {
    */
   function boxIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | Boxed<T>;
   /**
-   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
-   * unboxing is available. Otherwise, returns the original input unchanged.
+   * Extracts the primitive value from a wrapper object when the condition evaluates to `true` and
+   * native unboxing is available. Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
@@ -2153,8 +2151,8 @@ declare namespace Types {
    */
   function unboxIf<T>(value: T, condition: true): Unboxed<T>;
   /**
-   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
-   * unboxing is available. Otherwise, returns the original input unchanged.
+   * Extracts the primitive value from a wrapper object when the condition evaluates to `true` and
+   * native unboxing is available. Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
@@ -2173,8 +2171,8 @@ declare namespace Types {
    */
   function unboxIf<T>(value: T, condition?: false): T;
   /**
-   * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
-   * unboxing is available. Otherwise, returns the original input unchanged.
+   * Extracts the primitive value from a wrapper object when the condition evaluates to `true` and
+   * native unboxing is available. Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
@@ -2193,14 +2191,14 @@ declare namespace Types {
    */
   function unboxIf<T>(value: T, condition: ConversionCondition<T> | undefined): T | Unboxed<T>;
   /**
-   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
-   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   * Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`.
+   * Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
-   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a local
+   * `RegExp` object without explicit `flags`; copied expressions start with `lastIndex` zero.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -2214,14 +2212,14 @@ declare namespace Types {
    */
   function toRegExpIf<T>(value: T, condition: true, flags?: string): RegExp;
   /**
-   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
-   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   * Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`.
+   * Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
-   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a local
+   * `RegExp` object without explicit `flags`; copied expressions start with `lastIndex` zero.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -2235,14 +2233,14 @@ declare namespace Types {
    */
   function toRegExpIf<T>(value: T, condition?: false, flags?: string): T;
   /**
-   * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
-   * evaluates to `true`. Otherwise, returns the original input unchanged.
+   * Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`.
+   * Otherwise, returns the original input unchanged.
    *
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
-   * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+   * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a local
+   * `RegExp` object without explicit `flags`; copied expressions start with `lastIndex` zero.
    *
    * @param value The value to convert.
    * @param condition A boolean or synchronous predicate called once with the original value. Omitted
@@ -2329,9 +2327,9 @@ declare namespace Types {
    * TypeScript returns unknown until the caller validates it.
    * @throws Invalid JSON, omitted input and `undefined` throw `SyntaxError`. Symbols throw
    * `TypeError`. Input coercion and reviver errors propagate unchanged.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonvalue-reviver
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonvalue-reviver
    */
-  function fromJson(value: unknown, reviver?: JsonReviver | null): unknown;
+  function parseJson(value: unknown, reviver?: JsonReviver | null): unknown;
   /**
    * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
    * unchanged.
@@ -2339,7 +2337,7 @@ declare namespace Types {
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * Requested conversion uses `parseJson`. Uses captured native `JSON.parse`, including input
    * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
    * results are not awaited.
    *
@@ -2351,10 +2349,10 @@ declare namespace Types {
    * hosts may supply optional source context.
    * @returns The parsed or revived value when requested; otherwise the original input unchanged.
    * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate; requested conversion follows `fromJson` error behaviour.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   * propagate; requested conversion follows `parseJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonifvalue-condition-reviver
    */
-  function fromJsonIf<T>(value: T, condition: true, reviver?: JsonReviver | null): unknown;
+  function parseJsonIf<T>(value: T, condition: true, reviver?: JsonReviver | null): unknown;
   /**
    * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
    * unchanged.
@@ -2362,7 +2360,7 @@ declare namespace Types {
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * Requested conversion uses `parseJson`. Uses captured native `JSON.parse`, including input
    * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
    * results are not awaited.
    *
@@ -2374,10 +2372,10 @@ declare namespace Types {
    * hosts may supply optional source context.
    * @returns The parsed or revived value when requested; otherwise the original input unchanged.
    * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate; requested conversion follows `fromJson` error behaviour.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   * propagate; requested conversion follows `parseJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonifvalue-condition-reviver
    */
-  function fromJsonIf<T>(value: T, condition?: false, reviver?: JsonReviver | null): T;
+  function parseJsonIf<T>(value: T, condition?: false, reviver?: JsonReviver | null): T;
   /**
    * Parses JSON when the condition evaluates to `true`; otherwise returns the original input
    * unchanged.
@@ -2385,7 +2383,7 @@ declare namespace Types {
    * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
    * predicate results must be primitive booleans.
    *
-   * Requested conversion uses `fromJson`. Uses captured native `JSON.parse`, including input
+   * Requested conversion uses `parseJson`. Uses captured native `JSON.parse`, including input
    * coercion, reviver order and errors. Parsing does not validate an application schema; reviver
    * results are not awaited.
    *
@@ -2397,10 +2395,10 @@ declare namespace Types {
    * hosts may supply optional source context.
    * @returns The parsed or revived value when requested; otherwise the original input unchanged.
    * @throws Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors
-   * propagate; requested conversion follows `fromJson` error behaviour.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#fromjsonifvalue-condition-reviver
+   * propagate; requested conversion follows `parseJson` error behaviour.
+   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonifvalue-condition-reviver
    */
-  function fromJsonIf<T>(
+  function parseJsonIf<T>(
     value: T,
     condition: ConversionCondition<T> | undefined,
     reviver?: JsonReviver | null
@@ -2444,8 +2442,8 @@ declare namespace Types {
    * value as one member.
    *
    * Without arguments, creates a fresh empty Set; explicit `null` and `undefined` remain members.
-   * Preserves genuine Sets without consuming their members. Array input follows native Set iteration
-   * and equality; other values remain single members. A preserved Set is not a copy.
+   * Preserves Sets without consuming their members. Array input follows native Set iteration and
+   * equality; other values remain single members. A preserved Set is not a copy.
    *
    * @param value The value to normalise. Omit to create an empty Set; explicit undefined or null
    * remains one member.
@@ -2463,8 +2461,8 @@ declare namespace Types {
    * value as one member.
    *
    * Without arguments, creates a fresh empty Set; explicit `null` and `undefined` remain members.
-   * Preserves genuine Sets without consuming their members. Array input follows native Set iteration
-   * and equality; other values remain single members. A preserved Set is not a copy.
+   * Preserves Sets without consuming their members. Array input follows native Set iteration and
+   * equality; other values remain single members. A preserved Set is not a copy.
    *
    * @param value The value to normalise. Omit to create an empty Set; explicit undefined or null
    * remains one member.

@@ -88,6 +88,6 @@
   "unboxIf",
   "toRegExpIf",
   "toPromiseIf",
-  "fromJson",
-  "fromJsonIf"
+  "parseJson",
+  "parseJsonIf"
 ]

@@ -221,22 +221,22 @@ toPlainObject(new Map([['a', 1]]));    // => ({ a: 1 })
 toPlainObject([['a', 1], ['b', 2]]);   // => ({ a: 1, b: 2 })
 ```
 
-Copying a plain object preserves nested references and includes only its own enumerable string and symbol properties. Strings, nullish input, boxed primitives and malformed entries throw. Use `fromJson` to parse JSON text. See [plain-object conversion](docs/conversions.md#plain-object-conversion) for the complete contract.
+Copying a plain object preserves nested references and includes only its own enumerable string and symbol properties. Strings, nullish input, boxed primitives and malformed entries throw. Use `parseJson` to parse JSON text. See [plain-object conversion](docs/conversions.md#plain-object-conversion) for the complete contract.
 
 ### Parse JSON
 
 <!-- prettier-ignore -->
 ```javascript
-import { fromJson, fromJsonIf } from 'go-types';
+import { parseJson, parseJsonIf } from 'go-types';
 
-fromJson('{"a":1}');           // => ({ a: 1 })
-fromJson('[1,2]');             // => [1, 2]
-fromJson('false');             // => false
-fromJson('null');              // => null
-fromJsonIf('invalid', false);  // => 'invalid'
+parseJson('{"a":1}');            // => ({ a: 1 })
+parseJson('[1,2]');              // => [1, 2]
+parseJson('false');              // => false
+parseJson('null');               // => null
+parseJsonIf('invalid', false);   // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
 ```
 
-`fromJson(value, reviver?)` follows native `JSON.parse`, including revivers and parsing errors. Its TypeScript result is `unknown` until validated. The conditional form takes `(value, condition?, reviver?)`. See [JSON parsing](docs/conversions.md#json-parsing) for reviver order, optional source context and coercion rules.
+`parseJson(value, reviver?)` follows native `JSON.parse`, including revivers and parsing errors. Its TypeScript result is `unknown` until validated. The conditional form takes `(value, condition?, reviver?)`. See [JSON parsing](docs/conversions.md#json-parsing) for reviver order, optional source context and coercion rules.
 
 ### Serialise JSON
 
@@ -265,7 +265,7 @@ toRegExp('a.b', 'i').test('AxB');  // => true
 toPromiseIf(3, false);             // => 3
 ```
 
-`box` preserves existing objects and nullish input. `unbox` extracts genuine wrapper payloads without invoking custom conversion methods. `toRegExp` uses native pattern syntax; it does not escape text. `toPromise(value)` adopts values and thenables with native `Promise.resolve` semantics. All four have matching `If` variants; conditions remain synchronous booleans. See the [conversion guide](docs/conversions.md#boxing-and-unboxing) for identity, missing-API and TypeScript details.
+`box` preserves existing objects and nullish input. `unbox` extracts primitive values from wrapper objects without invoking custom conversion methods. `toRegExp` uses native pattern syntax; it does not escape text. `toPromise(value)` adopts values and thenables with native `Promise.resolve` semantics. All four have matching `If` variants; conditions remain synchronous booleans. See the [conversion guide](docs/conversions.md#boxing-and-unboxing) for identity, missing-API and TypeScript details.
 
 ## TypeScript
 

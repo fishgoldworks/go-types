@@ -9,14 +9,14 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, valueOf);
 
 /**
- * Checks whether a value is a primitive string or a genuine boxed `String`.
+ * Checks whether a value is a primitive string or a boxed `String`.
  *
  * Accepts wrappers from another realm, but rejects prototype imitations and proxies around
  * wrappers. Does not invoke overridden conversion methods.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is a primitive string or genuine boxed `String`;
- * otherwise `false`.
+ * @returns {boolean} `true` if the value is a primitive string or boxed `String`; otherwise
+ * `false`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isstringvalue
  * @example isString("x");                 // => true
  * @example isString(new String("x"));     // => true

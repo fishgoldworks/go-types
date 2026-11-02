@@ -91,7 +91,7 @@ test('private and unknown imports are not public entry points', () => {
 });
 
 for (const name of names.filter(
-  (name) => name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'fromJson', 'fromJsonIf'].includes(name)
+  (name) => name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'parseJson', 'parseJsonIf'].includes(name)
 )) {
   for (const prefix of ['conversion/', 'src/conversion/']) {
     for (const extension of ['', '.js']) {

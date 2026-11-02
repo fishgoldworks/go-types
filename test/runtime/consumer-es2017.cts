@@ -147,9 +147,9 @@ if (
   throw new Error('ES2017 wrapper, regex and Promise conversion failed');
 }
 
-const parsedJson: unknown = Types.fromJson('42');
-const skippedJson: 'invalid' = Types.fromJsonIf('invalid' as const, false);
-const revivedJson: unknown = Types.fromJson('{"a":1}', function (key, value, context) {
+const parsedJson: unknown = Types.parseJson('42');
+const skippedJson: 'invalid' = Types.parseJsonIf('invalid' as const, false);
+const revivedJson: unknown = Types.parseJson('{"a":1}', function (key, value, context) {
   const source: string | undefined = context && context.source;
   if (key === 'a' && source !== undefined && source !== '1') throw Error('Unexpected native source context');
   return key === '' ? 'root' : value;

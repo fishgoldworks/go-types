@@ -4,14 +4,14 @@ const toRegExp = require('./toRegExp');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Converts a native pattern and optional `flags` to a genuine `RegExp` when the condition
- * evaluates to `true`. Otherwise, returns the original input unchanged.
+ * Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`.
+ * Otherwise, returns the original input unchanged.
  *
  * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
  * predicate results must be primitive booleans.
  *
- * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a
- * genuine local `RegExp` without explicit `flags`; copied expressions start with `lastIndex` zero.
+ * Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a local
+ * `RegExp` object without explicit `flags`; copied expressions start with `lastIndex` zero.
  *
  * @param {*} value The value to convert.
  * @param {*} [condition] A boolean or synchronous predicate called once with the original value.

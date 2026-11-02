@@ -4,7 +4,7 @@ const floor = Math.floor;
 /**
  * Checks whether a primitive or boxed number is a finite number with a fractional part.
  *
- * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+ * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive or boxed finite non-integer number;

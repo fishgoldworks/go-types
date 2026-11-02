@@ -3,6 +3,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const exampleResult = require('./fixtures/exampleResult.cjs');
 const { pathToFileURL } = require('node:url');
 const ts = require('typescript');
 const root = path.resolve(process.env.GO_TYPES_DOCUMENTATION_ROOT || path.join(__dirname, '..'));
@@ -98,9 +99,10 @@ for (const file of ['README.md', 'docs/API.md'])
           const match = line.match(/^(.*?)\s*;\s*\/\/ => (.+?)\s*$/);
           if (!match) return line;
           examples++;
-          return match[2].startsWith('throws ')
-            ? 'assert.throws(() => (' + match[1] + '), ' + match[2].slice(7) + ');'
-            : 'assert.deepStrictEqual((' + match[1] + '), (' + match[2] + '));';
+          const expected = exampleResult(match[2]);
+          return expected.startsWith('throws ')
+            ? 'assert.throws(() => (' + match[1] + '), ' + expected.slice(7) + ');'
+            : 'assert.deepStrictEqual((' + match[1] + '), (' + expected + '));';
         })
         .join('\n');
       Function(

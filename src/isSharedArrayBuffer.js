@@ -9,14 +9,14 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getter);
 
 /**
- * Checks whether a value is a genuine `SharedArrayBuffer`.
+ * Checks whether a value is a `SharedArrayBuffer`.
  *
  * Supports foreign instances and rejects proxies or prototype imitations. Returns `false` when
  * native shared buffers are unavailable. Returns `false` when the local native detection
  * capability is unavailable.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if native shared buffers are available and the value is a genuine
+ * @returns {boolean} `true` if native shared buffers are available and the value is a
  * `SharedArrayBuffer`; otherwise `false`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issharedarraybuffervalue
  * @example isSharedArrayBuffer(new SharedArrayBuffer(8));   // => true

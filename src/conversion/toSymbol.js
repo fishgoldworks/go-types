@@ -4,13 +4,13 @@ const nativeSymbol = typeof Symbol === 'function' ? Symbol : undefined;
 const symbolValueOf = nativeSymbol && nativeSymbol.prototype.valueOf;
 
 /**
- * Converts a value to a primitive symbol, preserving primitive symbols and unboxing genuine Symbol
+ * Converts a value to a primitive symbol, preserving existing symbols and unboxing `Symbol`
  * wrappers.
  *
- * Preserves primitive symbol identity and unboxes genuine wrappers. Other inputs create a new
- * symbol and may invoke description-conversion hooks. Requires native `Symbol`; missing support
- * does not prevent loading. Requested conversion throws `TypeError` before inspecting the input
- * when it is unavailable.
+ * Preserves primitive symbol identity and unboxes wrappers. Other inputs create a new symbol and
+ * may invoke description-conversion hooks. Requires native `Symbol`; missing support does not
+ * prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is
+ * unavailable.
  *
  * @param {*} [value] The value to convert.
  * @returns {symbol} The original or unboxed symbol, or a new symbol created from the description.

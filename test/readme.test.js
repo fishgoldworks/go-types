@@ -4,6 +4,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const exampleResult = require('./fixtures/exampleResult.cjs');
 const root = path.resolve(process.env.GO_TYPES_DOCUMENTATION_ROOT || path.join(__dirname, '..'));
 const Types = require(path.join(root, 'index.js'));
 const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
@@ -34,12 +35,13 @@ function executableExample(code) {
       const statement = line.match(/^(.*?)\s*;\s*\/\/ => (.+?)\s*$/);
       if (statement) {
         assertions++;
-        if (statement[2].startsWith('throws ')) {
-          const type = statement[2].slice('throws '.length);
+        const expected = exampleResult(statement[2]);
+        if (expected.startsWith('throws ')) {
+          const type = expected.slice('throws '.length);
           assert.match(type, /^(TypeError|RangeError|SyntaxError|Error)$/);
           return `assert.throws(() => (${statement[1]}), ${type});`;
         }
-        return `assert.deepStrictEqual((${statement[1]}), (${statement[2]}));`;
+        return `assert.deepStrictEqual((${statement[1]}), (${expected}));`;
       }
       return line;
     })

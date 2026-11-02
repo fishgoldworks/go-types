@@ -8,7 +8,7 @@ const nativeCheck =
 /**
  * Checks whether a primitive or boxed number is an integer.
  *
- * Accepts genuine `Number` wrappers without invoking conversion hooks; rejects numeric strings.
+ * Accepts `Number` wrappers without invoking conversion hooks; rejects numeric strings.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive or boxed finite integral number; otherwise

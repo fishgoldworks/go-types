@@ -228,14 +228,14 @@ module.exports = function optionalApiChecks() {
     equal(thenReads, 1, 'read then exactly once');
     equal(api.isPromiseLike({ then: true }), false, 'non-callable then');
     equal(api.isPromiseLike(held.promise), true, 'held native promise protocol');
-    equal(api.fromJson('{"a":1}').a, 1, 'JSON parsing without optional capabilities');
-    equal(api.fromJson('false'), false, 'JSON boolean parsing');
+    equal(api.parseJson('{"a":1}').a, 1, 'JSON parsing without optional capabilities');
+    equal(api.parseJson('false'), false, 'JSON boolean parsing');
     equal(
-      api.fromJson('1', (key, value) => (typeof value === 'number' ? value + 1 : value)),
+      api.parseJson('1', (key, value) => (typeof value === 'number' ? value + 1 : value)),
       2,
       'JSON reviver'
     );
-    equal(api.fromJsonIf('[', false), '[', 'skipped invalid JSON');
+    equal(api.parseJsonIf('[', false), '[', 'skipped invalid JSON');
     equal(api.box(null), null, 'box preserves null');
     equal(Number.prototype.valueOf.call(api.box(3)), 3, 'box number');
     equal(typeof api.box(held.symbolValue), 'object', 'box held symbol');

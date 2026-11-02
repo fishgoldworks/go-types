@@ -9,13 +9,13 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, getter);
 
 /**
- * Checks whether a value is a genuine `DataView`.
+ * Checks whether a value is a `DataView`.
  *
  * Checks identity rather than memory usability; supports foreign instances and rejects proxies.
  * Returns `false` when the local native detection capability is unavailable.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is a genuine `DataView`; otherwise `false`.
+ * @returns {boolean} `true` if the value is a `DataView`; otherwise `false`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdataviewvalue
  * @example isDataView(new DataView(new ArrayBuffer(8)));  // => true
  * @example isDataView(new Uint8Array(8));                 // => false

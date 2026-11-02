@@ -4,8 +4,8 @@ const unbox = require('./unbox');
 const shouldConvert = require('../util/shouldConvert');
 
 /**
- * Extracts a genuine wrapper’s primitive payload when the condition evaluates to `true` and native
- * unboxing is available. Otherwise, returns the original input unchanged.
+ * Extracts the primitive value from a wrapper object when the condition evaluates to `true` and
+ * native unboxing is available. Otherwise, returns the original input unchanged.
  *
  * Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and
  * predicate results must be primitive booleans.

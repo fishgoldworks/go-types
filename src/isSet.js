@@ -9,13 +9,13 @@ const checkNativeBrand =
     : (value) => hasNativeBrand(value, has);
 
 /**
- * Checks whether a value is a genuine `Set`.
+ * Checks whether a value is a `Set`.
  *
  * Supports foreign instances without enumerating contents; rejects proxies and prototype or tag
  * imitations. Returns `false` when the local native detection capability is unavailable.
  *
  * @param {*} value The value to check.
- * @returns {boolean} `true` if the value is a genuine `Set`; otherwise `false`.
+ * @returns {boolean} `true` if the value is a `Set`; otherwise `false`.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetvalue
  * @example isSet(new Set());                      // => true
  * @example isSet(Object.create(Set.prototype));   // => false

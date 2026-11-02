@@ -24,11 +24,11 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 
 ### Checks and conversions
 
-Type checks do not convert values. For example, `isNumber('42')` returns `false`, while `toNumber('42')` returns `42`. Scalar conversions follow native coercion rules: they may invoke object hooks, lose numeric precision, underflow to zero, or return `NaN`, infinity or an invalid `Date`. `toBoolean` uses truthiness rather than parsing text, and `toString` does not perform JSON serialisation. Use `fromJson` to parse any JSON value with native `JSON.parse` semantics and an optional reviver; its result is `unknown` until validated. Use `toJson` to serialise with native `JSON.stringify` semantics, including replacer/indentation options and a possible `undefined` result.
+Type checks do not convert values. For example, `isNumber('42')` returns `false`, while `toNumber('42')` returns `42`. Scalar conversions follow native coercion rules: they may invoke object hooks, lose numeric precision, underflow to zero, or return `NaN`, infinity or an invalid `Date`. `toBoolean` uses truthiness rather than parsing text, and `toString` does not perform JSON serialisation. Use `parseJson` to parse any JSON value with native `JSON.parse` semantics and an optional reviver; its result is `unknown` until validated. Use `toJson` to serialise with native `JSON.stringify` semantics, including replacer/indentation options and a possible `undefined` result.
 
 `toArray` and `toSet` consume synchronous iterable values first, copy values from own enumerable string and symbol properties second, and read supported non-plain array-like indices third. Array-like lengths must already be numeric safe integers at least zero; a plain object's length property is ordinary data. `toMap` copies object entries including symbols or consumes exact two-element array pairs with both own indices. `toPlainObject` copies a plain object's own enumerable properties into a new plain object, or builds one from the same strict pairs with primitive string/symbol keys. Unsupported inputs throw instead of being boxed or silently converted to empty collections.
 
-`box` preserves nullish input and existing objects; `unbox` extracts genuine native wrapper payloads without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
+`box` preserves nullish input and existing objects; `unbox` extracts primitive values from wrapper objects without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
 
 Conditional converters evaluate a boolean condition or synchronous predicate once. A `false`, omitted or `undefined` condition returns the original input without inspecting or converting it. See the [conversion guide](conversions.md) for identity, coercion and precision details.
 
@@ -70,7 +70,7 @@ isMapOf(new Map([['score', 1]]), 'string', isNumber);            // => true
 isArrayOf([new Account()], value => value instanceof Account);   // => true
 ```
 
-Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise genuine Dates from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
+Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise Date objects from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
 
 Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
 

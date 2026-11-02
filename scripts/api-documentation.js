@@ -6,7 +6,7 @@ const formatExamples = require('./format-examples');
 const conversionTypes = {
   ensureArray: 'EnsuredArray<T>',
   ensureSet: 'EnsuredSet<T>',
-  fromJson: 'unknown',
+  parseJson: 'unknown',
   box: 'Boxed<T>',
   unbox: 'Unboxed<T>',
   toRegExp: 'RegExp',
@@ -28,7 +28,7 @@ const conversionTypes = {
 function signature(item) {
   const optionalValue =
     ['ensureArray', 'ensureSet'].includes(item.name) ||
-    (item.group === 'Conversion' && !['toArray', 'toPlainObject', 'fromJson'].includes(item.name));
+    (item.group === 'Conversion' && !['toArray', 'toPlainObject', 'parseJson'].includes(item.name));
   return (
     item.name +
     '(' +

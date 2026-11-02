@@ -14,14 +14,14 @@ const operations = [
 ];
 
 /**
- * Extracts the primitive payload of a genuine wrapper, leaving other values unchanged.
+ * Extracts the primitive value from a wrapper object, leaving other values unchanged.
  *
  * Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing
  * `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
  *
  * @param {*} [value] The value to convert.
- * @returns {*} The genuine wrapper’s primitive payload when its native unboxing operation is
- * available; otherwise the original input.
+ * @returns {*} The wrapper’s primitive value when its native unboxing operation is available;
+ * otherwise the original input.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
  * @example unbox(new Number(3));                                                                  // => 3
  * @example unbox(new Boolean(false));                                                             // => false

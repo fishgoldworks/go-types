@@ -47,7 +47,7 @@ Types.isArrayOf(items, (value) => value instanceof Account);
 
 The four collection checks now accept only primitive type-name strings or synchronous boolean predicates. Pass predicates directly: `isArrayOf(items, isNumber)`. For alternatives, use a predicate such as `value => typeof value === 'number' || value === null`, or compose predicates with go-fns. Literal `null`/`undefined`, boxed strings, matcher arrays and descriptor objects are not accepted.
 
-Every matcher is required, including both Map matchers. Use `'undefined'` to check undefined items, or `value => value === null` for null items. Valid names are `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` and `'function'`. The `'object'` name includes `null`; `'number'` excludes Number wrappers. Pass `isNumber` to include genuine Number wrappers.
+Every matcher is required, including both Map matchers. Use `'undefined'` to check undefined items, or `value => value === null` for null items. Valid names are `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` and `'function'`. The `'object'` name includes `null`; `'number'` excludes Number wrappers. Pass `isNumber` to include Number wrappers.
 
 Invalid or missing matchers throw before input inspection, even for empty collections or values of the wrong type. A predicate receives one value without a supplied receiver and must return a synchronous primitive boolean. Bind receiver-dependent methods or use an arrow adapter. Non-boolean results throw when reached; callback errors propagate. See [type specifications](API.md#type-specifications) for the complete contract.
 
@@ -95,7 +95,7 @@ The check does not invoke `then` or verify promise behaviour. Accessing `then` c
 
 ## Review corrected native and cycle checks
 
-Genuine native values are recognised across realms where documented; prototype/tag imitations are rejected. Promise and DOM instance checks retain their local-realm limitations. `isPromiseLike` checks for a callable `then` method without requiring a local Promise instance.
+Native values are recognised across realms where documented; prototype/tag imitations are rejected. Promise and DOM instance checks retain their local-realm limitations. `isPromiseLike` checks for a callable `then` method without requiring a local Promise instance.
 
 `isCyclic` has been renamed to `isCircular`. Update imports and calls, including function subpaths such as `go-types/isCircular`. The previous name is no longer exported.
 
@@ -105,16 +105,16 @@ Inherited enumerable properties remain included; symbols, non-enumerable propert
 
 ## Adopt new conversions and TypeScript declarations
 
-The published 1.3.1 package did not include conversion utilities or TypeScript declarations. The new conversions are described in the [conversion guide](conversions.md); they are not implicit extensions of the predicate functions. In particular, `toBoolean('false')` uses truthiness, `toPlainObject` creates a fresh plain object, and `fromJson` parses any JSON root with an `unknown` TypeScript result.
+The published 1.3.1 package did not include conversion utilities or TypeScript declarations. The new conversions are described in the [conversion guide](conversions.md); they are not implicit extensions of the predicate functions. In particular, `toBoolean('false')` uses truthiness, `toPlainObject` creates a fresh plain object, and `parseJson` parses any JSON root with an `unknown` TypeScript result.
 
 `toPlainObject` accepts plain objects and synchronous entry pairs. Strings throw `TypeError`. Requested `toPlainObjectIf` conversions follow the same rule; skipped calls return the original input unchanged.
 
-Use `fromJson` to parse JSON text. If the result must be an object, validate it before use:
+Use `parseJson` to parse JSON text. If the result must be an object, validate it before use:
 
 ```javascript
-import { fromJson, isPlainObject } from 'go-types';
+import { parseJson, isPlainObject } from 'go-types';
 
-const value = fromJson(text);
+const value = parseJson(text);
 
 if (!isPlainObject(value)) {
   throw new TypeError('Expected a JSON object.');

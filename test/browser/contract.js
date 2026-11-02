@@ -106,19 +106,19 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(Object.prototype.hasOwnProperty.call(api, 'compileTypeMatcher'), false);
   });
   test('JSON parsing preserves revivers, safe keys and conditional identity', () => {
-    equal(api.fromJson('null'), null);
-    exampleEqual(api.fromJson('[1,2]'), [1, 2]);
+    equal(api.parseJson('null'), null);
+    exampleEqual(api.parseJson('[1,2]'), [1, 2]);
     exampleEqual(
-      api.fromJson('{"a":1,"b":2}', (key, value) => (key === 'a' ? undefined : value)),
+      api.parseJson('{"a":1,"b":2}', (key, value) => (key === 'a' ? undefined : value)),
       { b: 2 }
     );
-    const own = api.fromJson('{"__proto__":{"polluted":true}}');
+    const own = api.parseJson('{"__proto__":{"polluted":true}}');
     equal(Object.getPrototypeOf(own), Object.prototype);
     equal(Object.prototype.hasOwnProperty.call(own, '__proto__'), true);
     equal({}.polluted, undefined);
     const visits = [];
     equal(
-      api.fromJson('1', function (key, value) {
+      api.parseJson('1', function (key, value) {
         equal(this[key], value);
         visits.push(key);
         return 2;
@@ -129,7 +129,7 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     const error = new Error('reviver');
     let caught;
     try {
-      api.fromJson('1', () => {
+      api.parseJson('1', () => {
         throw error;
       });
     } catch (failure) {
@@ -138,10 +138,10 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(caught, error);
     const revoked = Proxy.revocable({}, {});
     revoked.revoke();
-    equal(api.fromJsonIf(revoked.proxy, false, revoked.proxy), revoked.proxy);
-    equal(api.fromJsonIf('invalid'), 'invalid');
+    equal(api.parseJsonIf(revoked.proxy, false, revoked.proxy), revoked.proxy);
+    equal(api.parseJsonIf('invalid'), 'invalid');
     equal(
-      api.fromJsonIf('2', true, (_key, value) => (typeof value === 'number' ? value * 2 : value)),
+      api.parseJsonIf('2', true, (_key, value) => (typeof value === 'number' ? value * 2 : value)),
       4
     );
   });
