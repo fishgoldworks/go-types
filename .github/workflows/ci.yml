@@ -70,7 +70,8 @@ jobs:
       - run: npm run test:package
   browsers:
     needs: source-and-package
-    runs-on: ubuntu-latest
+    # Match the Linux distribution supported by the pinned Playwright binaries.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
