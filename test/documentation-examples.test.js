@@ -60,7 +60,10 @@ for (const file of ['README.md', 'docs/API.md', 'docs/conversions.md'])
     let examples = 0;
     for (const [index, block] of [...text.matchAll(/```(javascript|typescript|html)\n([\s\S]*?)\n```/g)].entries()) {
       let code = block[2];
-      if (file === 'docs/conversions.md' && !/^import .+ from ['"]go-fns['"];$/m.test(code)) continue;
+      if (file === 'docs/conversions.md') {
+        if (!code.includes('// => ')) continue;
+        code = code.replace(/;\s*\n\s*\/\/ => ([^\n]+)/g, '; // => $1');
+      }
       // The companion library is optional; never substitute mock combinators.
       if (/^import .+ from ['"]go-fns['"];$/m.test(code) && !process.env.GO_TYPES_GO_FNS_ROOT) {
         await t.test(
@@ -106,13 +109,13 @@ for (const file of ['README.md', 'docs/API.md', 'docs/conversions.md'])
             : 'assert.deepStrictEqual((' + match[1] + '), (' + expected + '));';
         })
         .join('\n');
-      Function(
+      await Function(
         'assert',
         'Types',
         '__api',
         ...Object.keys(Types),
         ...Object.keys(imports),
-        'return (function () {' + code + '\n})();'
+        'return (async function () {' + code + '\n})();'
       )(assert, Types, Types, ...Object.values(Types), ...values);
     }
     assert.ok(examples > 0, file + ': examples must assert documented results');

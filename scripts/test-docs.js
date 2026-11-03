@@ -29,6 +29,47 @@ function snapshot(root) {
   );
 }
 
+function runExamples(documentationRoot) {
+  const env = { ...process.env, GO_TYPES_DOCUMENTATION_ROOT: documentationRoot };
+  delete env.GO_TYPES_GO_FNS_ROOT;
+  delete env.NODE_TEST_CONTEXT;
+  return spawnSync(
+    process.execPath,
+    ['--test', '--test-reporter=tap', path.join(root, 'test/documentation-examples.test.js')],
+    { cwd: root, encoding: 'utf8', env, timeout: 30000 }
+  );
+}
+
+test('documentation examples execute core conversions without the optional companion checkout', () => {
+  const result = runExamples(root);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /ok \d+ - docs\/conversions\.md:/);
+  assert.match(result.stdout, /# pass [1-9]/);
+});
+
+test('wrong conversion-guide results fail without the optional companion checkout', (t) => {
+  const temp = fixture(t);
+  fs.appendFileSync(path.join(temp, 'docs/conversions.md'), '\n```javascript\ntoNumber("42"); // => 0\n```\n');
+  const result = runExamples(temp);
+  assert.notEqual(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /42 !== 0|\+\s*42[\s\S]*-\s*0/);
+  assert.doesNotMatch(result.stdout, /examples must assert documented results/);
+});
+
+test('wrong awaited conversion results fail without the optional companion checkout', (t) => {
+  const temp = fixture(t);
+  const file = path.join(temp, 'docs/conversions.md');
+  const text = fs.readFileSync(file, 'utf8');
+  assert.match(text, /await promise;\s*\/\/ => 3/);
+  fs.writeFileSync(
+    file,
+    text.replace(/await promise;(\s*\/\/ => )3/, (_, comment) => 'await promise;' + comment + '0')
+  );
+  const result = runExamples(temp);
+  assert.notEqual(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /3 !== 0|\+\s*3[\s\S]*-\s*0/);
+});
+
 for (const document of ['README.md', 'docs/API.md'])
   test(document + ': documentation check rejects stale output without changing files', (t) => {
     const root = fixture(t);
