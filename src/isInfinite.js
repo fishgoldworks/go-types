@@ -8,7 +8,7 @@ const getNumberValue = require('./util/getNumberValue');
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is primitive or boxed positive or negative infinity;
  * otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinfinitevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isinfinitevalue
  * @example isInfinite(-Infinity);               // => true
  * @example isInfinite(new Number(-Infinity));   // => true
  * @example isInfinite(NaN);                     // => false

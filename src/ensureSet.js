@@ -32,7 +32,7 @@ if (!setBrand && prototype) {
  * inputs throw when all captured native identity checks are unavailable. Native construction,
  * revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member
  * fails.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensuresetvalue
  * @example ensureSet().size;                                                          // => 0
  * @example ensureSet("read").has("read");                                             // => true
  * @example toArray(ensureSet([1, 2, 1]));                                             // => [1,2]

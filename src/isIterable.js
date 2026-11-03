@@ -9,7 +9,7 @@ const isCallable = require('./util/isCallable');
  * @returns {boolean} `true` if the value has a callable `Symbol.iterator` method; otherwise
  * `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isiterablevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isiterablevalue
  * @example isIterable([]);                // => true
  * @example isIterable("");                // => true
  * @example isIterable({next(){}});        // => false

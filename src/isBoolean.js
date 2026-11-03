@@ -17,7 +17,7 @@ const checkNativeBrand =
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive boolean or boxed `Boolean`; otherwise
  * `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isbooleanvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isbooleanvalue
  * @example isBoolean(false);                // => true
  * @example isBoolean(new Boolean(false));   // => true
  * @example isBoolean(0);                    // => false

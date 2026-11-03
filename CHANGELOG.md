@@ -2,9 +2,6 @@
 
 ## 2.0.0 — Unreleased
 
-- Removed the draft conditional conversion family and its subpaths; use `applyIf` from go-fns 2.0.0 or later with the base converters.
-- Collection predicates now use JavaScript truthiness while the checks retain boolean results and callback error propagation.
-
 This major update removes `isTypeOf` and `isThenable`, renames `isCyclic` to `isCircular` and `isFragment` to `isDocumentFragment`, retains the other 41 root exports from 1.3.1 and adds 31 functions. Read the [migration guide](docs/migration.md) before upgrading.
 
 ### Breaking changes

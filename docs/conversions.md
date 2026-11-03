@@ -351,7 +351,7 @@ applyIf('42', text => !isBlank(text), toNumber);               // => 42
 applyIf('invalid', false, parseJson);                          // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
 ```
 
-A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
+A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/fishgoldworks/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
 
 Wrap conversions that need additional arguments:
 

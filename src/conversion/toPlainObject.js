@@ -46,7 +46,7 @@ function fromEntries(value) {
  * supplied entries.
  * @throws {*} Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError.
  * Getter, proxy and iterator errors propagate without replacement.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toplainobjectvalue
  * @example toPlainObject({a:1});                                                            // => {"a":1}
  * @example toPlainObject([['a', 1], ['a', 2]]);                                             // => {"a":2}
  * @example (() => { const object = {x: 1}; return toPlainObject(object) === object; })();   // => false

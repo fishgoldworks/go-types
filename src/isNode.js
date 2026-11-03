@@ -9,7 +9,7 @@
  * instance check; otherwise `false`.
  * @throws {*} Native `instanceof` errors propagate, including errors from proxy prototype access
  * or a custom `Symbol.hasInstance` method.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnodevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnodevalue
  * @example isNode(document);              // => true
  * @example isNode({nodeType:1});          // => false
  */

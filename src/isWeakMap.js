@@ -16,7 +16,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `WeakMap`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweakmapvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isweakmapvalue
  * @example isWeakMap(new WeakMap());                      // => true
  * @example isWeakMap(Object.create(WeakMap.prototype));   // => false
  */

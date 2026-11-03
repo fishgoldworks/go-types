@@ -12,7 +12,7 @@ const nativeNumber = Number;
  * @returns {number} The converted primitive number; it may be `NaN` or infinite.
  * @throws {*} Symbols throw `TypeError`. Object-coercion errors propagate; invalid numeric text
  * returns `NaN`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tonumbervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tonumbervalue
  * @example toNumber('12.5');              // => 12.5
  * @example toNumber('0x10');              // => 16
  * @example toNumber(null);                // => 0

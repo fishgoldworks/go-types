@@ -15,7 +15,7 @@ const compileTypeMatcher = require('./util/compileTypeMatcher');
  * matcher, including an empty input; otherwise `false`.
  * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
  * iteration errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraylikeofvalue-matcher
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraylikeofvalue-matcher
  * @example isArrayLikeOf({0:1,length:1}, "number");     // => true
  * @example isArrayLikeOf({0:"x",length:1}, "number");   // => false
  * @example isArrayLikeOf({length:0}, "number");         // => true

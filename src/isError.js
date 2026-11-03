@@ -12,7 +12,7 @@ var toStringTag = typeof Symbol === 'function' ? Symbol.toStringTag : undefined;
  * @returns {boolean} `true` if the captured native error check, or its conservative fallback,
  * recognises the value as an error; otherwise `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iserrorvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#iserrorvalue
  * @example isError(new Error("x"));                   // => true
  * @example isError(Object.create(Error.prototype));   // => false
  * @example isError({name:"Error",message:"x"});       // => false

@@ -16,7 +16,7 @@ const symbolValueOf = nativeSymbol && nativeSymbol.prototype.valueOf;
  * @returns {symbol} The original or unboxed symbol, or a new symbol created from the description.
  * @throws {*} Native description-conversion errors propagate. Unavailable native `Symbol` support
  * throws `TypeError` before conversion.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosymbolvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tosymbolvalue
  * @example toSymbol('key').toString();                                                                // => "Symbol(key)"
  * @example toSymbol('key') !== toSymbol('key');                                                       // => true
  * @example (() => { const symbol = Symbol('key'); return toSymbol(Object(symbol)) === symbol; })();   // => true

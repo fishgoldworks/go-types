@@ -11,7 +11,7 @@ var getArrayLikeLength = require('./util/getArrayLikeLength');
  * @returns {boolean} `true` if the value is not a function and has a numeric integer length from
  * `0` through `Number.MAX_SAFE_INTEGER`; otherwise `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraylikevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraylikevalue
  * @example isArrayLike("");               // => true
  * @example isArrayLike({length:0});       // => true
  * @example isArrayLike({length:0.5});     // => false

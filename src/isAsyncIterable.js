@@ -10,7 +10,7 @@ const isCallable = require('./util/isCallable');
  * @returns {boolean} `true` if the async-iterator symbol is available and the value has a callable
  * `Symbol.asyncIterator` method; otherwise `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isasynciterablevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isasynciterablevalue
  * @example isAsyncIterable((async function*(){})());  // => true
  * @example isAsyncIterable([]);                       // => false
  */

@@ -7,7 +7,7 @@ const getNumberValue = require('./util/getNumberValue');
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is primitive or boxed `NaN`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnanvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnanvalue
  * @example isNaN(NaN);                    // => true
  * @example isNaN(new Number(NaN));        // => true
  * @example isNaN("NaN");                  // => false

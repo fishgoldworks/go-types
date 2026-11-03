@@ -19,7 +19,7 @@ const getLength = lengthDescriptor && lengthDescriptor.get;
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a native typed array, including a Node.js `Buffer`;
  * otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#istypedarrayvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#istypedarrayvalue
  * @example isTypedArray(new Uint8Array(2));                 // => true
  * @example isTypedArray(new BigInt64Array(2));              // => true
  * @example isTypedArray(new DataView(new ArrayBuffer(8)));  // => false

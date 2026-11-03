@@ -13,7 +13,7 @@ const nativeCheck =
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive or boxed finite integral number; otherwise
  * `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isintegervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isintegervalue
  * @example isInteger(1);                  // => true
  * @example isInteger(new Number(1));      // => true
  * @example isInteger(1.5);                // => false

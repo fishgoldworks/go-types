@@ -19,7 +19,7 @@ const entries = typeof Map === 'function' ? Map.prototype.entries : undefined;
  * matchers, including an empty `Map`; otherwise `false`.
  * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
  * iteration errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
  * @example isMapOf(new Map([["x",1]]), "string", "number");   // => true
  * @example isMapOf(new Map(), "string", "number");            // => true
  * @example isMapOf(new Map([[1,1]]), "string", "number");     // => false

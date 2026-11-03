@@ -10,7 +10,7 @@ const nativeBoolean = Boolean;
  * @param {*} [value] The value to convert.
  * @returns {boolean} `true` if the input is truthy under JavaScript boolean coercion; otherwise
  * `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tobooleanvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tobooleanvalue
  * @example toBoolean(0);                    // => false
  * @example toBoolean('false');              // => true
  * @example toBoolean(new Boolean(false));   // => true

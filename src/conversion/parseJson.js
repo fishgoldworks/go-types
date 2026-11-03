@@ -16,7 +16,7 @@ const nativeParse = JSON.parse;
  * TypeScript returns unknown until the caller validates it.
  * @throws {*} Invalid JSON, omitted input and `undefined` throw `SyntaxError`. Symbols throw
  * `TypeError`. Input coercion and reviver errors propagate unchanged.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonvalue-reviver
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#parsejsonvalue-reviver
  * @example parseJson('{"a":1}');                                                            // => {"a":1}
  * @example parseJson('[1,2]');                                                              // => [1,2]
  * @example parseJson('false');                                                              // => false

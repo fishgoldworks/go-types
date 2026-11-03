@@ -25,7 +25,7 @@ const nonSpace = /\S/;
  * supported collection containing only nullish values; otherwise `false`.
  * @throws {*} `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
  * throw. See Empty and blank values.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isblankvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isblankvalue
  * @example isBlank(" \t\n");                  // => true
  * @example isBlank([null,undefined]);         // => true
  * @example isBlank(new Map([["key",null]]));  // => true

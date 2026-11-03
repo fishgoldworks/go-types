@@ -15,7 +15,7 @@ const isArray = require('./isArray');
  * @returns {Array} A new empty array when no value is supplied; otherwise the original array or a
  * new array containing the supplied value.
  * @throws {*} Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensurearrayvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensurearrayvalue
  * @example ensureArray();                                                               // => []
  * @example ensureArray(1);                                                              // => [1]
  * @example ensureArray("hello");                                                        // => ["hello"]

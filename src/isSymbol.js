@@ -5,7 +5,7 @@
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive symbol; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issymbolvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issymbolvalue
  * @example isSymbol(Symbol("x"));         // => true
  * @example isSymbol("x");                 // => false
  */

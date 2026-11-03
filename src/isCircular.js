@@ -14,7 +14,7 @@ var hasCircularReference = require('./hasCircularReference');
  * on the current path; otherwise `false`.
  * @throws {*} Property getters and proxy traps may throw; their errors propagate. Requested
  * Map/Set content inspection throws `TypeError` when native traversal support is unavailable.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iscircularvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#iscircularvalue
  * @example isCircular({a:1,b:{c:1}});                             // => false
  * @example isCircular((()=>{const x={};x.self=x;return x;})());   // => true
  * @example isCircular(new Map([["item", {}]]));                   // => false

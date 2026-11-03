@@ -118,7 +118,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is `undefined`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isundefinedvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isundefinedvalue
    */
   function isUndefined(value: unknown): value is undefined;
   /**
@@ -126,7 +126,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is `null`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnullvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnullvalue
    */
   function isNull(value: unknown): value is null;
   /**
@@ -137,7 +137,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive boolean or boxed `Boolean`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isbooleanvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isbooleanvalue
    */
   function isBoolean(value: unknown): boolean;
   /**
@@ -149,7 +149,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is a primitive number or boxed `Number`, including `NaN` and
    * infinities; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnumbervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnumbervalue
    */
   function isNumber(value: unknown): boolean;
   /**
@@ -160,7 +160,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive string or boxed `String`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isstringvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isstringvalue
    */
   function isString(value: unknown): boolean;
   /**
@@ -170,7 +170,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive symbol; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issymbolvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issymbolvalue
    */
   function isSymbol(value: unknown): value is symbol;
   /**
@@ -180,7 +180,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive bigint; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isbigintvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isbigintvalue
    */
   function isBigInt(value: unknown): value is bigint;
   /**
@@ -190,7 +190,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive, including `null` or `undefined`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isprimitivevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isprimitivevalue
    */
   function isPrimitive(value: unknown): value is undefined | null | boolean | number | string | symbol | bigint;
   /**
@@ -198,7 +198,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is `null` or `undefined`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnullishvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnullishvalue
    */
   function isNullish(value: unknown): value is null | undefined;
   /**
@@ -215,7 +215,7 @@ declare namespace Types {
    * otherwise `false`.
    * @throws `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
    * throw. See Empty and blank values.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isemptyvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isemptyvalue
    */
   function isEmpty(value: unknown): boolean;
   /**
@@ -233,7 +233,7 @@ declare namespace Types {
    * collection containing only nullish values; otherwise `false`.
    * @throws `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
    * throw. See Empty and blank values.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isblankvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isblankvalue
    */
   function isBlank(value: unknown): boolean;
   /**
@@ -241,7 +241,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is truthy under JavaScript boolean coercion; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#istruthyvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#istruthyvalue
    */
   function isTruthy(value: unknown): boolean;
   /**
@@ -249,7 +249,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is falsy under JavaScript boolean coercion; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfalsyvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfalsyvalue
    */
   function isFalsy(value: unknown): boolean;
   /**
@@ -259,7 +259,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite integral number; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isintegervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isintegervalue
    */
   function isInteger(value: unknown): boolean;
   /**
@@ -270,7 +270,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed integer within the safe-integer range;
    * otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issafeintegervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issafeintegervalue
    */
   function isSafeInteger(value: unknown): boolean;
   /**
@@ -281,7 +281,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite non-integer number; otherwise
    * `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfloatvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfloatvalue
    */
   function isFloat(value: unknown): boolean;
   /**
@@ -291,7 +291,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a primitive or boxed finite number; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfinitevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfinitevalue
    */
   function isFinite(value: unknown): boolean;
   /**
@@ -302,7 +302,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is primitive or boxed positive or negative infinity; otherwise
    * `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinfinitevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isinfinitevalue
    */
   function isInfinite(value: unknown): boolean;
   /**
@@ -312,7 +312,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is primitive or boxed `NaN`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnanvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnanvalue
    */
   function isNaN(value: unknown): boolean;
   /**
@@ -324,7 +324,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is a finite primitive or boxed number, a primitive bigint, or
    * non-blank string text converting to a finite number; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnumericvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnumericvalue
    */
   function isNumeric(value: unknown): boolean;
   /**
@@ -332,7 +332,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a non-null object or function; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isobjectvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isobjectvalue
    */
   function isObject(value: unknown): boolean;
   /**
@@ -344,7 +344,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value has a null or ordinary `Object` prototype; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isplainobjectvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isplainobjectvalue
    */
   function isPlainObject(value: unknown): boolean;
   /**
@@ -361,7 +361,7 @@ declare namespace Types {
    * current path; otherwise `false`.
    * @throws Property getters and proxy traps may throw; their errors propagate. Requested Map/Set
    * content inspection throws `TypeError` when native traversal support is unavailable.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iscircularvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#iscircularvalue
    */
   function isCircular(value: unknown): boolean;
   /**
@@ -373,7 +373,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value has a callable `Symbol.iterator` method; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isiterablevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isiterablevalue
    */
   function isIterable(value: unknown): boolean;
   /**
@@ -384,7 +384,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value passes native `Array.isArray`; otherwise `false`.
    * @throws `TypeError` for a revoked proxy, following native `Array.isArray` behaviour.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarrayvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarrayvalue
    */
   function isArray(value: unknown): boolean;
   /**
@@ -401,7 +401,7 @@ declare namespace Types {
    * empty array; otherwise `false`.
    * @throws `TypeError` for invalid or missing matchers. Callback, property-access and native
    * iteration errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarrayofvalue-matcher
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarrayofvalue-matcher
    */
   function isArrayOf(value: unknown, matcher: TypeMatcher): boolean;
   /**
@@ -414,7 +414,7 @@ declare namespace Types {
    * @returns `true` if the value is not a function and has a numeric integer length from `0` through
    * `Number.MAX_SAFE_INTEGER`; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraylikevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraylikevalue
    */
   function isArrayLike(value: unknown): boolean;
   /**
@@ -431,7 +431,7 @@ declare namespace Types {
    * including an empty input; otherwise `false`.
    * @throws `TypeError` for invalid or missing matchers. Callback, property-access and native
    * iteration errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraylikeofvalue-matcher
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraylikeofvalue-matcher
    */
   function isArrayLikeOf(value: unknown, matcher: TypeMatcher): boolean;
   /**
@@ -441,7 +441,7 @@ declare namespace Types {
    * @returns `true` if the value is an array of length `2`; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate. Native
    * `Array.isArray` also throws `TypeError` for a revoked proxy.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ispairvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ispairvalue
    */
   function isPair(value: unknown): boolean;
   /**
@@ -452,7 +452,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `Map`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ismapvalue
    */
   function isMap(value: unknown): boolean;
   /**
@@ -463,7 +463,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `Set`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issetvalue
    */
   function isSet(value: unknown): boolean;
   /**
@@ -474,7 +474,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `WeakMap`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweakmapvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isweakmapvalue
    */
   function isWeakMap(value: unknown): boolean;
   /**
@@ -485,7 +485,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `WeakSet`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isweaksetvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isweaksetvalue
    */
   function isWeakSet(value: unknown): boolean;
   /**
@@ -495,7 +495,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if `typeof value` is `"function"`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfunctionvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfunctionvalue
    */
   function isFunction(value: unknown): boolean;
   /**
@@ -503,7 +503,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `Date`, valid or invalid; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdatevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isdatevalue
    */
   function isDate(value: unknown): boolean;
   /**
@@ -511,7 +511,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `Date` with a finite timestamp; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isvaliddatevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isvaliddatevalue
    */
   function isValidDate(value: unknown): boolean;
   /**
@@ -519,7 +519,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `Date` with a `NaN` timestamp; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinvaliddatevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isinvaliddatevalue
    */
   function isInvalidDate(value: unknown): boolean;
   /**
@@ -527,7 +527,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `RegExp` object; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isregexpvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isregexpvalue
    */
   function isRegExp(value: unknown): boolean;
   /**
@@ -541,7 +541,7 @@ declare namespace Types {
    * `false`.
    * @throws Native `instanceof` errors propagate, including errors from proxy prototype access or a
    * custom `Symbol.hasInstance` method.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ispromisevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ispromisevalue
    */
   function isPromise(value: unknown): boolean;
   /**
@@ -554,7 +554,7 @@ declare namespace Types {
    * @returns `true` if the value is a non-null object or function with a callable `then` method;
    * otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ispromiselikevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ispromiselikevalue
    */
   function isPromiseLike(value: unknown): boolean;
   /**
@@ -567,7 +567,7 @@ declare namespace Types {
    * @returns `true` if the captured native error check, or its conservative fallback, recognises the
    * value as an error; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iserrorvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#iserrorvalue
    */
   function isError(value: unknown): boolean;
   /**
@@ -581,7 +581,7 @@ declare namespace Types {
    * check; otherwise `false`.
    * @throws Native `instanceof` errors propagate, including errors from proxy prototype access or a
    * custom `Symbol.hasInstance` method.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnodevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnodevalue
    */
   function isNode(value: unknown): boolean;
   /**
@@ -595,7 +595,7 @@ declare namespace Types {
    * check; otherwise `false`.
    * @throws Native `instanceof` errors propagate, including errors from proxy prototype access or a
    * custom `Symbol.hasInstance` method.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#iselementvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#iselementvalue
    */
   function isElement(value: unknown): boolean;
   /**
@@ -609,7 +609,7 @@ declare namespace Types {
    * instance check; otherwise `false`.
    * @throws Native `instanceof` errors propagate, including errors from proxy prototype access or a
    * custom `Symbol.hasInstance` method.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdocumentfragmentvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isdocumentfragmentvalue
    */
   function isDocumentFragment(value: unknown): boolean;
   /**
@@ -620,7 +620,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `ArrayBuffer`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraybuffervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraybuffervalue
    */
   function isArrayBuffer(value: unknown): boolean;
   /**
@@ -633,7 +633,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if native shared buffers are available and the value is a `SharedArrayBuffer`;
    * otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issharedarraybuffervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issharedarraybuffervalue
    */
   function isSharedArrayBuffer(value: unknown): boolean;
   /**
@@ -645,7 +645,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a native typed array or `DataView`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraybufferviewvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraybufferviewvalue
    */
   function isArrayBufferView(value: unknown): boolean;
   /**
@@ -659,7 +659,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is a native typed array, including a Node.js `Buffer`; otherwise
    * `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#istypedarrayvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#istypedarrayvalue
    */
   function isTypedArray(value: unknown): boolean;
   /**
@@ -670,7 +670,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is a `DataView`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdataviewvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isdataviewvalue
    */
   function isDataView(value: unknown): boolean;
   /**
@@ -684,7 +684,7 @@ declare namespace Types {
    * @returns `true` if the async-iterator symbol is available and the value has a callable
    * `Symbol.asyncIterator` method; otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isasynciterablevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isasynciterablevalue
    */
   function isAsyncIterable(value: unknown): boolean;
   /**
@@ -696,7 +696,7 @@ declare namespace Types {
    * @returns `true` if the value is a non-null object or function with a callable `next` method;
    * otherwise `false`.
    * @throws Property getters or proxy traps may throw; their errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isiteratorlikevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isiteratorlikevalue
    */
   function isIteratorLike(value: unknown): boolean;
   /**
@@ -704,7 +704,7 @@ declare namespace Types {
    *
    * @param value The value to check.
    * @returns `true` if the value is neither `null` nor `undefined`; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnotnullishvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnotnullishvalue
    */
   function isNotNullish<T>(value: T): value is NonNullable<T>;
   /**
@@ -716,7 +716,7 @@ declare namespace Types {
    * @param value The value to check.
    * @returns `true` if the value is primitive or boxed string text that parses as JSON; otherwise
    * `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isjsonvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isjsonvalue
    */
   function isJson(value: unknown): boolean;
   /**
@@ -735,7 +735,7 @@ declare namespace Types {
    * `Set`; otherwise `false`.
    * @throws `TypeError` for invalid or missing matchers. Callback, property-access and native
    * iteration errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetofvalue-matcher
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issetofvalue-matcher
    */
   function isSetOf(value: unknown, matcher: TypeMatcher): boolean;
   /**
@@ -756,7 +756,7 @@ declare namespace Types {
    * including an empty `Map`; otherwise `false`.
    * @throws `TypeError` for invalid or missing matchers. Callback, property-access and native
    * iteration errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
    */
   function isMapOf(value: unknown, keyMatcher: TypeMatcher, valueMatcher: TypeMatcher): boolean;
   /** Iteration takes precedence. Otherwise include all declared record values, including symbols and length.
@@ -822,7 +822,7 @@ declare namespace Types {
    * lengths. Oversized array results can throw RangeError. Getter, proxy and iterator errors
    * propagate. Missing native Array.from throws before conversion; object copying requires
    * symbol-enumeration support.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toarrayvalue
    */
   function toArray<T>(value: T & CollectionSourceInput<T>): ArrayElement<T>[];
   /**
@@ -836,7 +836,7 @@ declare namespace Types {
    * @throws `RangeError` for fractional or non-finite numbers; `SyntaxError` for invalid integer
    * text; `TypeError` for nullish values, symbols, or unavailable native BigInt support.
    * Object-coercion errors propagate.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tobigintvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tobigintvalue
    */
   function toBigInt(value?: unknown): bigint;
   /**
@@ -846,7 +846,7 @@ declare namespace Types {
    *
    * @param value The value to convert.
    * @returns `true` if the input is truthy under JavaScript boolean coercion; otherwise `false`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tobooleanvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tobooleanvalue
    */
   function toBoolean(value?: unknown): boolean;
   /**
@@ -860,7 +860,7 @@ declare namespace Types {
    * @returns The original `Date`, or a new `Date` constructed from the input; it may be invalid.
    * @throws Symbols, bigints and failed object coercion can throw. Invalid date text can instead
    * produce an invalid `Date`; check with `isValidDate`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#todatevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#todatevalue
    */
   function toDate(value?: unknown): Date;
   /**
@@ -872,7 +872,7 @@ declare namespace Types {
    * @returns The numeric conversion truncated towards zero; it may be `NaN` or infinite.
    * @throws Symbols and failed object conversions can throw. `NaN` and infinity are returned rather
    * than rejected.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tointegervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tointegervalue
    */
   function toInteger(value?: unknown): number;
   /**
@@ -889,7 +889,7 @@ declare namespace Types {
    * input without a replacer.
    * @throws Cycles and unhandled bigints throw `TypeError`. Getter, proxy, `toJSON` and replacer
    * exceptions propagate unchanged.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tojsonvalue-replacer-space
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tojsonvalue-replacer-space
    */
   function toJson(value?: unknown, replacer?: JsonReplacer, space?: string | number): string | undefined;
   /**
@@ -902,7 +902,7 @@ declare namespace Types {
    * @returns The converted primitive number; it may be `NaN` or infinite.
    * @throws Symbols throw `TypeError`. Object-coercion errors propagate; invalid numeric text
    * returns `NaN`.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tonumbervalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tonumbervalue
    */
   function toNumber(value?: unknown): number;
   /**
@@ -918,7 +918,7 @@ declare namespace Types {
    * entries.
    * @throws Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError. Getter,
    * proxy and iterator errors propagate without replacement.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toplainobjectvalue
    */
   function toPlainObject<Key extends string | symbol, Value>(
     value: Iterable<readonly [Key, Value]>
@@ -936,7 +936,7 @@ declare namespace Types {
    * entries.
    * @throws Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError. Getter,
    * proxy and iterator errors propagate without replacement.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toplainobjectvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toplainobjectvalue
    */
   function toPlainObject<T>(value: T & PlainObjectInput<T>): ConvertedPlainObject<T>;
 
@@ -950,7 +950,7 @@ declare namespace Types {
    * @returns The converted primitive string; nullish inputs become their literal text.
    * @throws Native conversion errors propagate, including boxed symbols and objects that cannot
    * produce a primitive.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tostringvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tostringvalue
    */
   function toString(value?: unknown): string;
   /**
@@ -966,7 +966,7 @@ declare namespace Types {
    * @returns The original or unboxed symbol, or a new symbol created from the description.
    * @throws Native description-conversion errors propagate. Unavailable native `Symbol` support
    * throws `TypeError` before conversion.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosymbolvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tosymbolvalue
    */
   function toSymbol(value?: unknown): symbol;
   /**
@@ -984,7 +984,7 @@ declare namespace Types {
    * two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry
    * validation errors close the outer iterator. Missing native Map throws before conversion; object
    * copying requires symbol-enumeration support.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tomapvalue
    */
   function toMap<Key, Value>(value: readonly (readonly [Key, Value])[]): Map<Key, Value>;
   /**
@@ -1002,7 +1002,7 @@ declare namespace Types {
    * two-element arrays with both own indices. Getter, proxy and iterator errors propagate. Entry
    * validation errors close the outer iterator. Missing native Map throws before conversion; object
    * copying requires symbol-enumeration support.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tomapvalue
    */
   function toMap<T = unknown>(value?: T & MapInput<T>): ConvertedMap<T>;
   /**
@@ -1020,7 +1020,7 @@ declare namespace Types {
    * @throws TypeError for unsupported input, malformed iterators or invalid array-like lengths.
    * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; object
    * copying requires symbol-enumeration support.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tosetvalue
    */
   function toSet<T = unknown>(value?: T & SetInput<T>): ConvertedSet<T>;
   /** Primitive wrapper result; objects and nullish values retain identity. */
@@ -1058,7 +1058,7 @@ declare namespace Types {
    * @param value The value to convert.
    * @returns A native wrapper for a non-nullish primitive; otherwise the original object, function
    * or nullish input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#boxvalue
    */
   function box(): undefined;
   /**
@@ -1071,7 +1071,7 @@ declare namespace Types {
    * @param value The value to convert.
    * @returns A native wrapper for a non-nullish primitive; otherwise the original object, function
    * or nullish input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#boxvalue
    */
   function box<T>(value: T): Boxed<T>;
   /**
@@ -1083,7 +1083,7 @@ declare namespace Types {
    * @param value The value to convert.
    * @returns The wrapper’s primitive value when its native unboxing operation is available;
    * otherwise the original input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#unboxvalue
    */
   function unbox(): undefined;
   /**
@@ -1095,7 +1095,7 @@ declare namespace Types {
    * @param value The value to convert.
    * @returns The wrapper’s primitive value when its native unboxing operation is available;
    * otherwise the original input.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#unboxvalue
    */
   function unbox<T>(value: T): Unboxed<T>;
   /**
@@ -1110,7 +1110,7 @@ declare namespace Types {
    * @returns A `RegExp`, which may retain input identity under native rules.
    * @throws Invalid patterns or `flags` throw `SyntaxError`. Native coercion, getters and proxy
    * errors propagate unchanged.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpvalue-flags
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toregexpvalue-flags
    */
   function toRegExp(value?: unknown, flags?: string): RegExp;
   /**
@@ -1124,7 +1124,7 @@ declare namespace Types {
    * @returns A native `Promise` that adopts the input; ordinary local promises retain identity.
    * @throws Missing `Promise.resolve` support throws `TypeError` before input inspection. Native
    * synchronous errors propagate; native resolution failures produce rejected promises.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromisevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#topromisevalue
    */
   function toPromise(): Promise<undefined>;
   /**
@@ -1138,7 +1138,7 @@ declare namespace Types {
    * @returns A native `Promise` that adopts the input; ordinary local promises retain identity.
    * @throws Missing `Promise.resolve` support throws `TypeError` before input inspection. Native
    * synchronous errors propagate; native resolution failures produce rejected promises.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromisevalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#topromisevalue
    */
   function toPromise<T>(value: T): Promise<Awaited<T>>;
   /**
@@ -1155,7 +1155,7 @@ declare namespace Types {
    * TypeScript returns unknown until the caller validates it.
    * @throws Invalid JSON, omitted input and `undefined` throw `SyntaxError`. Symbols throw
    * `TypeError`. Input coercion and reviver errors propagate unchanged.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#parsejsonvalue-reviver
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#parsejsonvalue-reviver
    */
   function parseJson(value: unknown, reviver?: JsonReviver | null): unknown;
   /**
@@ -1172,7 +1172,7 @@ declare namespace Types {
    * @returns A new empty array when no value is supplied; otherwise the original array or a new
    * array containing the supplied value.
    * @throws Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensurearrayvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensurearrayvalue
    */
   function ensureArray<T = unknown>(): T[];
   /**
@@ -1189,7 +1189,7 @@ declare namespace Types {
    * @returns A new empty array when no value is supplied; otherwise the original array or a new
    * array containing the supplied value.
    * @throws Native `Array.isArray` errors propagate, including `TypeError` for revoked proxies.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensurearrayvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensurearrayvalue
    */
   function ensureArray<T>(value: T): EnsuredArray<T>;
   /**
@@ -1208,7 +1208,7 @@ declare namespace Types {
    * inputs throw when all captured native identity checks are unavailable. Native construction,
    * revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member
    * fails.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensuresetvalue
    */
   function ensureSet<T = unknown>(): Set<T>;
   /**
@@ -1227,7 +1227,7 @@ declare namespace Types {
    * inputs throw when all captured native identity checks are unavailable. Native construction,
    * revoked-proxy and array-iterator errors propagate; native iteration closes when adding a member
    * fails.
-   * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
+   * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ensuresetvalue
    */
   function ensureSet<T>(value: T): EnsuredSet<T>;
 }

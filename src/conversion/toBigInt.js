@@ -13,7 +13,7 @@ const nativeBigInt = typeof BigInt === 'function' ? BigInt : undefined;
  * @throws {*} `RangeError` for fractional or non-finite numbers; `SyntaxError` for invalid integer
  * text; `TypeError` for nullish values, symbols, or unavailable native BigInt support.
  * Object-coercion errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tobigintvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tobigintvalue
  * @example toBigInt('9007199254740993') === 9007199254740993n;  // => true
  * @example toBigInt(true) === 1n;                               // => true
  * @example toBigInt('0xff') === 255n;                           // => true

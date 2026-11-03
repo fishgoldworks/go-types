@@ -16,7 +16,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `DataView`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdataviewvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isdataviewvalue
  * @example isDataView(new DataView(new ArrayBuffer(8)));  // => true
  * @example isDataView(new Uint8Array(8));                 // => false
  */

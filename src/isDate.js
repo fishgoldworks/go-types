@@ -13,7 +13,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `Date`, valid or invalid; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isdatevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isdatevalue
  * @example isDate(new Date(NaN));         // => true
  * @example isDate("2026-01-01");          // => false
  */

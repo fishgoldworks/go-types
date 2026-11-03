@@ -11,7 +11,7 @@ const nativeCheck =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive or boxed finite number; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfinitevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfinitevalue
  * @example isFinite(1);                   // => true
  * @example isFinite(new Number(1));       // => true
  * @example isFinite(Infinity);            // => false

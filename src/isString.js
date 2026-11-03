@@ -17,7 +17,7 @@ const checkNativeBrand =
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive string or boxed `String`; otherwise
  * `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isstringvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isstringvalue
  * @example isString("x");                 // => true
  * @example isString(new String("x"));     // => true
  * @example isString(1);                   // => false

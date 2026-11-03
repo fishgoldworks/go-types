@@ -129,7 +129,7 @@ function comment(item, { source = false, indent = '' } = {}) {
   lines.push(...wrap('@returns ' + (source ? '{' + type + '} ' : '') + item.summaryReturn));
   if (item.errors)
     lines.push(...wrap('@throws ' + (source ? '{*} ' : '') + item.errors.replace(/\[([^\]]+)\]\(#[^)]*\)/g, '$1')));
-  lines.push('@see https://github.com/koyote130708/go-types/blob/master/docs/API.md#' + anchor(item));
+  lines.push('@see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#' + anchor(item));
   if (source) {
     const examples = formatExamples(
       item.examples.map((example) => example.expression + '; // => ' + JSON.stringify(example.expected)).join('\n')

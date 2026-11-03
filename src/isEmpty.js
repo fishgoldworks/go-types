@@ -24,7 +24,7 @@ const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'si
  * collection; otherwise `false`.
  * @throws {*} `TypeError` for unsized iterators or iterables. Property getters and proxy traps may
  * throw. See Empty and blank values.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isemptyvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isemptyvalue
  * @example isEmpty(null);                 // => true
  * @example isEmpty([]);                   // => true
  * @example isEmpty(new Map());            // => true

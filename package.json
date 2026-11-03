@@ -16,10 +16,10 @@
     "validation",
     "typescript"
   ],
-  "homepage": "https://github.com/koyote130708/go-types",
+  "homepage": "https://github.com/fishgoldworks/go-types",
   "repository": {
     "type": "git",
-    "url": "https://github.com/koyote130708/go-types.git"
+    "url": "https://github.com/fishgoldworks/go-types.git"
   },
   "type": "commonjs",
   "main": "./index.js",

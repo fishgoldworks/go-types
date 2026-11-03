@@ -5,7 +5,7 @@
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if `typeof value` is `"function"`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfunctionvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfunctionvalue
  * @example isFunction(() => {});          // => true
  * @example isFunction(class A {});        // => true
  * @example isFunction({call(){}});        // => false

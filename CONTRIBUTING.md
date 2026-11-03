@@ -94,7 +94,7 @@ Version changes and breaking contracts belong in `CHANGELOG.md` and `docs/migrat
 
 ## Shared library tooling
 
-Use [go-equality](https://github.com/koyote130708/go-equality) as the concrete reference for common folder and command names. Runtime cases use `test/**/*.test.js`, browser fixtures use `test/browser/`, benchmark workloads use `benchmarks/`, and command-line runners use `scripts/`. CommonJS tooling uses `.js` in this CommonJS package; TypeScript module-mode fixtures and their emitted `.cjs`/`.mjs` files retain explicit formats.
+Use [go-equality](https://github.com/fishgoldworks/go-equality) as the concrete reference for common folder and command names. Runtime cases use `test/**/*.test.js`, browser fixtures use `test/browser/`, benchmark workloads use `benchmarks/`, and command-line runners use `scripts/`. CommonJS tooling uses `.js` in this CommonJS package; TypeScript module-mode fixtures and their emitted `.cjs`/`.mjs` files retain explicit formats.
 
 Root and generated consumer manifests share the family field order, with dependencies alphabetised by package name. `scripts/package-layout.js` owns generated metadata order and retains `os` then `cpu` after shared fields when supplied. Conditional exports, compiler mappings and fallback arrays retain their semantic order.
 

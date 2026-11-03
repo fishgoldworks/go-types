@@ -8,7 +8,7 @@ var isObject = require('./isObject');
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive, including `null` or `undefined`;
  * otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isprimitivevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isprimitivevalue
  * @example isPrimitive(null);             // => true
  * @example isPrimitive(1n);               // => true
  * @example isPrimitive(new Number(1));    // => false

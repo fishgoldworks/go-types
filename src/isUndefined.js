@@ -3,7 +3,7 @@
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is `undefined`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isundefinedvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isundefinedvalue
  * @example isUndefined(undefined);        // => true
  * @example isUndefined("x");              // => false
  */

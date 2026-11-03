@@ -10,7 +10,7 @@ const isTypedArray = require('./isTypedArray');
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a native typed array or `DataView`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraybufferviewvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraybufferviewvalue
  * @example isArrayBufferView(new Uint8Array(2));                  // => true
  * @example isArrayBufferView(new DataView(new ArrayBuffer(8)));   // => true
  * @example isArrayBufferView(new ArrayBuffer(8));                 // => false

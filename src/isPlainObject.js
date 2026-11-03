@@ -14,7 +14,7 @@ var objectConstructorSource = functionToString.call(Object);
  * @returns {boolean} `true` if the value has a null or ordinary `Object` prototype; otherwise
  * `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isplainobjectvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isplainobjectvalue
  * @example isPlainObject({constructor:null});   // => true
  * @example isPlainObject(Object.create(null));  // => true
  * @example isPlainObject(new (class A {})());   // => false

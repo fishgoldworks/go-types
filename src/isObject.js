@@ -3,7 +3,7 @@
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a non-null object or function; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isobjectvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isobjectvalue
  * @example isObject(Object.create(null));   // => true
  * @example isObject(() => {});              // => true
  * @example isObject(null);                  // => false

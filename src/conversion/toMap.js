@@ -18,7 +18,7 @@ const mapInput = require('../util/mapInput');
  * exact two-element arrays with both own indices. Getter, proxy and iterator errors propagate.
  * Entry validation errors close the outer iterator. Missing native Map throws before conversion;
  * object copying requires symbol-enumeration support.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tomapvalue
  * @example toArray(toMap({a: 1, b: 2}));                                                  // => [["a",1],["b",2]]
  * @example toArray(toMap([['a', 1], ['b', 2], ['a', 3]]));                                // => [["a",3],["b",2]]
  * @example (() => { const key = Symbol('key'); return toMap({[key]: 2}).get(key); })();   // => 2

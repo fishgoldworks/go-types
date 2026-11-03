@@ -16,7 +16,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `ArrayBuffer`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarraybuffervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarraybuffervalue
  * @example isArrayBuffer(new ArrayBuffer(8));   // => true
  * @example isArrayBuffer(new Uint8Array(8));    // => false
  */

@@ -11,7 +11,7 @@ var parse = JSON.parse;
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is primitive or boxed string text that parses as JSON;
  * otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isjsonvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isjsonvalue
  * @example isJson("null");                // => true
  * @example isJson("[1,null]");            // => true
  * @example isJson("{bad}");               // => false

@@ -11,7 +11,7 @@ var isObject = require('./isObject');
  * @returns {boolean} `true` if the value is a non-null object or function with a callable `then`
  * method; otherwise `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ispromiselikevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ispromiselikevalue
  * @example isPromiseLike(Promise.resolve(1));   // => true
  * @example isPromiseLike({then(){}});           // => true
  * @example isPromiseLike({then:1});             // => false

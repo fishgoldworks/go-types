@@ -26,7 +26,7 @@ This is a bundler optimisation, not native Node lazy loading. Use `import isArra
 
 Collection checks such as `isArrayOf` validate a type-name string or predicate once per call and reuse it for their entries. Predicate closures retain their live state.
 
-Use the logic utilities in [go-fns](https://github.com/koyote130708/go-fns) to combine existing predicates into reusable functions. Go Types does not depend on go-fns.
+Use the logic utilities in [go-fns](https://github.com/fishgoldworks/go-fns) to combine existing predicates into reusable functions. Go Types does not depend on go-fns.
 
 Conversions retain native coercion semantics. Where the converted value is needed, convert once and validate the result rather than performing redundant conversion and validation passes.
 

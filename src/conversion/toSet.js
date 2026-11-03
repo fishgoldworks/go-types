@@ -18,7 +18,7 @@ const NativeSet = typeof Set === 'function' ? Set : undefined;
  * @throws {*} TypeError for unsupported input, malformed iterators or invalid array-like lengths.
  * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; object
  * copying requires symbol-enumeration support.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tosetvalue
  * @example toArray(toSet([3, 1, 3]));             // => [3,1]
  * @example toArray(toSet('A😀A'));                // => ["A","😀"]
  * @example toArray(toSet({a: 1, b: 2, c: 1}));    // => [1,2]

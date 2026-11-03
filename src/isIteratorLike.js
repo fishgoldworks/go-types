@@ -9,7 +9,7 @@ const isObject = require('./isObject');
  * @returns {boolean} `true` if the value is a non-null object or function with a callable `next`
  * method; otherwise `false`.
  * @throws {*} Property getters or proxy traps may throw; their errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isiteratorlikevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isiteratorlikevalue
  * @example isIteratorLike({next(){}});    // => true
  * @example isIteratorLike([]);            // => false
  * @example isIteratorLike({next:1});      // => false

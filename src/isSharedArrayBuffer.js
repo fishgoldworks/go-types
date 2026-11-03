@@ -18,7 +18,7 @@ const checkNativeBrand =
  * @param {*} value The value to check.
  * @returns {boolean} `true` if native shared buffers are available and the value is a
  * `SharedArrayBuffer`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issharedarraybuffervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issharedarraybuffervalue
  * @example isSharedArrayBuffer(new SharedArrayBuffer(8));   // => true
  * @example isSharedArrayBuffer(new Uint8Array(8));          // => false
  */

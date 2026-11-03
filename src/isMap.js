@@ -16,7 +16,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `Map`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#ismapvalue
  * @example isMap(new Map());                      // => true
  * @example isMap(Object.create(Map.prototype));   // => false
  */

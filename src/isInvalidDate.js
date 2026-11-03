@@ -7,7 +7,7 @@ var getTime = Date.prototype.getTime;
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `Date` with a `NaN` timestamp; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isinvaliddatevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isinvaliddatevalue
  * @example isInvalidDate(new Date(NaN));  // => true
  * @example isInvalidDate(new Date(0));    // => false
  * @example isInvalidDate(0);              // => false

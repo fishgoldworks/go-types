@@ -1,8 +1,10 @@
 # Go Types API
 
-Full API documentation for [{{NAME}} {{VERSION}}](../CHANGELOG.md). [Back to README](../README.md) · [Runtime support](../README.md#runtime-support).
+[← Back to README](../README.md)
 
-Conversion behaviour is also summarised in the [conversion guide](conversions.md).
+Full API documentation for [{{NAME}} {{VERSION}}](../CHANGELOG.md).
+
+[Runtime support](runtime.md) · [Conversion guide](conversions.md)
 
 ## Contents
 

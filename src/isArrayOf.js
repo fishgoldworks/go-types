@@ -16,7 +16,7 @@ const compileTypeMatcher = require('./util/compileTypeMatcher');
  * including an empty array; otherwise `false`.
  * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
  * iteration errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarrayofvalue-matcher
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isarrayofvalue-matcher
  * @example isArrayOf([1,2], "number");    // => true
  * @example isArrayOf([1,"x"], "number");  // => false
  * @example isArrayOf([], "number");       // => true

@@ -3,7 +3,7 @@
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is `null`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnullvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnullvalue
  * @example isNull(null);                  // => true
  * @example isNull("x");                   // => false
  */

@@ -19,7 +19,7 @@ const arrayFrom = typeof Array.from === 'function' ? Array.from : undefined;
  * array-like lengths. Oversized array results can throw RangeError. Getter, proxy and iterator
  * errors propagate. Missing native Array.from throws before conversion; object copying requires
  * symbol-enumeration support.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toarrayvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toarrayvalue
  * @example toArray(new Set([1, 2]));                                                    // => [1,2]
  * @example toArray('A😀B');                                                             // => ["A","😀","B"]
  * @example toArray({0: 'x', length: 1});                                                // => ["x",1]

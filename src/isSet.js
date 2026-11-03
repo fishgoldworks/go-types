@@ -16,7 +16,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `Set`; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issetvalue
  * @example isSet(new Set());                      // => true
  * @example isSet(Object.create(Set.prototype));   // => false
  */

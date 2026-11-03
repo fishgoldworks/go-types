@@ -15,7 +15,7 @@ const nativeResolve = NativePromise && NativePromise.resolve;
  * identity.
  * @throws {*} Missing `Promise.resolve` support throws `TypeError` before input inspection. Native
  * synchronous errors propagate; native resolution failures produce rejected promises.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#topromisevalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#topromisevalue
  * @example isPromise(toPromise(3));                                                             // => true
  * @example (() => { const value = Promise.resolve(3); return toPromise(value) === value; })();  // => true
  */

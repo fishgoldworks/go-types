@@ -124,7 +124,3 @@ if (!isPlainObject(value)) {
 The parsed object is already fresh. Calling `toPlainObject` is useful only when a separate shallow copy is needed. Passing the parsed value straight to `toPlainObject` also accepts entry arrays, so that composition does not replace an object-only JSON check.
 
 Declarations cover root, focused and bundle imports. Fixed primitive/nullish checks narrow, while native identity checks, dynamic matchers and partial validators generally return `boolean` to avoid unsound false-branch narrowing. TypeScript interfaces are structural and cannot prove native identity. See the [TypeScript guidance](API.md#typescript) for module settings and narrowing boundaries.
-
-## Conditional conversion during draft upgrades
-
-The published 1.3.1 package had no conditional conversion helpers. The 2.0.0 draft’s `to*If`, `parseJsonIf`, `boxIf` and `unboxIf` functions have been removed before publication, including their subpaths. Use `applyIf(value, condition, converter)` from go-fns 2.0.0 or later instead. Omitted conditions are not supported by `applyIf`; supply a boolean or predicate explicitly. Wrap converters that need additional arguments. See [conditional conversions](conversions.md#conditional-conversions).

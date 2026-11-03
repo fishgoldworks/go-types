@@ -9,7 +9,7 @@ const floor = Math.floor;
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive or boxed finite non-integer number;
  * otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isfloatvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isfloatvalue
  * @example isFloat(0.5);                  // => true
  * @example isFloat(new Number(0.5));      // => true
  * @example isFloat(1);                    // => false

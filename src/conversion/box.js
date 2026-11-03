@@ -12,7 +12,7 @@ const NativeObject = Object;
  * @param {*} [value] The value to convert.
  * @returns {Object|null|undefined} A native wrapper for a non-nullish primitive; otherwise the
  * original object, function or nullish input.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#boxvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#boxvalue
  * @example box(3).valueOf();                                              // => 3
  * @example box(false).valueOf();                                          // => false
  * @example box(null) === null;                                            // => true

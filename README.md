@@ -136,7 +136,7 @@ The package also includes the readable `dist/go-types.js` and the browser ES mod
 
 ## Combining predicates with go-fns
 
-Use [go-fns](https://github.com/koyote130708/go-fns) to negate or combine go-types checks. Install it separately when you need function composition:
+Use [go-fns](https://github.com/fishgoldworks/go-fns) to negate or combine go-types checks. Install it separately when you need function composition:
 
 ```sh
 npm install go-types go-fns
@@ -163,7 +163,7 @@ const values = [1, 'hello', [], null];
 values.filter(isNotArray);     // => [1, 'hello', null]
 ```
 
-These helpers return synchronous boolean predicates: `not` negates a result, `or` stops at the first truthy result, and `and` stops at the first falsy result. Use synchronous callbacks; returned promises are treated as truthy values and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md) for the full contracts.
+These helpers return synchronous boolean predicates: `not` negates a result, `or` stops at the first truthy result, and `and` stops at the first falsy result. Use synchronous callbacks; returned promises are treated as truthy values and are not awaited. See the [go-fns API reference](https://github.com/fishgoldworks/go-fns/blob/master/docs/API.md) for the full contracts.
 
 ### Convert conditionally
 
@@ -178,7 +178,7 @@ applyIf('42', text => !isBlank(text), toNumber);   // => 42
 applyIf('invalid', false, parseJson);              // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
 ```
 
-A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
+A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/fishgoldworks/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
 
 ## API summary
 
@@ -470,7 +470,7 @@ From a source checkout, run:
 npm run benchmark
 ```
 
-Measurements depend on the workload and runtime; they are not universal speed guarantees. The [performance guide](https://github.com/koyote130708/go-types/blob/master/docs/performance.md) explains the hot paths, trade-offs and comparison methodology.
+Measurements depend on the workload and runtime; they are not universal speed guarantees. The [performance guide](https://github.com/fishgoldworks/go-types/blob/master/docs/performance.md) explains the hot paths, trade-offs and comparison methodology.
 
 ## Migration
 
@@ -499,7 +499,7 @@ npm run verify
 
 `npm run verify` checks lint, formatting, generated documentation, source coverage, declarations, build recovery, package contents and installed consumers. `npm run verify:all` adds Chromium, Firefox and WebKit checks against the same archive, including the browser bundles and README example.
 
-See the [development guide](https://github.com/koyote130708/go-types/blob/master/CONTRIBUTING.md) for exact-runtime selection, browser setup, local installation, build recovery and release procedures.
+See the [development guide](https://github.com/fishgoldworks/go-types/blob/master/CONTRIBUTING.md) for exact-runtime selection, browser setup, local installation, build recovery and release procedures.
 
 The coverage badge measures executable source-line coverage. The documentation badge measures public API reference coverage. Neither badge guarantees correctness for every input.
 
@@ -507,10 +507,10 @@ The coverage badge measures executable source-line coverage. The documentation b
 
 - [Full API documentation](docs/API.md): signatures, parameters, examples and behavioural contracts.
 - [Changelog](CHANGELOG.md): release changes and migration from version 1.
-- [Development guide](https://github.com/koyote130708/go-types/blob/master/CONTRIBUTING.md): contributor setup, verification, builds and release procedures.
+- [Development guide](https://github.com/fishgoldworks/go-types/blob/master/CONTRIBUTING.md): contributor setup, verification, builds and release procedures.
 - [Conversion guide](docs/conversions.md): coercion, identity, precision and conditional conversion.
 - [Runtime guide](docs/runtime.md): supported features, native checks and declaration boundaries.
-- [Testing guide](https://github.com/koyote130708/go-types/blob/master/docs/project-testing.md): validation strategy and commands.
+- [Testing guide](https://github.com/fishgoldworks/go-types/blob/master/docs/project-testing.md): validation strategy and commands.
 
 ## Licence
 

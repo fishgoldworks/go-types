@@ -17,7 +17,7 @@ const checkNativeBrand =
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a primitive number or boxed `Number`, including `NaN`
  * and infinities; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isnumbervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isnumbervalue
  * @example isNumber(NaN);                 // => true
  * @example isNumber(new Number(1));       // => true
  * @example isNumber("1");                 // => false

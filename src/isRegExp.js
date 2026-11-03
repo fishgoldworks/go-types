@@ -14,7 +14,7 @@ const checkNativeBrand =
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is a `RegExp` object; otherwise `false`.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isregexpvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#isregexpvalue
  * @example isRegExp(/x/g);                // => true
  * @example isRegExp(RegExp.prototype);    // => false
  * @example isRegExp("/x/");               // => false

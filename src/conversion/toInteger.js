@@ -14,7 +14,7 @@ const trunc = typeof Math.trunc === 'function' ? Math.trunc : (value) => (value 
  * @returns {number} The numeric conversion truncated towards zero; it may be `NaN` or infinite.
  * @throws {*} Symbols and failed object conversions can throw. `NaN` and infinity are returned
  * rather than rejected.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tointegervalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#tointegervalue
  * @example toInteger('12.9');               // => 12
  * @example toInteger(-12.9);                // => -12
  * @example isNaN(toInteger('12px'));        // => true

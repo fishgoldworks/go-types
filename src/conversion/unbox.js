@@ -22,7 +22,7 @@ const operations = [
  * @param {*} [value] The value to convert.
  * @returns {*} The wrapper’s primitive value when its native unboxing operation is available;
  * otherwise the original input.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#unboxvalue
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#unboxvalue
  * @example unbox(new Number(3));                                                                  // => 3
  * @example unbox(new Boolean(false));                                                             // => false
  * @example unbox(new String("text"));                                                             // => "text"

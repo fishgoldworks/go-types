@@ -18,7 +18,7 @@ const values = typeof Set === 'function' ? Set.prototype.values : undefined;
  * an empty `Set`; otherwise `false`.
  * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
  * iteration errors propagate.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#issetofvalue-matcher
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#issetofvalue-matcher
  * @example isSetOf(new Set([1,2]), "number");     // => true
  * @example isSetOf(new Set([1,"x"]), "number");   // => false
  * @example isSetOf(new Set(), "number");          // => true

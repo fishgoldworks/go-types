@@ -15,7 +15,7 @@ const isRegExp = require('../isRegExp');
  * @returns {RegExp} A `RegExp`, which may retain input identity under native rules.
  * @throws {*} Invalid patterns or `flags` throw `SyntaxError`. Native coercion, getters and proxy
  * errors propagate unchanged.
- * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#toregexpvalue-flags
+ * @see https://github.com/fishgoldworks/go-types/blob/master/docs/API.md#toregexpvalue-flags
  * @example toRegExp('a.b', 'i').test('AxB');                                      // => true
  * @example toRegExp().source;                                                     // => "(?:)"
  * @example toRegExp('/a/i').test('a');                                            // => false
