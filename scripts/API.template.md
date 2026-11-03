@@ -30,7 +30,7 @@ Type checks do not convert values. For example, `isNumber('42')` returns `false`
 
 `box` preserves nullish input and existing objects; `unbox` extracts primitive values from wrapper objects without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
 
-For conditional conversion, use `applyIf` from go-fns 2.0.0 or later. See [conditional conversions](conversions.md#conditional-conversions) for examples and version availability.
+For conditional conversion, use `applyIf` from go-fns 2.0.0 or later. See [conditional conversions](conversions.md#conditional-conversions) for examples.
 
 ### Errors and side effects
 

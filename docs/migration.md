@@ -127,4 +127,4 @@ Declarations cover root, focused and bundle imports. Fixed primitive/nullish che
 
 ## Conditional conversion during draft upgrades
 
-The published 1.3.1 package had no conditional conversion helpers. The 2.0.0 draft’s `to*If`, `parseJsonIf`, `boxIf` and `unboxIf` functions have been removed before publication, including their subpaths. Use `applyIf(value, condition, converter)` from the upcoming go-fns 2.0.0 release instead. Omitted conditions are not supported by `applyIf`; supply a boolean or predicate explicitly. Wrap converters that need additional arguments. See [conditional conversions](conversions.md#conditional-conversions).
+The published 1.3.1 package had no conditional conversion helpers. The 2.0.0 draft’s `to*If`, `parseJsonIf`, `boxIf` and `unboxIf` functions have been removed before publication, including their subpaths. Use `applyIf(value, condition, converter)` from go-fns 2.0.0 or later instead. Omitted conditions are not supported by `applyIf`; supply a boolean or predicate explicitly. Wrap converters that need additional arguments. See [conditional conversions](conversions.md#conditional-conversions).

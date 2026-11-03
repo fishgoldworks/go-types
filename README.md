@@ -167,7 +167,7 @@ These helpers return synchronous boolean predicates: `not` negates a result, `or
 
 ### Convert conditionally
 
-Use `applyIf` from go-fns 2.0.0 or later to apply a conversion conditionally. This helper is part of the upcoming go-fns 2.0.0 release; its declarations require TypeScript 5.4 or later.
+Use `applyIf` from go-fns 2.0.0 or later to apply a conversion conditionally. The go-fns declarations require TypeScript 5.4 or later.
 
 <!-- prettier-ignore -->
 ```javascript
