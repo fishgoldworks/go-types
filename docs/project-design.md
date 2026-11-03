@@ -4,7 +4,7 @@ This guide records go-types design constraints. The library provides small, comp
 
 - Keep zero runtime dependencies and small CommonJS source modules. The public API includes collection-content checks, collection normalisation and conversions. The changelog records published upgrade changes. Matcher validation stays internal; use go-fns to combine predicates.
 - Prefer captured standard intrinsics where their contracts match; no speculative legacy polyfills and no security claims about a compromised runtime.
-- Validate required type-name strings or predicates before inspecting collection inputs. Never probe predicates during validation or infer constructor intent. Preserve traversal, callback order, short-circuiting and exceptions; enforce primitive boolean results when callbacks run.
+- Validate required type-name strings or predicates before inspecting collection inputs. Never probe predicates during validation or infer constructor intent. Preserve traversal, callback order, short-circuiting and exceptions; evaluate callback results using JavaScript truthiness and return primitive booleans from checks.
 - `isArrayOf` and `isArrayLikeOf` accept empty inputs. Holes are read through ordinary indexed access. Non-empty array detection is separate.
 - Include null-prototype plain dictionaries. Reject whitespace-only numeric strings. Preserve boxed Number/String/Boolean support and primitive-only Symbol/BigInt checks.
 - Default empty/blank operations inspect sized collections and plain dictionaries without advancing caller iterators. Unsized iterable/iterator inputs throw. Map blankness concerns values; Set blankness concerns items.
@@ -15,7 +15,7 @@ This guide records go-types design constraints. The library provides small, comp
 - Type declarations are conservative: no unsafe integer/blank/plain-object/boxed-primitive negative-branch narrowing. Exact primitive checks and non-nullish filtering narrow.
 - Use `node:test` for public-API tests, alongside independent generated graph/model tests, TypeScript consumer tests, browser tests and packed-package checks.
 - Publish supported source, entries, declarations, bundles and documentation. Keep private helpers, tests and development tooling outside the public API.
-- Expose the conversion functions and their conditional counterparts listed in the public inventory. Document nullish input, output identity, exceptions, precision and iteration; skipped conversions do not inspect the input.
+- Expose focused base conversions and normalisers; compose conditional conversion with go-fns applyIf instead of publishing conversion-specific variants.
 - Target Node >=8 for CommonJS consumers and the [documented ESM and browser requirements](runtime.md#supported-environments-and-verification). Keep development tools on Node >=22.16.0. Keep measured verification evidence separate from product documentation.
 
 ## Source and package boundaries

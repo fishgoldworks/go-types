@@ -11,7 +11,6 @@ const original = {
     throw new Error('Skipped conversion must not coerce');
   }
 };
-if (Types.toBigIntIf(original, false) !== original) throw new Error('Compiled conditional conversion changed identity');
 
 const emptyItems = Types.ensureArray<number>();
 if (emptyItems.length !== 0 || Types.ensureArray(undefined).length !== 1 || Types.ensureArray(null).length !== 1)

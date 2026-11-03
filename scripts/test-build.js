@@ -220,8 +220,8 @@ test('package builds are repeatable, self-contained and leave canonical inputs u
     assert.equal(packaged.private, undefined);
     assert.equal(packaged.scripts, undefined);
     assert.equal(packaged.devDependencies, undefined);
-    assert.equal(Object.keys(packaged.exports).length, 414);
-    assert.equal(Object.keys(packaged.typesVersions['*']).length, 412);
+    assert.equal(Object.keys(packaged.exports).length, 295);
+    assert.equal(Object.keys(packaged.typesVersions['*']).length, 293);
     assert.equal(packaged.exports['./isThenable'], undefined);
     assert.equal(packaged.typesVersions['*'].isThenable, undefined);
     assert.equal(packaged.exports['./isTypeOf'], undefined);
@@ -274,22 +274,22 @@ test('removed public entries leave no generated wrappers after rebuilding', () =
   fixture((directory, build) => {
     assert.equal(build('').status, 0);
     const inventory = path.join(directory, 'scripts', 'exports.json');
-    const names = JSON.parse(fs.readFileSync(inventory, 'utf8')).filter((name) => name !== 'toSymbolIf');
+    const names = JSON.parse(fs.readFileSync(inventory, 'utf8')).filter((name) => name !== 'toSymbol');
     fs.writeFileSync(inventory, JSON.stringify(names));
     const result = build('');
     assert.equal(result.status, 0, result.stdout + result.stderr);
     for (const file of [
-      'toSymbolIf.js',
-      'conversion/toSymbolIf.js',
-      'src/toSymbolIf.js',
-      'esm/toSymbolIf.mjs',
-      'types/toSymbolIf.d.ts'
+      'toSymbol.js',
+      'conversion/toSymbol.js',
+      'src/toSymbol.js',
+      'esm/toSymbol.mjs',
+      'types/toSymbol.d.ts'
     ]) {
       assert.ok(!fs.existsSync(path.join(directory, 'package', file)), file);
     }
     const pkg = JSON.parse(fs.readFileSync(path.join(directory, 'package/package.json'), 'utf8'));
-    assert.equal(pkg.exports['./toSymbolIf'], undefined);
-    assert.equal(pkg.typesVersions['*'].toSymbolIf, undefined);
+    assert.equal(pkg.exports['./toSymbol'], undefined);
+    assert.equal(pkg.typesVersions['*'].toSymbol, undefined);
   }));
 
 test('a failed rebuild cannot pack the previous package', () =>

@@ -173,7 +173,6 @@ test('Date identity survives prototype removal while ordinary timestamp conversi
   });
   for (const api of backends) {
     assert.equal(api.toDate(foreignDate), foreignDate);
-    assert.equal(api.toDateIf(foreignDate, true), foreignDate);
     for (const [input, expected] of [
       [-8640000000000000, -8640000000000000],
       [-8640000000000001, NaN],
@@ -230,67 +229,4 @@ test('Symbol wrappers preserve payload despite removed prototypes, but proxies f
     assert.throws(() => api.toSymbol({ [Symbol.toPrimitive]: () => symbol }), isTypeError);
   }
   assert.equal(hookCalls, backends.length);
-});
-
-test('scalar conditions run before coercion and conversion uses changes made by the callback', () => {
-  for (const api of backends) {
-    for (const [name, hint, expected] of hinted) {
-      const trace = [];
-      const input = {
-        [Symbol.toPrimitive]() {
-          throw Error('old hook');
-        }
-      };
-      const result = api[name + 'If'](input, function (value) {
-        assert.equal(this, undefined);
-        assert.equal(value, input);
-        assert.equal(arguments.length, 1);
-        trace.push('condition');
-        value[Symbol.toPrimitive] = function (actualHint) {
-          trace.push(actualHint);
-          return name === 'toDate' ? 42 : '42';
-        };
-        return true;
-      });
-      assert.equal(resultValue(name, result), expected);
-      assert.deepEqual(trace, ['condition', hint]);
-    }
-  }
-});
-
-test('scalar conditions neither assimilate thenable results nor inspect input after a rejected condition', () => {
-  const scalarNames = [
-    'toBigInt',
-    'toBoolean',
-    'toDate',
-    'toInteger',
-    'toNumber',
-    'toPlainObject',
-    'toString',
-    'toSymbol'
-  ];
-  for (const api of backends) {
-    for (const name of scalarNames) {
-      const revocable = Proxy.revocable({}, {});
-      revocable.revoke();
-      const result = {
-        get then() {
-          throw Error('must not assimilate condition');
-        }
-      };
-      assert.throws(() => api[name + 'If'](revocable.proxy, () => result), isTypeError);
-      const failure = Symbol(name);
-      assert.throws(
-        () =>
-          api[name + 'If'](revocable.proxy, () => {
-            throw failure;
-          }),
-        (error) => error === failure
-      );
-      assert.equal(
-        api[name + 'If'](revocable.proxy, () => false),
-        revocable.proxy
-      );
-    }
-  }
 });

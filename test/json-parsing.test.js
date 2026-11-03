@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { parseJson, parseJsonIf } = require('../index');
+const { parseJson } = require('../index');
 
 for (const [label, input, expected] of [
   ['object', '{"a":1}', { a: 1 }],
@@ -147,66 +147,6 @@ test('parseJson propagates reviver errors and does not invoke a reviver for inva
     SyntaxError
   );
   assert.equal(calls, 0);
-});
-test('parseJsonIf converts on true, calls its predicate once and forwards the reviver', () => {
-  let calls = 0;
-  assert.deepEqual(
-    parseJsonIf(
-      '{"a":1}',
-      function (value) {
-        assert.equal(value, '{"a":1}');
-        assert.equal(this, undefined);
-        calls++;
-        return true;
-      },
-      (_key, value) => (typeof value === 'number' ? value + 1 : value)
-    ),
-    { a: 2 }
-  );
-  assert.equal(calls, 1);
-  assert.equal(parseJsonIf('null', true), null);
-});
-test('parseJsonIf skips input and reviver inspection when false or omitted', () => {
-  const revoked = Proxy.revocable({}, {});
-  revoked.revoke();
-  for (const condition of [false, undefined, () => false]) {
-    assert.equal(parseJsonIf(revoked.proxy, condition, revoked.proxy), revoked.proxy);
-    assert.equal(parseJsonIf('[', condition), '[');
-  }
-});
-test('parseJsonIf rejects invalid conditions and non-boolean results before conversion', () => {
-  const input = {
-    toString() {
-      throw Error('must not inspect');
-    }
-  };
-  for (const condition of [null, 1, 'true', new Boolean(true), () => 1, () => undefined, async () => true]) {
-    assert.throws(() => parseJsonIf(input, condition), TypeError);
-  }
-  const error = new Error('predicate');
-  assert.throws(
-    () =>
-      parseJsonIf(input, () => {
-        throw error;
-      }),
-    (e) => e === error
-  );
-});
-test('parseJsonIf preserves requested conversion errors and deliberate predicate mutation', () => {
-  assert.throws(() => parseJsonIf('[', true), SyntaxError);
-  const input = {
-    text: '[',
-    toString() {
-      return this.text;
-    }
-  };
-  assert.equal(
-    parseJsonIf(input, (value) => {
-      value.text = '2';
-      return true;
-    }),
-    2
-  );
 });
 test('parseJson retains the captured parser after JSON.parse is replaced', () => {
   const { environment, moduleLoader } = require('./fixtures/verify-optional-apis.cjs');

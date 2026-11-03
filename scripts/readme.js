@@ -59,37 +59,35 @@ const categories = [
       'toString',
       'toSymbol'
     ]
-  ],
-  [
-    'Conditional conversion',
-    [
-      'boxIf',
-      'unboxIf',
-      'toRegExpIf',
-      'toPromiseIf',
-      'toArrayIf',
-      'toBigIntIf',
-      'toBooleanIf',
-      'toDateIf',
-      'toIntegerIf',
-      'toJsonIf',
-      'parseJsonIf',
-      'toMapIf',
-      'toNumberIf',
-      'toPlainObjectIf',
-      'toSetIf',
-      'toStringIf',
-      'toSymbolIf'
-    ]
   ]
 ];
 
 // Multi-step examples are easier to copy than immediately invoked expressions.
 // They are executed directly from the generated API reference by the tests.
 const readableExamples = {
+  isEmpty: `const hasSelection = value => isArray(value) && !isEmpty(value);
+
+hasSelection(['report.pdf']);  // => true
+hasSelection([]);               // => false
+hasSelection(false);            // => false
+hasSelection([null]);           // => true
+
+const settings = [null, undefined, false, 0, '', [], 'hello'];
+settings.filter(value => !isEmpty(value));  // => [false, 0, 'hello']`,
+  isBlank: `const hasLabel = value => isString(value) && !isBlank(value);
+
+hasLabel('Release notes');  // => true
+hasLabel('   ');            // => false
+hasLabel('');               // => false
+hasLabel(42);               // => false
+hasLabel(new String('Release notes')); // => true
+hasLabel(new String('   ')); // => false
+
+isBlank(['   ']);           // => false
+isBlank([null]);            // => true`,
   ensureSet: `ensureSet().size; // => 0
 ensureSet("read").has("read"); // => true
-Array.from(ensureSet([1, 2, 1])); // => [1, 2]
+toArray(ensureSet([1, 2, 1])); // => [1, 2]
 ensureSet(null).has(null); // => true
 ensureSet(undefined).has(undefined); // => true
 
@@ -136,10 +134,6 @@ isIteratorLike({ next: 1 }); // => false`,
 toBigInt(true); // => 1n
 toBigInt('0xff'); // => 255n
 toBigInt(1.5); // => throws RangeError`,
-  toBigIntIf: `toBigIntIf('42', true); // => 42n
-toBigIntIf('42', false); // => '42'
-toBigIntIf('42'); // => '42'
-toBigIntIf('42', value => typeof value === 'string'); // => 42n`,
   toDate: `toDate(0).toISOString(); // => '1970-01-01T00:00:00.000Z'
 toDate('2024-01-01T00:00:00.000Z').getTime(); // => 1704067200000
 isInvalidDate(toDate('not a date')); // => true
@@ -160,7 +154,7 @@ toSymbol(symbol) === symbol; // => true
 toSymbol(Object(symbol)) === symbol; // => true`
 };
 
-const { signature, anchor, returnType, parameters, conversionDetails } = require('./api-documentation');
+const { signature, anchor, returnType, parameters } = require('./api-documentation');
 
 // Readable examples retain the reviewed reference's complete executable coverage.
 const referenceExamples = {
@@ -236,11 +230,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
         'These functions convert or normalise values. Each function documents its input, copying and coercion rules.',
         ''
       );
-    if (category === 'Conditional conversion')
-      documentation.push(
-        'Each `If` function accepts a boolean or synchronous boolean-returning predicate. A `false`, omitted, or `undefined` condition returns the input unchanged without converting or inspecting it.',
-        ''
-      );
+
     for (const [index, name] of members.entries()) {
       if (index > 0) documentation.push('---', '');
       const item = byName.get(name);
@@ -255,7 +245,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
         '',
         item.summary,
         '',
-        [item.description, conversionDetails(item)].filter(Boolean).join('\n\n'),
+        item.description,
         '',
         '**Parameters**',
         '',
@@ -274,7 +264,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
       documentation.push('**Examples**', '');
       if (name === 'isSharedArrayBuffer')
         documentation.push('The positive example requires native `SharedArrayBuffer` support.', '');
-      if (['isBigInt', 'isPrimitive', 'toBigInt', 'toBigIntIf'].includes(name))
+      if (['isBigInt', 'isPrimitive', 'toBigInt'].includes(name))
         documentation.push('Examples using bigint literals require native BigInt support.', '');
       if (name === 'isAsyncIterable')
         documentation.push('The positive example requires native async-generator support.', '');
@@ -323,7 +313,7 @@ module.exports = function generateReadme({ write = true, documents = false } = {
     summary.push('');
   }
   summary.push(
-    '`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).',
+    '`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).',
     ''
   );
   const replacements = {

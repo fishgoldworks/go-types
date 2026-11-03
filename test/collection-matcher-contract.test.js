@@ -88,20 +88,6 @@ for (const [name, input, check] of checks) {
     }
     assert.equal(reads, 0);
   });
-
-  test(name + ' rejects non-boolean predicate results and propagates callback failures', () => {
-    for (const result of [undefined, null, 0, 1, '', 'yes', {}, new Boolean(true), Promise.resolve(true)]) {
-      assert.throws(() => check(input(1), () => result), TypeError);
-    }
-    const failure = new Error('predicate failure');
-    assert.throws(
-      () =>
-        check(input(1), () => {
-          throw failure;
-        }),
-      (error) => error === failure
-    );
-  });
 }
 
 test('empty and wrong-container inputs validate required matchers without executing predicates', () => {

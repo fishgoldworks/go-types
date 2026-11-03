@@ -3,10 +3,6 @@
 // Conversions retain their original source directory; other public functions are flat.
 module.exports = function sourcePath(name) {
   return (
-    (name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'parseJson', 'parseJsonIf'].includes(name)
-      ? 'src/conversion/'
-      : 'src/') +
-    name +
-    '.js'
+    (name.startsWith('to') || ['box', 'unbox', 'parseJson'].includes(name) ? 'src/conversion/' : 'src/') + name + '.js'
   );
 };

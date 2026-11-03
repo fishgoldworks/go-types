@@ -76,20 +76,3 @@ for (const [name, native] of Object.entries(conversions)) {
     }
   });
 }
-for (const name of Object.keys(conversions).concat(['toArray', 'toDate', 'toSymbol'])) {
-  test(name + 'If does not inspect a skipped revoked proxy and invokes conditions once', () => {
-    const { proxy, revoke } = Proxy.revocable({}, {});
-    revoke();
-    assert.equal(T[name + 'If'](proxy, false), proxy);
-    let calls = 0;
-    assert.equal(
-      T[name + 'If'](proxy, (value) => {
-        calls++;
-        assert.equal(value, proxy);
-        return false;
-      }),
-      proxy
-    );
-    assert.equal(calls, 1);
-  });
-}

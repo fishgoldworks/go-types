@@ -52,7 +52,6 @@ for (const name of ['toArray', 'toSet', 'toMap']) {
         }
       });
       assert.throws(() => Types[name](input), TypeError);
-      assert.equal(Types[name + 'If'](input, false), input);
     }
     for (const input of [1, true, Symbol('x'), BigInt(1), Promise.resolve(1), new (class {})()])
       assert.throws(() => Types[name](input), TypeError);

@@ -1,9 +1,9 @@
 # Conversion utilities
 
-Go Types provides **34 public conversion functions**: seventeen conversions and their seventeen conditional counterparts. All are part of the supported public API.
+Go Types provides **17 conversion functions** and the `ensureArray` and `ensureSet` normalisers. Use go-fns `applyIf` for [conditional conversion](#conditional-conversions).
 
 ```javascript
-import { toNumber, toArrayIf } from 'go-types';
+import { toNumber, toArray } from 'go-types';
 import toString from 'go-types/toString';
 
 // Equivalent CommonJS and conversion-directory paths:
@@ -37,25 +37,27 @@ Conversions propagate application errors. Object conversion methods, getters and
 
 ## API summary
 
-| Conversion                                    | Conditional counterpart                                     | Result                                                         |
-| --------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
-| [`toArray`](API.md#toarrayvalue)              | [`toArrayIf`](API.md#toarrayifvalue-condition)              | A new shallow ordinary array.                                  |
-| [`toBigInt`](API.md#tobigintvalue)            | [`toBigIntIf`](API.md#tobigintifvalue-condition)            | A primitive bigint.                                            |
-| [`toBoolean`](API.md#tobooleanvalue)          | [`toBooleanIf`](API.md#tobooleanifvalue-condition)          | A primitive boolean, using truthiness.                         |
-| [`toDate`](API.md#todatevalue)                | [`toDateIf`](API.md#todateifvalue-condition)                | A `Date`, which may be invalid.                                |
-| [`toInteger`](API.md#tointegervalue)          | [`toIntegerIf`](API.md#tointegerifvalue-condition)          | Number conversion truncated towards zero.                      |
-| [`toJson`](API.md#tojsonvalue-replacer-space) | [`toJsonIf`](API.md#tojsonifvalue-condition-replacer-space) | Native JSON text, or `undefined`.                              |
-| [`parseJson`](API.md#parsejsonvalue-reviver)  | [`parseJsonIf`](API.md#parsejsonifvalue-condition-reviver)  | Parsed or revived value, typed as `unknown`.                   |
-| [`toMap`](API.md#tomapvalue)                  | [`toMapIf`](API.md#tomapifvalue-condition)                  | A new shallow Map from a plain object or iterable entries.     |
-| [`toNumber`](API.md#tonumbervalue)            | [`toNumberIf`](API.md#tonumberifvalue-condition)            | A primitive number, potentially `NaN` or infinite.             |
-| [`toPlainObject`](API.md#toplainobjectvalue)  | [`toPlainObjectIf`](API.md#toplainobjectifvalue-condition)  | A shallow object copy or an object built from key/value pairs. |
-| [`toSet`](API.md#tosetvalue)                  | [`toSetIf`](API.md#tosetifvalue-condition)                  | A new shallow Set of iterable, object or indexed values.       |
-| [`toString`](API.md#tostringvalue)            | [`toStringIf`](API.md#tostringifvalue-condition)            | A primitive string.                                            |
-| [`toSymbol`](API.md#tosymbolvalue)            | [`toSymbolIf`](API.md#tosymbolifvalue-condition)            | A primitive symbol.                                            |
-| [`box`](API.md#boxvalue)                      | [`boxIf`](API.md#boxifvalue-condition)                      | Native primitive wrapper, or unchanged object/nullish input.   |
-| [`unbox`](API.md#unboxvalue)                  | [`unboxIf`](API.md#unboxifvalue-condition)                  | Primitive value from a wrapper, or unchanged input.            |
-| [`toRegExp`](API.md#toregexpvalue-flags)      | [`toRegExpIf`](API.md#toregexpifvalue-condition-flags)      | A RegExp object.                                               |
-| [`toPromise`](API.md#topromisevalue)          | [`toPromiseIf`](API.md#topromiseifvalue-condition)          | Native Promise adopting the input.                             |
+| Function                                      | Result                                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`ensureArray`](API.md#ensurearrayvalue)      | A new empty array when no value is supplied; otherwise the original array or a new array containing the supplied value.                                      |
+| [`ensureSet`](API.md#ensuresetvalue)          | The original Set, or a new Set containing array items or one supplied member. With no arguments, a new empty Set.                                            |
+| [`toArray`](API.md#toarrayvalue)              | A new shallow array containing iterable items, plain object property values or indexed array-like values.                                                    |
+| [`toBigInt`](API.md#tobigintvalue)            | The converted primitive bigint.                                                                                                                              |
+| [`toBoolean`](API.md#tobooleanvalue)          | `true` if the input is truthy under JavaScript boolean coercion; otherwise `false`.                                                                          |
+| [`toDate`](API.md#todatevalue)                | The original `Date`, or a new `Date` constructed from the input; it may be invalid.                                                                          |
+| [`toInteger`](API.md#tointegervalue)          | The numeric conversion truncated towards zero; it may be `NaN` or infinite.                                                                                  |
+| [`toJson`](API.md#tojsonvalue-replacer-space) | JSON text, or `undefined` when native serialisation produces no text, including omitted input without a replacer.                                            |
+| [`toMap`](API.md#tomapvalue)                  | A new Map containing a plain object's own enumerable properties as entries, or the supplied key/value pairs. Omitted or nullish input produces an empty Map. |
+| [`toNumber`](API.md#tonumbervalue)            | The converted primitive number; it may be `NaN` or infinite.                                                                                                 |
+| [`toPlainObject`](API.md#toplainobjectvalue)  | A fresh ordinary object containing the copied enumerable properties or supplied entries.                                                                     |
+| [`toSet`](API.md#tosetvalue)                  | A new Set of iterable items, plain object property values or indexed array-like values, or an empty Set for omitted or nullish input.                        |
+| [`toString`](API.md#tostringvalue)            | The converted primitive string; nullish inputs become their literal text.                                                                                    |
+| [`toSymbol`](API.md#tosymbolvalue)            | The original or unboxed symbol, or a new symbol created from the description.                                                                                |
+| [`box`](API.md#boxvalue)                      | A native wrapper for a non-nullish primitive; otherwise the original object, function or nullish input.                                                      |
+| [`unbox`](API.md#unboxvalue)                  | The wrapper’s primitive value when its native unboxing operation is available; otherwise the original input.                                                 |
+| [`toRegExp`](API.md#toregexpvalue-flags)      | A `RegExp`, which may retain input identity under native rules.                                                                                              |
+| [`toPromise`](API.md#topromisevalue)          | A native `Promise` that adopts the input; ordinary local promises retain identity.                                                                           |
+| [`parseJson`](API.md#parsejsonvalue-reviver)  | The parsed value, or any root value returned by the reviver, including `undefined`. TypeScript returns unknown until the caller validates it.                |
 
 See the **[full API documentation](API.md)** for parameters, return values, errors and examples for each function. The additional examples below illustrate the shared rules and important distinctions.
 
@@ -71,16 +73,16 @@ See the **[full API documentation](API.md)** for parameters, return values, erro
 
 <!-- prettier-ignore -->
 ```javascript
-toArray(new Set([1, 2]));          // => [1, 2]
-toArray(new Map([['x', 1]]));      // => [['x', 1]]
-toArray('A😀B');                   // => ['A', '😀', 'B']
-toArray({a: 1, b: 2});             // => [1, 2]
-toArray({0: 'x', length: 2});      // => ['x', 2]
-toArray(Array(2));                 // => [undefined, undefined]
-Array.from(toSet({a: 1, b: 1}));   // => [1]
-toArray(42);                       // => throws TypeError
-toArray(null);                     // => throws TypeError
-toSet(null).size;                  // => 0
+toArray(new Set([1, 2]));        // => [1, 2]
+toArray(new Map([['x', 1]]));    // => [['x', 1]]
+toArray('A😀B');                 // => ['A', '😀', 'B']
+toArray({a: 1, b: 2});           // => [1, 2]
+toArray({0: 'x', length: 2});    // => ['x', 2]
+toArray(Array(2));               // => [undefined, undefined]
+toArray(toSet({a: 1, b: 1}));    // => [1]
+toArray(42);                     // => throws TypeError
+toArray(null);                   // => throws TypeError
+toSet(null).size;                // => 0
 ```
 
 Plain objects include null-prototype and foreign-realm objects. A property named `length` is ordinary property data, even if its value is not numeric. The own-key list is snapshotted in property order: string keys followed by symbol keys. Each current descriptor is checked for enumerability and each included value is read once. An enumerable nullish `Symbol.iterator` value is reused from source dispatch so its getter is not read again. Deleted or newly hidden keys are skipped, newly added keys are excluded, and inherited or non-enumerable properties are not copied. Getters and proxy traps can run, mutate input or throw.
@@ -92,10 +94,10 @@ Only non-plain array-like objects use the indexed fallback. Their `length` must 
 class Indexed {
   constructor(length) { this[0] = 'x'; this.length = length; }
 }
-toArray(new Indexed(2));             // => ['x', undefined]
-Array.from(toSet(new Indexed(2)));   // => ['x', undefined]
-toArray(new Indexed('2'));           // => throws TypeError
-toArray(new Indexed(1.5));           // => throws TypeError
+toArray(new Indexed(2));         // => ['x', undefined]
+toArray(toSet(new Indexed(2)));  // => ['x', undefined]
+toArray(new Indexed('2'));       // => throws TypeError
+toArray(new Indexed(1.5));       // => throws TypeError
 ```
 
 On eligible inputs, a synchronous iterator takes precedence over object and indexed data. The iterator method is read once and called with the original input as its receiver. A nullish method permits fallback; any other non-callable method throws. Strings iterate by Unicode code point. Functions, boxed primitives, Dates and RegExps are rejected before iterator or length inspection, even if custom properties suggest a source. Other non-string primitives are also rejected, apart from the nullish Set case.
@@ -133,7 +135,7 @@ Numeric text and bigints can round to the nearest representable number; large ma
 
 ## BigInt conversion
 
-`toBigInt(value)` requires native BigInt support (Node.js 10.4 or later). Without it, requested conversion throws `TypeError` before coercing input; `toBigIntIf(value, false)` still returns the input unchanged. The following examples require BigInt support.
+`toBigInt(value)` requires native BigInt support (Node.js 10.4 or later). Without it, requested conversion throws `TypeError` before coercing input. The following examples require BigInt support.
 
 On capable hosts, `toBigInt(value)` follows `BigInt(value)`. Integral numbers, booleans and valid integer strings are accepted. Integer strings can contain hexadecimal, binary or octal prefixes. Whitespace-only and empty strings convert to `0n`.
 
@@ -171,21 +173,19 @@ String conversion can call object hooks. Primitive symbols have a special descri
 
 ## JSON parsing
 
-`parseJson(value, reviver?)` parses any JSON value through captured native `JSON.parse`. Objects, arrays, strings, numbers, booleans and null are supported. `parseJsonIf(value, condition?, reviver?)` uses the same parsing when requested; skipped calls return the original input without inspecting it or the reviver.
+`parseJson(value, reviver?)` parses any JSON value through captured native `JSON.parse`. Objects, arrays, strings, numbers, booleans and null are supported.
 
 <!-- prettier-ignore -->
 ```javascript
-parseJson('{"a":1}');            // => ({ a: 1 })
-parseJson('[1,2]');              // => [1, 2]
-parseJson('"hello"');            // => 'hello'
-parseJson('42');                 // => 42
-parseJson('false');              // => false
-parseJson('null');               // => null
-parseJson('invalid');            // => throws SyntaxError
-parseJson();                     // => throws SyntaxError
+parseJson('{"a":1}');                                                          // => ({ a: 1 })
+parseJson('[1,2]');                                                            // => [1, 2]
+parseJson('"hello"');                                                          // => 'hello'
+parseJson('42');                                                               // => 42
+parseJson('false');                                                            // => false
+parseJson('null');                                                             // => null
+parseJson('invalid');                                                          // => throws SyntaxError
+parseJson();                                                                   // => throws SyntaxError
 
-parseJsonIf('invalid', false);   // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
-parseJsonIf('42', true);         // => 42
 ```
 
 Native coercion applies to non-string input: `parseJson(42)` returns `42` and `parseJson(null)` returns `null`. Undefined input cannot be parsed; symbols throw `TypeError`. Parsing is not schema validation or a precision guarantee. Duplicate names use the last value, and numbers follow native Number precision and range. Nested JSON-looking strings remain strings.
@@ -203,24 +203,22 @@ Input coercion and reviver exceptions propagate unchanged. Native parsing treats
 
 ## JSON serialisation
 
-`toJson(value, replacer?, space?)` serialises using the captured native `JSON.stringify` operation. `toJsonIf(value, condition?, replacer?, space?)` applies the same operation when its condition requests conversion. A skipped conversion returns the exact input without inspecting it or either option.
+`toJson(value, replacer?, space?)` serialises using the captured native `JSON.stringify` operation.
 
 <!-- prettier-ignore -->
 ```javascript
-toJson({ a: 1 });                  // => '{"a":1}'
-toJson([1, 2]);                    // => '[1,2]'
-toJson('hello');                   // => '"hello"'
-toJson(null);                      // => 'null'
-toJson(undefined);                 // => undefined
-toJson({ a: undefined });          // => '{}'
-toJson([undefined]);               // => '[null]'
-toJson(NaN);                       // => 'null'
-toJson(new Map([['a', 1]]));       // => '{}'
-toJson(new Set([1, 2]));           // => '{}'
-toJson({ a: 1, b: 2 }, ['a']);     // => '{"a":1}'
-toJson({ a: 1 }, null, 2);         // => '{\n  "a": 1\n}'
-toJsonIf({ a: 1 }, true, ['a']);   // => '{"a":1}'
-toJsonIf({ a: 1 }, false);         // => ({ a: 1 })
+toJson({ a: 1 });                // => '{"a":1}'
+toJson([1, 2]);                  // => '[1,2]'
+toJson('hello');                 // => '"hello"'
+toJson(null);                    // => 'null'
+toJson(undefined);               // => undefined
+toJson({ a: undefined });        // => '{}'
+toJson([undefined]);             // => '[null]'
+toJson(NaN);                     // => 'null'
+toJson(new Map([['a', 1]]));     // => '{}'
+toJson(new Set([1, 2]));         // => '{}'
+toJson({ a: 1, b: 2 }, ['a']);   // => '{"a":1}'
+toJson({ a: 1 }, null, 2);       // => '{\n  "a": 1\n}'
 ```
 
 Strings are encoded as strings even if they already contain JSON text. Without a replacer, top-level `undefined`, functions and symbols produce `undefined`; their object properties are omitted and array positions become `null`. Non-finite numbers become `null`. Ordinary Maps and Sets have no automatic entry/value encoding. Native `toJSON` methods apply, so a valid Date normally produces its ISO string and an invalid Date produces `null`.
@@ -231,10 +229,10 @@ A replacer callback receives `(key, value)` and the containing object as `this`,
 ```javascript
 toJson({ visible: 1, secret: 2 }, (key, value) => key === 'secret' ? undefined : value);
 // => '{"visible":1}'
-toJson(undefined, () => 42);   // => '42'
+toJson(undefined, () => 42);     // => '42'
 ```
 
-Cycles and unhandled bigints throw `TypeError`; repeated references without cycles are allowed. Getters, proxy traps, `toJSON` methods and replacers may run, mutate input or throw their original errors. Inputs and callback results are never awaited. Unlike a conversion condition, a replacer returns replacement values and has a native holder receiver; it is not a strict boolean predicate.
+Cycles and unhandled bigints throw `TypeError`; repeated references without cycles are allowed. Getters, proxy traps, `toJSON` methods and replacers may run, mutate input or throw their original errors. Inputs and callback results are never awaited. A replacer returns replacement values and receives the containing object as its native `this` receiver.
 
 The return type is `string | undefined`, even for object input, because hooks and replacers can suppress the root. Replacer values and holder objects are typed as `unknown`; narrow them before property access. Exact escaping follows the host JSON implementation, including differences in older runtimes. This utility is neither canonical JSON nor HTML-safe escaping, and adds no collection encodings, cycle markers or global polyfills.
 
@@ -268,8 +266,6 @@ Nullish values (including omitted input), primitives, boxed primitives, function
 
 The function does not depend on native `Object.fromEntries`, `Object.entries`, `Map` or `Set`. Object copying requires `Reflect.ownKeys` or `Object.getOwnPropertySymbols`; if neither exists, it throws instead of dropping possible symbol properties. Array-entry conversion remains usable. The runtime guide records optional-capability limitations.
 
-`toPlainObjectIf(value, true)` uses the same complete conversion. A false, omitted or undefined condition returns the exact original input, including strings, without inspection; predicate conditions retain the common synchronous strict-boolean rules.
-
 ## Date conversion
 
 `toDate(value)` preserves an existing Date object, including one from another realm, a subclass or an invalid Date. Their overridden conversion methods are not used. Other inputs are passed to `new Date(value)`.
@@ -285,7 +281,7 @@ isInvalidDate(toDate(undefined));      // => true
 
 Numeric values are millisecond timestamps. Prefer ISO date-time strings with an explicit timezone for portable string input. Standard date-only strings use UTC; date-time strings without a timezone use local time. Non-ISO parsing is runtime-dependent. Symbols, bigints and failed coercions can throw. Invalid text and out-of-range timestamps produce invalid Dates. The operation neither supplies the current time for missing input nor guarantees a valid date.
 
-TypeScript returns `Date` conservatively. A structurally Date-compatible input, such as a typed Proxy, may be converted to a new Date without additional input properties. Date objects, including subclass instances, still retain identity at runtime. A skipped `toDateIf(value, false)` preserves the exact input type.
+TypeScript returns `Date` conservatively. A structurally Date-compatible input, such as a typed Proxy, may be converted to a new Date without additional input properties. Date objects, including subclass instances, still retain identity at runtime.
 
 ## Symbol conversion
 
@@ -309,8 +305,8 @@ Description conversion may run user code and throw. Existing Symbol wrappers byp
 <!-- prettier-ignore -->
 ```javascript
 const entries = [['a', 1], ['b', 2], ['a', 3]];
-Array.from(toMap(entries));                      // => [['a', 3], ['b', 2]]
-Array.from(toMap({a: 1, b: 2}));                 // => [['a', 1], ['b', 2]]
+toArray(toMap(entries));                         // => [['a', 3], ['b', 2]]
+toArray(toMap({a: 1, b: 2}));                    // => [['a', 1], ['b', 2]]
 toMap([[undefined, undefined]]).has(undefined);  // => true
 toMap([['a']]);                                  // => throws TypeError
 toMap([['a', 1, 2]]);                            // => throws TypeError
@@ -333,64 +329,56 @@ Maps and Sets use native SameValueZero equality: repeated `NaN` keys or values c
 
 <!-- prettier-ignore -->
 ```javascript
-Array.from(toSet([3, 1, 3]));      // => [3, 1]
-Array.from(toSet('A😀A'));         // => ['A', '😀']
+toArray(toSet([3, 1, 3]));                       // => [3, 1]
+toArray(toSet('A😀A'));                          // => ['A', '😀']
 const input = { key: 1 };
-toMapIf(input, false) === input;   // => true
-toMapIf(input, true).get('key');   // => 1
-toSetIf(input, false) === input;   // => true
-Array.from(toSetIf(input, true));  // => [1]
+toMap(input).get('key');                         // => 1
+toArray(toSet(input));                           // => [1]
 ```
 
 Object inference includes symbol properties as well as string/number properties. A visibly optional iterator keeps inferred collection contents conservative because it may override object or indexed values. TypeScript cannot prove that a structural object type has a plain prototype or that a property is enumerable.
 
 ## Conditional conversions
 
-All `If` functions share the same contract:
-
-| Condition                                 | Behaviour                                           |
-| ----------------------------------------- | --------------------------------------------------- |
-| `true`                                    | Convert using the corresponding base function.      |
-| `false`, omitted or `undefined`           | Return the exact original value without inspection. |
-| A synchronous predicate returning `true`  | Convert after evaluating the predicate once.        |
-| A synchronous predicate returning `false` | Return the exact original value.                    |
-| Any other condition or predicate result   | Throw `TypeError`; no truthiness coercion.          |
-
-Predicates receive exactly one argument, the original value, with no explicit `this` receiver. A non-strict JavaScript function may still substitute the global object for `this`.
-
-`ConversionCondition<T>` declares `this: undefined`, so TypeScript rejects callbacks that explicitly require an object receiver. Bind such a method before passing it (for example, `policy.allow.bind(policy)`), or use an arrow that calls the method on its owner. Ordinary arrows and receiver-independent functions remain accepted.
-
-Predicates must be synchronous and return a primitive boolean. The utility rejects Promise results without awaiting them or attaching rejection handlers. Do not pass asynchronous predicates.
+Use `applyIf` from go-fns 2.0.0 or later to apply a conversion conditionally. This helper is part of the upcoming go-fns 2.0.0 release; its declarations require TypeScript 5.4 or later.
 
 <!-- prettier-ignore -->
 ```javascript
-toNumberIf('42', true);                                // => 42
-toNumberIf('42', false);                               // => '42'
-toNumberIf('42');                                      // => '42'
-toNumberIf('42', value => typeof value === 'string');  // => 42
+import { applyIf } from 'go-fns';
+import { isBlank, toNumber, parseJson } from 'go-types';
 
-toBigIntIf('invalid', false);                          // => 'invalid'
-toBigIntIf('invalid', true);                           // => throws SyntaxError
+applyIf('42', text => !isBlank(text), toNumber);               // => 42
+applyIf('invalid', false, parseJson);                          // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
 ```
 
-Predicates and conversions propagate their original exceptions. A predicate may itself mutate its input; a subsequent conversion sees that mutation. No clone or rollback is introduced. If a predicate throws or returns a non-boolean result, conversion is not attempted.
+A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
+
+Wrap conversions that need additional arguments:
+
+<!-- prettier-ignore -->
+```javascript
+import { applyIf } from 'go-fns';
+import { toJson } from 'go-types';
+
+applyIf({ a: 1, b: 2 }, true, value => toJson(value, ['a']));  // => '{"a":1}'
+```
+
+Conversion errors propagate when the conversion runs. A skipped conversion does not inspect or coerce its input.
 
 ## TypeScript
 
-Return types preserve known iterable elements, object values, supported indexed elements and Map key/value types from entry tuples where possible. `ConvertedMap<T>` and `ConvertedSet<T>` describe the collection results; unknown inputs keep unknown element types. Literal `true` conditions select the converted type; literal `false` conditions select the original type. General boolean conditions and predicates return a union of both possibilities.
+Return types preserve known iterable elements, object values, supported indexed elements and Map key/value types from entry tuples where possible. `ConvertedMap<T>` and `ConvertedSet<T>` describe the collection results; unknown inputs keep unknown element types.
 
 <!-- prettier-ignore -->
 ```ts
 const recordMap = toMap({ a: 1, b: 2 });            // Map<string, number>
 const numbers = toArray(new Set([1, 2]));            // number[]
-const converted = toNumberIf('42', true);            // number
-const original = toNumberIf('42' as const, false);   // '42'
-const maybe = toNumberIf('42', Math.random() > 0.5); // string | number
+const converted = toNumber('42');                  // number
 ```
 
-`ConvertedPlainObject<T>` describes a fresh object. Prototype-name properties and broad string-keyed objects also use `unknown`, because omitted own keys can reveal inherited values. Inferred object and entry keys are optional because TypeScript cannot prove enumerability or that a collection contains a key. Copied properties are writable even if the input is readonly. A visible optional iterator makes the result conservative. Types reject strings and other obvious unsupported inputs but cannot prove that an arbitrary structural object is plain. Skipped `toPlainObjectIf` calls preserve the original type; dynamic conditions include both possible results.
+`ConvertedPlainObject<T>` describes a fresh object. Prototype-name properties and broad string-keyed objects also use `unknown`, because omitted own keys can reveal inherited values. Inferred object and entry keys are optional because TypeScript cannot prove enumerability or that a collection contains a key. Copied properties are writable even if the input is readonly. A visible optional iterator makes the result conservative. Types reject strings and other obvious unsupported inputs but cannot prove that an arbitrary structural object is plain.
 
-A return type describes successful completion, not an absence of exceptions or a guarantee of finite, valid or application-safe content. Conversion conditions are typed as `ConversionCondition<T>`; promises and non-boolean returns are rejected at compile time as well as at runtime.
+A return type describes successful completion, not an absence of exceptions or a guarantee of finite, valid or application-safe content.
 
 ## Platform references
 
@@ -402,7 +390,7 @@ These ECMAScript references describe the native operations used by the converter
 - [Object, Boolean and Symbol](https://tc39.es/ecma262/multipage/fundamental-objects.html)
 - [String](https://tc39.es/ecma262/multipage/text-processing.html#sec-string-constructor)
 
-These references describe platform semantics. Tests exercise the specific library contracts, including collection source selection, strict pairs, Date/Symbol identity preservation and conditional conversion.
+These references describe platform semantics. Tests exercise the specific library contracts, including collection source selection, strict pairs and Date/Symbol identity preservation.
 
 ## Boxing and unboxing
 
@@ -417,8 +405,6 @@ box();                         // => undefined
 unbox(new Number(3));          // => 3
 unbox(new Boolean(false));     // => false
 unbox('text');                 // => 'text'
-boxIf(3, false);               // => 3
-unboxIf(new Number(3), true);  // => 3
 
 const object = { valueOf() { return 3; } };
 unbox(object) === object;      // => true
@@ -433,14 +419,12 @@ This is shallow conversion. Dates, prototype imitations and proxies around wrapp
 
 <!-- prettier-ignore -->
 ```javascript
-toRegExp('a.b', 'i').test('AxB');      // => true
-toRegExp('/a/i').test('a');            // => false
-toRegExp().source;                     // => '(?:)'
-toRegExp(null).source;                 // => 'null'
-toRegExp('[');                         // => throws SyntaxError
-toRegExp('a', 'gg');                   // => throws SyntaxError
-toRegExpIf('a', true, 'i').test('A');  // => true
-toRegExpIf('[', false);                // => '['
+toRegExp('a.b', 'i').test('AxB');  // => true
+toRegExp('/a/i').test('a');        // => false
+toRegExp().source;                 // => '(?:)'
+toRegExp(null).source;             // => 'null'
+toRegExp('[');                     // => throws SyntaxError
+toRegExp('a', 'gg');               // => throws SyntaxError
 ```
 
 ## Promises
@@ -458,8 +442,6 @@ const thenable = {
   }
 };
 await toPromise(thenable);     // => 4
-toPromiseIf(3, false);         // => 3
-await toPromiseIf(3, true);    // => 3
 ```
 
-`toPromiseIf` still requires a synchronous boolean condition or predicate. Skipping returns the input immediately, even when it is not a Promise. TypeScript uses `Promise<Awaited<T>>` for requested conversion. Missing `Promise` or its `resolve` operation causes a descriptive `TypeError` before input inspection; skipped calls remain usable. No polyfill or rejection handler is installed.
+TypeScript uses `Promise<Awaited<T>>`. Missing `Promise` or its `resolve` operation causes a descriptive `TypeError` before input inspection. No polyfill or rejection handler is installed.

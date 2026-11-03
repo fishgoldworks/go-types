@@ -1,6 +1,5 @@
 import T = require('go-types');
 import toJson = require('go-types/toJson');
-import toJsonIf = require('go-types/src/conversion/toJsonIf.js');
 
 type IsAny<V> = 0 extends 1 & V ? true : false;
 function expectFalse<V extends false>(): void {}
@@ -21,29 +20,8 @@ toJson(input, function (key, value) {
   void value.a;
   return typeof value === 'number' ? value + 1 : value;
 });
-expectType<string | undefined>(toJsonIf(input, true, ['a'], 2));
-expectType<typeof input>(toJsonIf(input, false, null, 2));
-expectType<typeof input>(toJsonIf(input));
-expectType<typeof input>(toJsonIf(input, undefined));
-expectType<typeof input | string | undefined>(toJsonIf(input, Math.random() > 0.5));
-expectType<typeof input | string | undefined>(
-  toJsonIf(input, function (value) {
-    expectFalse<IsAny<typeof value>>();
-    expectType<typeof input>(value);
-    expectType<undefined>(this);
-    return value.a === 1;
-  })
-);
 // @ts-expect-error serialization is not guaranteed to produce a string.
 expectType<string>(toJson(input));
-// @ts-expect-error even a serializable input can be removed by a replacer.
-expectType<string>(toJsonIf(input, true, () => undefined));
-// @ts-expect-error condition must not be truthiness-coerced.
-toJsonIf(input, 'true');
-// @ts-expect-error conditional conversion does not await a promise.
-toJsonIf(input, async () => true);
-// @ts-expect-error predicate must return a boolean.
-toJsonIf(input, () => 1);
 // @ts-expect-error callback must accept arbitrary values, not just numbers.
 toJson(input, (_key: string, value: number) => value);
 // @ts-expect-error JSON does not guarantee a particular holder shape.
@@ -52,7 +30,5 @@ toJson(input, function (this: { policy: boolean }, _key, value) {
 });
 // @ts-expect-error public indentation options are strings or numbers.
 toJson(input, null, {});
-// @ts-expect-error the second conditional argument is the condition, not a replacer list.
-toJsonIf(input, ['a']);
 // A JSON replacer has native semantics and may replace values with arbitrary objects.
 toJson(input, async () => 1);

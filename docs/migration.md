@@ -1,6 +1,6 @@
 # Migrating from 1.3.1 to 2.0.0
 
-Version 2.0.0 removes `isTypeOf` and `isThenable`, renames `isCyclic` to `isCircular` and `isFragment` to `isDocumentFragment`, retains the other 41 root functions from 1.3.1, and adds 48 functions. Several contracts also change. This guide covers the published upgrade path; the [API reference](API.md) describes the complete current contract.
+Version 2.0.0 removes `isTypeOf` and `isThenable`, renames `isCyclic` to `isCircular` and `isFragment` to `isDocumentFragment`, retains the other 41 root functions from 1.3.1, and adds 31 functions. Several contracts also change. This guide covers the published upgrade path; the [API reference](API.md) describes the complete current contract.
 
 ## Runtime and imports
 
@@ -45,11 +45,11 @@ Types.isString(value);
 Types.isArrayOf(items, (value) => value instanceof Account);
 ```
 
-The four collection checks now accept only primitive type-name strings or synchronous boolean predicates. Pass predicates directly: `isArrayOf(items, isNumber)`. For alternatives, use a predicate such as `value => typeof value === 'number' || value === null`, or compose predicates with go-fns. Literal `null`/`undefined`, boxed strings, matcher arrays and descriptor objects are not accepted.
+The four collection checks now accept only primitive type-name strings or predicates evaluated using JavaScript truthiness. Pass predicates directly: `isArrayOf(items, isNumber)`. For alternatives, use a predicate such as `value => typeof value === 'number' || value === null`, or compose predicates with go-fns. Literal `null`/`undefined`, boxed strings, matcher arrays and descriptor objects are not accepted.
 
 Every matcher is required, including both Map matchers. Use `'undefined'` to check undefined items, or `value => value === null` for null items. Valid names are `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` and `'function'`. The `'object'` name includes `null`; `'number'` excludes Number wrappers. Pass `isNumber` to include Number wrappers.
 
-Invalid or missing matchers throw before input inspection, even for empty collections or values of the wrong type. A predicate receives one value without a supplied receiver and must return a synchronous primitive boolean. Bind receiver-dependent methods or use an arrow adapter. Non-boolean results throw when reached; callback errors propagate. See [type specifications](API.md#type-specifications) for the complete contract.
+Invalid or missing matchers throw before input inspection, even for empty collections or values of the wrong type. A predicate receives one value without a supplied receiver and has its result evaluated using JavaScript truthiness. Bind receiver-dependent methods or use an arrow adapter. Truthy results match and falsy results do not. Promises are truthy without awaiting; callback errors propagate. See [type specifications](API.md#type-specifications) for the complete contract.
 
 ## Separate collection contents from non-emptiness
 
@@ -107,7 +107,7 @@ Inherited enumerable properties remain included; symbols, non-enumerable propert
 
 The published 1.3.1 package did not include conversion utilities or TypeScript declarations. The new conversions are described in the [conversion guide](conversions.md); they are not implicit extensions of the predicate functions. In particular, `toBoolean('false')` uses truthiness, `toPlainObject` creates a fresh plain object, and `parseJson` parses any JSON root with an `unknown` TypeScript result.
 
-`toPlainObject` accepts plain objects and synchronous entry pairs. Strings throw `TypeError`. Requested `toPlainObjectIf` conversions follow the same rule; skipped calls return the original input unchanged.
+`toPlainObject` accepts plain objects and synchronous entry pairs. Strings throw `TypeError`.
 
 Use `parseJson` to parse JSON text. If the result must be an object, validate it before use:
 
@@ -124,3 +124,7 @@ if (!isPlainObject(value)) {
 The parsed object is already fresh. Calling `toPlainObject` is useful only when a separate shallow copy is needed. Passing the parsed value straight to `toPlainObject` also accepts entry arrays, so that composition does not replace an object-only JSON check.
 
 Declarations cover root, focused and bundle imports. Fixed primitive/nullish checks narrow, while native identity checks, dynamic matchers and partial validators generally return `boolean` to avoid unsound false-branch narrowing. TypeScript interfaces are structural and cannot prove native identity. See the [TypeScript guidance](API.md#typescript) for module settings and narrowing boundaries.
+
+## Conditional conversion during draft upgrades
+
+The published 1.3.1 package had no conditional conversion helpers. The 2.0.0 draft’s `to*If`, `parseJsonIf`, `boxIf` and `unboxIf` functions have been removed before publication, including their subpaths. Use `applyIf(value, condition, converter)` from the upcoming go-fns 2.0.0 release instead. Omitted conditions are not supported by `applyIf`; supply a boolean or predicate explicitly. Wrap converters that need additional arguments. See [conditional conversions](conversions.md#conditional-conversions).

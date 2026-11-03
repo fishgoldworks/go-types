@@ -75,7 +75,7 @@ isArrayOf(value, 'nubmer');
 isArrayOf(value, 42);
 // @ts-expect-error descriptor objects are no longer matchers.
 isArrayOf([1], { predicate: () => true });
-// @ts-expect-error async predicates are not supported.
+// A returned Promise is truthy without awaiting its eventual value.
 isArrayOf([1], async () => true);
 if (isIteratorLike(value)) {
   // @ts-expect-error next presence does not prove the full iterator contract.
@@ -99,7 +99,6 @@ legacyObjectConversion('{}');
 // Conversion return types retain element types, original identities and conditional branches.
 import {
   toArray,
-  toArrayIf,
   toBigInt,
   toBoolean,
   toDate,
@@ -107,11 +106,7 @@ import {
   toNumber,
   toPlainObject,
   toString as convertToString,
-  toSymbol,
-  toNumberIf,
-  toDateIf,
-  toPlainObjectIf,
-  type ConversionCondition
+  toSymbol
 } from 'go-types';
 expectType<number[]>(toArray(new Set([1, 2])));
 expectType<string[]>(toArray('abc'));
@@ -128,26 +123,6 @@ const originalObject = { score: 1 };
 expectType<Partial<typeof originalObject>>(toPlainObject(originalObject));
 // @ts-expect-error JSON text is not a plain-object conversion source.
 toPlainObject('{}');
-expectType<number>(toNumberIf('1', true));
-expectType<'1'>(toNumberIf('1' as const, false));
-expectType<'1'>(toNumberIf('1' as const));
-expectType<number | string>(toNumberIf('1', Math.random() > 0.5));
-const textCondition: ConversionCondition<string> = (text) => text.length > 0;
-expectType<string | number>(toNumberIf('1', textCondition));
-// @ts-expect-error a predicate may skip conversion; the original string remains possible.
-expectType<number>(toNumberIf('1', textCondition));
-// @ts-expect-error conditions are booleans or boolean-returning predicates.
-toNumberIf('1', 'true');
-// @ts-expect-error async conversion predicates are not supported.
-toNumberIf('1', async () => true);
-// @ts-expect-error truthy return values are not boolean predicates.
-toNumberIf('1', () => 1);
-expectType<number[]>(toArrayIf(new Set([1]), true));
-expectType<Set<number>>(toArrayIf(new Set([1]), false));
-expectType<Date>(toDateIf(0, true));
-expectType<0>(toDateIf(0 as const, false));
-expectType<Partial<typeof originalObject>>(toPlainObjectIf(originalObject, true));
-expectType<1>(toPlainObjectIf(1 as const, false));
 import numberConversion from 'go-types/toNumber';
 import nestedNumberConversion from 'go-types/conversion/toNumber';
 import sourceConversion from 'go-types/src/conversion/toNumber.js';
@@ -156,7 +131,7 @@ expectType<number>(nestedNumberConversion('2'));
 expectType<number>(sourceConversion('2'));
 
 // Collection conversions infer iterable values and readonly entry tuples.
-import { toMap, toMapIf, toSet, toSetIf, type ConvertedMap, type ConvertedSet } from 'go-types';
+import { toMap, toSet, type ConvertedMap, type ConvertedSet } from 'go-types';
 import focusedMap from 'go-types/toMap';
 import legacySet from 'go-types/src/conversion/toSet.js';
 const entries = [['key', 1]] as const;
@@ -174,32 +149,15 @@ expectType<Set<[string, number]>>(toSet(new Map<string, number>()));
 expectType<Set<unknown>>(toSet({ length: 2 }));
 expectType<Set<unknown>>(toSet());
 expectType<ConvertedSet<readonly [1, 2]>>(legacySet([1, 2] as const));
-expectType<Map<'key', 1>>(toMapIf(entries, true));
-expectType<typeof entries>(toMapIf(entries, false));
-expectType<typeof entries>(toMapIf(entries));
-expectType<typeof entries | Map<'key', 1>>(toMapIf(entries, () => true));
-expectType<Set<string>>(toSetIf('abc', true));
-expectType<'abc'>(toSetIf('abc' as const, false));
-expectType<'abc'>(toSetIf('abc' as const));
-expectType<string | Set<string>>(toSetIf('abc', Math.random() > 0.5));
 // @ts-expect-error Unknown iterable entries must not silently become typed Map entries.
 expectType<Map<string, number>>(toMap(value));
 // @ts-expect-error A Map conversion preserves its key type.
 expectType<Map<number, 1>>(toMap(entries));
 // @ts-expect-error A Set conversion preserves its element type.
 expectType<Set<number>>(toSet('abc'));
-// @ts-expect-error Predicates may skip conversion and preserve the original input.
-expectType<Map<'key', 1>>(toMapIf(entries, () => true));
-// @ts-expect-error Predicates may skip conversion and preserve the original input.
-expectType<Set<string>>(toSetIf('abc', () => true));
-// @ts-expect-error Collection conversions do not accept async conditions.
-toMapIf(entries, async () => true);
-// @ts-expect-error Collection conversions do not accept truthiness coercion.
-toSetIf('abc', () => 1);
 
 const recordMapInput = { a: 1, b: 2 } as const;
 expectType<Map<string, 1 | 2>>(toMap(recordMapInput));
 expectType<Map<string, 1 | 2>>(focusedMap(recordMapInput));
-expectType<ConvertedMap<typeof recordMapInput>>(toMapIf(recordMapInput, true));
 // @ts-expect-error object keys are strings, not numeric values.
 expectType<Map<number, number>>(focusedMap(recordMapInput));

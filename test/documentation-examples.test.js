@@ -53,13 +53,14 @@ async function imported(specifier) {
   const target = typeof route.import === 'string' ? route.import : route.import.default;
   return import(pathToFileURL(path.join(root, target)).href);
 }
-for (const file of ['README.md', 'docs/API.md'])
+for (const file of ['README.md', 'docs/API.md', 'docs/conversions.md'])
   test(file + ': adoption and shared-contract examples execute; TypeScript compiles', async (t) => {
-    const text = file === 'README.md' ? read(file) : read(file).split('## Behaviour\n')[1];
+    const text = file === 'docs/API.md' ? read(file).split('## Behaviour\n')[1] : read(file);
     assert.ok(text);
     let examples = 0;
     for (const [index, block] of [...text.matchAll(/```(javascript|typescript|html)\n([\s\S]*?)\n```/g)].entries()) {
       let code = block[2];
+      if (file === 'docs/conversions.md' && !/^import .+ from ['"]go-fns['"];$/m.test(code)) continue;
       // The companion library is optional; never substitute mock combinators.
       if (/^import .+ from ['"]go-fns['"];$/m.test(code) && !process.env.GO_TYPES_GO_FNS_ROOT) {
         await t.test(

@@ -21,7 +21,7 @@ const targets = [
   'Symbol'
 ];
 for (const target of targets) {
-  for (const suffix of ['', 'If']) {
+  for (const suffix of ['']) {
     const name = 'to' + target + suffix;
     test(name + ' is a supported root function', () => {
       assert.equal(Object.hasOwn(Types, name), true);
@@ -522,109 +522,6 @@ test('toSymbol invokes string conversion on other objects and propagates errors'
   assert.throws(() => Types.toSymbol(Object.create(Symbol.prototype)), TypeError);
 });
 
-const conditionalFixtures = {
-  Json: { input: () => ({ a: 1 }), check: (value) => assert.equal(value, '{"a":1}') },
-  Array: { input: () => 'ab', check: (output) => assert.deepEqual(output, ['a', 'b']) },
-  BigInt: { input: () => '42', check: (output) => assert.equal(output, 42n) },
-  Boolean: { input: () => '', check: (output) => assert.equal(output, false) },
-  Date: { input: () => 0, check: (output) => assert.equal(output.getTime(), 0) },
-  Integer: { input: () => '4.8', check: (output) => assert.equal(output, 4) },
-  Map: { input: () => [['key', 1]], check: (output) => assert.deepEqual([...output], [['key', 1]]) },
-  Set: { input: () => [1, 1, 2], check: (output) => assert.deepEqual([...output], [1, 2]) },
-  Number: { input: () => '4.8', check: (output) => assert.equal(output, 4.8) },
-  PlainObject: { input: () => ({ a: 1 }), check: (output) => assert.deepEqual(output, { a: 1 }) },
-  String: { input: () => 4, check: (output) => assert.equal(output, '4') },
-  Symbol: {
-    input: () => 'x',
-    check: (output) => {
-      assert.equal(typeof output, 'symbol');
-      assert.equal(output.description, 'x');
-    }
-  }
-};
-for (const target of targets) {
-  const name = 'to' + target + 'If';
-  const fixture = conditionalFixtures[target];
-  test(name + ' converts when the condition is true', () => fixture.check(Types[name](fixture.input(), true)));
-  test(name + ' preserves exact input identity when false or omitted', () => {
-    const input = Object.freeze({ x: 1 });
-    assert.equal(Types[name](input, false), input);
-    assert.equal(Types[name](input), input);
-    assert.equal(Types[name](input, undefined), input);
-    assert.equal(Types[name](-0, false), -0);
-    assert.equal(Types[name](NaN, false), NaN);
-  });
-  test(name + ' calls a synchronous predicate once with the original input and no receiver', () => {
-    const input = fixture.input();
-    let calls = 0;
-    fixture.check(
-      Types[name](input, function (value) {
-        calls++;
-        assert.equal(arguments.length, 1);
-        assert.equal(value, input);
-        assert.equal(this, undefined);
-        return true;
-      })
-    );
-    assert.equal(calls, 1);
-  });
-  test(name + ' skips all input inspection when its predicate returns false', () => {
-    const revocable = Proxy.revocable({}, {});
-    revocable.revoke();
-    let calls = 0;
-    assert.equal(
-      Types[name](revocable.proxy, () => {
-        calls++;
-        return false;
-      }),
-      revocable.proxy
-    );
-    assert.equal(calls, 1);
-  });
-  test(name + ' rejects non-boolean conditions without coercion', () => {
-    for (const condition of [null, 0, 1, '', 'false', {}, [], new Boolean(false), Symbol('x'), 1n]) {
-      assert.throws(() => Types[name](fixture.input(), condition), TypeError);
-    }
-  });
-  test(name + ' rejects non-boolean predicate results, including promises', () => {
-    for (const result of [undefined, null, 0, 1, 'true', {}, [], new Boolean(true), Promise.resolve(true)]) {
-      assert.throws(() => Types[name](fixture.input(), () => result), TypeError);
-    }
-    assert.throws(() => Types[name](fixture.input(), async () => true), TypeError);
-  });
-  test(name + ' propagates the original predicate error', () => {
-    const error = new Error('predicate failed');
-    assert.throws(
-      () =>
-        Types[name](fixture.input(), () => {
-          throw error;
-        }),
-      (e) => e === error
-    );
-  });
-}
-test('conditional conversions do not pre-convert invalid values on a false condition', () => {
-  assert.equal(Types.toBigIntIf('bad', false), 'bad');
-  assert.equal(Types.toArrayIf(null, false), null);
-  const symbol = Symbol('x');
-  assert.equal(Types.toNumberIf(symbol, false), symbol);
-  assert.throws(() => Types.toBigIntIf('bad', true), SyntaxError);
-  assert.throws(() => Types.toArrayIf(null, true), TypeError);
-  assert.throws(() => Types.toNumberIf(symbol, true), TypeError);
-});
-test('conditional array conversion does not advance an iterator when skipped', () => {
-  let calls = 0;
-  function* values() {
-    calls++;
-    yield 1;
-  }
-  const value = values();
-  assert.equal(Types.toArrayIf(value, false), value);
-  assert.equal(calls, 0);
-  assert.deepEqual(Types.toArrayIf(value, true), [1]);
-  assert.equal(calls, 1);
-});
-
 test('conversion functions retain captured built-ins after initialisation', () => {
   const result = spawnSync(
     process.execPath,
@@ -736,29 +633,4 @@ test('conversions that need object properties reject revoked proxies', () => {
 test('toString supports boxed bigint and boolean values', () => {
   assert.equal(Types.toString(Object(12n)), '12');
   assert.equal(Types.toString(new Boolean(false)), 'false');
-});
-test('a conditional conversion sees deliberate input mutation by its predicate', () => {
-  const input = {
-    number: 1,
-    valueOf() {
-      return this.number;
-    }
-  };
-  const result = Types.toNumberIf(input, (value) => {
-    value.number = 2;
-    return true;
-  });
-  assert.equal(result, 2);
-  assert.equal(input.number, 2);
-});
-test('invalid conditional results do not run conversion hooks', () => {
-  let conversions = 0;
-  const input = {
-    valueOf() {
-      conversions++;
-      return 1;
-    }
-  };
-  assert.throws(() => Types.toNumberIf(input, () => 'true'), TypeError);
-  assert.equal(conversions, 0);
 });

@@ -235,7 +235,6 @@ module.exports = function optionalApiChecks() {
       2,
       'JSON reviver'
     );
-    equal(api.parseJsonIf('[', false), '[', 'skipped invalid JSON');
     equal(api.box(null), null, 'box preserves null');
     equal(Number.prototype.valueOf.call(api.box(3)), 3, 'box number');
     equal(typeof api.box(held.symbolValue), 'object', 'box held symbol');
@@ -270,17 +269,12 @@ module.exports = function optionalApiChecks() {
         throw Error('must not inspect');
       }
     };
-    equal(api.toPromiseIf(hostile, false), hostile, 'skipped Promise conversion');
     if (absent('Promise') || absent('Promise.resolve')) {
       throws(() => api.toPromise(hostile), 'toPromise requires native Promise.resolve support.');
-      throws(() => api.toPromiseIf(hostile, true), 'toPromise requires native Promise.resolve support.');
     } else equal(api.toPromise(held.promise), held.promise, 'native Promise identity');
     throws(() => api.toPlainObject('{"a":1}'));
     throws(() => api.toPlainObject('{'));
-    throws(() => api.toPlainObjectIf('{"a":1}', true));
-    equal(api.toPlainObjectIf('{"a":1}', false), '{"a":1}', 'skipped plain conversion preserves JSON text');
     equal(api.toPlainObject([['a', 1]]).a, 1, 'plain entry conversion without optional capabilities');
-    equal(api.toPlainObjectIf(held.map, false), held.map, 'skipped plain conversion preserves identity');
     const missingKeys = (absent('Reflect') || absent('Reflect.ownKeys')) && absent('Object.getOwnPropertySymbols');
     if (missingKeys) {
       throws(() => api.toPlainObject({ a: 1 }));
@@ -371,7 +365,25 @@ module.exports = function optionalApiChecks() {
         true,
         'direct predicate'
       );
-      throws(() => check(() => 1));
+      equal(
+        check(() => 1),
+        true,
+        'truthy predicate'
+      );
+      equal(
+        check(() => 0),
+        false,
+        'falsy predicate'
+      );
+      equal(
+        check(() => ({
+          get then() {
+            throw Error('must not inspect');
+          }
+        })),
+        true,
+        'opaque predicate result'
+      );
       throws(() => check(new String('number')));
       throws(() => check({ predicate: api.isNumber }));
     }
@@ -409,31 +421,11 @@ module.exports = function optionalApiChecks() {
       ['BigInt', 'toBigInt', 'BigInt', 1],
       ['Array.from', 'toArray', 'array', []]
     ]) {
-      const original = {
-        valueOf() {
-          throw Error('must not coerce skipped input');
-        }
-      };
-      equal(api[name + 'If'](original, false), original, name + ' skipped conversion');
-      equal(api[name + 'If'](original), original, name + ' omitted condition');
-      throws(() => api[name + 'If'](original, 'invalid'));
-      const failure = new Error('predicate error');
-      let caught;
-      try {
-        api[name + 'If'](original, () => {
-          throw failure;
-        });
-      } catch (error) {
-        caught = error;
-      }
-      equal(caught, failure, name + ' predicate error identity');
       if (absent(native)) {
         const message = 'Native ' + description + ' conversion is unavailable in this runtime.';
         throws(() => api[name](argument), message);
-        throws(() => api[name + 'If'](original, true), message);
       } else if (native === 'Set' && absent('Set.prototype.add')) {
         throws(() => api[name](argument));
-        throws(() => api[name + 'If'](original, true));
       } else {
         const value = api[name](argument);
         equal(value !== undefined, true, name + ' native conversion');

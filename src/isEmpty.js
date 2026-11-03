@@ -13,10 +13,11 @@ const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'si
 /**
  * Checks whether a value is nullish, an empty string, or an empty supported collection.
  *
- * Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw
- * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
- * loading or checks of other supported values. If a detected collection lacks the required native
- * size or iteration operation, the check throws `TypeError`.
+ * Check the expected type before using negation to require contents. Uses lengths, collection
+ * sizes or dictionary keys. Unsized iterators and iterables throw `TypeError`; getters and proxy
+ * traps may run. Unavailable native collection types do not prevent loading or checks of other
+ * supported values. If a detected collection lacks the required native size or iteration
+ * operation, the check throws `TypeError`.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is nullish, an empty string, or an empty supported
@@ -29,6 +30,7 @@ const setSize = getNativeGetter(typeof Set === 'function' ? Set : undefined, 'si
  * @example isEmpty(new Map());            // => true
  * @example isEmpty(Object.create(null));  // => true
  * @example isEmpty([null]);               // => false
+ * @example isEmpty(false);                // => false
  */
 function isEmpty(value) {
   if (value === null || value === undefined) return true;

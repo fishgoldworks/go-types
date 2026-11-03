@@ -35,7 +35,7 @@ if (!setBrand && prototype) {
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ensuresetvalue
  * @example ensureSet().size;                                                          // => 0
  * @example ensureSet("read").has("read");                                             // => true
- * @example Array.from(ensureSet([1, 2, 1]));                                          // => [1,2]
+ * @example toArray(ensureSet([1, 2, 1]));                                             // => [1,2]
  * @example ensureSet(null).has(null);                                                 // => true
  * @example ensureSet(undefined).has(undefined);                                       // => true
  * @example (()=>{const values=new Set([1,2]);return ensureSet(values)===values;})();  // => true

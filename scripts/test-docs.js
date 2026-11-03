@@ -141,22 +141,22 @@ test('return descriptions identify conversion results without leaked native func
   assert.match(description, /\bstring\b/, 'String conversion must describe its string result');
 });
 
-test('conditional converter tooltips include the requested conversion boundaries', () => {
+test('converter tooltips include their conversion boundaries', () => {
   const ts = require('typescript');
   const file = path.join(root, 'index.d.ts');
   const program = ts.createProgram([file], { target: ts.ScriptTarget.ES2020, noEmit: true });
   const checker = program.getTypeChecker();
   const required = {
-    toArrayIf: /Consumes iterable input/,
-    toBigIntIf: /Fractional numbers and invalid integer text throw/,
-    toBooleanIf: /truthiness rather than parsing boolean text/,
-    toDateIf: /May return an invalid Date/,
-    toIntegerIf: /Does not guarantee a finite or safe integer/,
-    toJsonIf: /Cycles and unhandled bigints throw/,
-    toNumberIf: /lose bigint precision/,
-    toPlainObjectIf: /fresh ordinary object/,
-    toStringIf: /including for boxed symbols/,
-    toSymbolIf: /unboxes wrappers/
+    toArray: /Consumes iterable input/,
+    toBigInt: /Fractional numbers and invalid integer text throw/,
+    toBoolean: /truthiness rather than parsing boolean text/,
+    toDate: /May return an invalid Date/,
+    toInteger: /Does not guarantee a finite or safe integer/,
+    toJson: /Cycles and unhandled bigints throw/,
+    toNumber: /lose bigint precision/,
+    toPlainObject: /fresh ordinary object/,
+    toString: /including for boxed symbols/,
+    toSymbol: /unboxes wrappers/
   };
   const seen = new Set();
   function visit(node) {

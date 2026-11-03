@@ -197,50 +197,6 @@ test('toPromise retains native rejection and synchronous error distinctions', as
     (e) => e === error
   );
 });
-for (const [name, input, expected] of [
-  ['box', 3, 3],
-  ['unbox', new Number(3), 3],
-  ['toRegExp', 'a', 'a'],
-  ['toPromise', 3, 3]
-]) {
-  test(name + 'If obeys strict, synchronous conditions and skips without inspection', async () => {
-    const fn = T[name + 'If'];
-    const normalize = (value) =>
-      name === 'box' ? Number.prototype.valueOf.call(value) : name === 'toRegExp' ? value.source : value;
-    assert.equal(normalize(await fn(input, true)), expected);
-    let calls = 0;
-    assert.equal(
-      normalize(
-        await fn(input, function (value) {
-          assert.equal(this, undefined);
-          assert.equal(value, input);
-          calls++;
-          return true;
-        })
-      ),
-      expected
-    );
-    assert.equal(calls, 1);
-    const revoked = Proxy.revocable({}, {});
-    revoked.revoke();
-    for (const condition of [false, undefined, () => false]) assert.equal(fn(revoked.proxy, condition), revoked.proxy);
-    for (const condition of [null, 1, 'true', new Boolean(true), () => undefined, async () => true])
-      assert.throws(() => fn(input, condition), TypeError);
-    const error = new Error('predicate');
-    assert.throws(
-      () =>
-        fn(input, () => {
-          throw error;
-        }),
-      (e) => e === error
-    );
-  });
-}
-test('toRegExpIf puts flags after the condition and skips invalid flags', () => {
-  assert.equal(T.toRegExpIf('a', true, 'i').test('A'), true);
-  assert.equal(T.toRegExpIf('[', false, 'gg'), '[');
-});
-
 for (const backend of [false, true]) {
   for (const constructor of ['Symbol', 'BigInt']) {
     for (const mode of ['deleted', 'undefined']) {

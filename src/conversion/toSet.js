@@ -19,12 +19,12 @@ const NativeSet = typeof Set === 'function' ? Set : undefined;
  * Getter, proxy and iterator errors propagate. Missing native Set throws before conversion; object
  * copying requires symbol-enumeration support.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tosetvalue
- * @example Array.from(toSet([3, 1, 3]));            // => [3,1]
- * @example Array.from(toSet('A😀A'));               // => ["A","😀"]
- * @example Array.from(toSet({a: 1, b: 2, c: 1}));   // => [1,2]
- * @example Array.from(toSet({0: 'x', length: 1}));  // => ["x",1]
- * @example toSet().size;                            // => 0
- * @example toSet(null).size;                        // => 0
+ * @example toArray(toSet([3, 1, 3]));             // => [3,1]
+ * @example toArray(toSet('A😀A'));                // => ["A","😀"]
+ * @example toArray(toSet({a: 1, b: 2, c: 1}));    // => [1,2]
+ * @example toArray(toSet({0: 'x', length: 1}));   // => ["x",1]
+ * @example toSet().size;                          // => 0
+ * @example toSet(null).size;                      // => 0
  */
 function toSet(value) {
   if (!NativeSet) throw new TypeError('Native Set conversion is unavailable in this runtime.');

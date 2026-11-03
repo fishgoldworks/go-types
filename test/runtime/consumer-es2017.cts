@@ -17,15 +17,9 @@ if (copied === record || copied.a !== 1) throw new Error('ES2017 object copy fai
 const entries = [['key', 1]] as const;
 const convertedMap: Map<'key', 1> = Types.toMap(entries);
 const convertedSet: Set<number> = Types.toSet([1, 1, 2]);
-const skippedEntries: typeof entries = Types.toMapIf(entries, false);
-const skippedText: 'aba' = Types.toSetIf('aba' as const, false);
 if (
   convertedMap.get('key') !== 1 ||
   convertedSet.size !== 2 ||
-  skippedEntries !== entries ||
-  skippedText !== 'aba' ||
-  Types.toMapIf(entries, true).get('key') !== 1 ||
-  Types.toSetIf('aba', true).size !== 2 ||
   Types.toMap().size !== 0 ||
   Types.toSet(null).size !== 0
 ) {
@@ -40,9 +34,7 @@ try {
 } catch (error) {
   rejectedText = error instanceof TypeError;
 }
-const unchangedText: typeof scalarText = Types.toPlainObjectIf(scalarText, false);
-const skippedPredicateText: typeof scalarText = Types.toPlainObjectIf(scalarText, () => false);
-if (!rejectedText || unchangedText !== scalarText || skippedPredicateText !== scalarText) {
+if (!rejectedText) {
   throw new Error('ES2017 string rejection or skipped conversion failed');
 }
 
@@ -60,20 +52,14 @@ const optionalArrayInput: OptionalArrayIterator = {
 const optionalArrayResult: unknown[] = Types.toArray(optionalArrayInput);
 // @ts-expect-error a present optional iterator overrides the indexed number type.
 const optionalArrayNumbers: number[] = Types.toArray(optionalArrayInput);
-if (optionalArrayResult[0] !== 'text' || Types.toArrayIf(optionalArrayInput, false) !== optionalArrayInput) {
+if (optionalArrayResult[0] !== 'text') {
   throw new Error('ES2017 optional iteration declaration/behaviour failed');
 }
 
 const recordMapInput = { a: 1, b: 2 } as const;
 const recordMap: Map<string, 1 | 2> = Types.toMap(recordMapInput);
 const numericRecordMap: Map<string, string> = Types.toMap({ 42: 'answer' });
-if (
-  recordMap.get('a') !== 1 ||
-  recordMap.get('b') !== 2 ||
-  numericRecordMap.get('42') !== 'answer' ||
-  Types.toMapIf(recordMapInput, true).get('a') !== 1 ||
-  Types.toMapIf(recordMapInput, false) !== recordMapInput
-) {
+if (recordMap.get('a') !== 1 || recordMap.get('b') !== 2 || numericRecordMap.get('42') !== 'answer') {
   throw new Error('ES2017 record Map conversion failed');
 }
 
@@ -118,15 +104,7 @@ if (arbitraryMap.get(arbitraryMapKey) !== 'value') throw new Error('ES2017 arbit
 // JSON options and conditional inference must work without DOM or newer native declarations.
 const jsonInput = { a: 1, b: 2 };
 const jsonText: string | undefined = Types.toJson(jsonInput, ['a'] as const, 2);
-const jsonOriginal: typeof jsonInput = Types.toJsonIf(jsonInput, false);
-const jsonConverted: typeof jsonInput | string | undefined = Types.toJsonIf(
-  jsonInput,
-  (value) => value.a === 1,
-  function (_key, value) {
-    return typeof value === 'number' ? value + 1 : value;
-  }
-);
-if (jsonText !== '{\n  "a": 1\n}' || jsonOriginal !== jsonInput || jsonConverted !== '{"a":2,"b":3}') {
+if (jsonText !== '{\n  "a": 1\n}') {
   throw new Error('ES2017 JSON serialization contract failed');
 }
 
@@ -136,24 +114,16 @@ const unboxedNumber = Types.unbox(boxedNumber);
 const pattern: RegExp = Types.toRegExp('a', 'i');
 const nativePromise = Promise.resolve(3);
 const wrappedPromise: Promise<number> = Types.toPromise(nativePromise);
-const skippedPromise: 3 = Types.toPromiseIf(3 as const, false);
-if (
-  unboxedNumber !== 3 ||
-  boxedNull !== null ||
-  !pattern.test('A') ||
-  wrappedPromise !== nativePromise ||
-  skippedPromise !== 3
-) {
+if (unboxedNumber !== 3 || boxedNull !== null || !pattern.test('A') || wrappedPromise !== nativePromise) {
   throw new Error('ES2017 wrapper, regex and Promise conversion failed');
 }
 
 const parsedJson: unknown = Types.parseJson('42');
-const skippedJson: 'invalid' = Types.parseJsonIf('invalid' as const, false);
 const revivedJson: unknown = Types.parseJson('{"a":1}', function (key, value, context) {
   const source: string | undefined = context && context.source;
   if (key === 'a' && source !== undefined && source !== '1') throw Error('Unexpected native source context');
   return key === '' ? 'root' : value;
 });
-if (parsedJson !== 42 || skippedJson !== 'invalid' || revivedJson !== 'root') {
+if (parsedJson !== 42 || revivedJson !== 'root') {
   throw Error('ES2017 JSON parsing contract failed');
 }

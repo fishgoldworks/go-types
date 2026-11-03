@@ -15,11 +15,11 @@ const trunc = typeof Math.trunc === 'function' ? Math.trunc : (value) => (value 
  * @throws {*} Symbols and failed object conversions can throw. `NaN` and infinity are returned
  * rather than rejected.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tointegervalue
- * @example toInteger('12.9');                 // => 12
- * @example toInteger(-12.9);                  // => -12
- * @example Number.isNaN(toInteger('12px'));   // => true
- * @example Object.is(toInteger(-0.5), -0);    // => true
- * @example toInteger('1e3');                  // => 1000
+ * @example toInteger('12.9');               // => 12
+ * @example toInteger(-12.9);                // => -12
+ * @example isNaN(toInteger('12px'));        // => true
+ * @example Object.is(toInteger(-0.5), -0);  // => true
+ * @example toInteger('1e3');                // => 1000
  */
 function toInteger(value) {
   // Convert the whole value before truncating: '12px' must not become 12.

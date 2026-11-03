@@ -14,10 +14,11 @@ const nonSpace = /\S/;
  * Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection
  * containing only nullish values.
  *
- * Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw
- * `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent
- * loading or checks of other supported values. If a detected collection lacks the required native
- * size or iteration operation, the check throws `TypeError`.
+ * Check for a string before using negation to require text. Shallow and non-consuming. Map checks
+ * inspect values. Unsized iterators and iterables throw `TypeError`; getters and proxy traps may
+ * run. Unavailable native collection types do not prevent loading or checks of other supported
+ * values. If a detected collection lacks the required native size or iteration operation, the
+ * check throws `TypeError`.
  *
  * @param {*} value The value to check.
  * @returns {boolean} `true` if the value is nullish, an empty or whitespace-only string, or a
@@ -30,6 +31,7 @@ const nonSpace = /\S/;
  * @example isBlank(new Map([["key",null]]));  // => true
  * @example isBlank([""]);                     // => false
  * @example isBlank(0);                        // => false
+ * @example isBlank(['   ']);                  // => false
  */
 function isBlank(value) {
   if (value === null || value === undefined) return true;

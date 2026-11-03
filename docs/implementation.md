@@ -3,7 +3,7 @@
 | Location                                                               | Responsibility                                                                                                                                               |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/`                                                                 | Focused type checks, collection matcher validation and cycle traversal.                                                                                      |
-| `src/conversion/`                                                      | Explicit conversions and their conditional variants; see the public inventory in `scripts/exports.json`.                                                     |
+| `src/conversion/`                                                      | Explicit conversions; see the public inventory in `scripts/exports.json`.                                                                                    |
 | `src/util/nativeTypes.js`                                              | Optional once-only Node classifier discovery; browser code needs no static Node import.                                                                      |
 | `src/util/`                                                            | Private shared helpers; no public import guarantee.                                                                                                          |
 | `index.js`                                                             | Development aggregate loading canonical source through the public inventory.                                                                                 |
@@ -27,6 +27,6 @@
 | `scripts/test-package.js`                                              | Clean installed-tarball, import and declaration checks without rebuilding or repacking.                                                                      |
 | `test/`, `test/browser/`                                               | Public-behaviour, documentation, import, declaration and browser tests.                                                                                      |
 
-Public functions have one implementation. Conditional variants delegate to their base conversion after the shared strict condition check. Source-directory compatibility imports are export-map aliases, not separate implementations. The documentation and entry manifests are checked against the real public API.
+Public functions have one implementation. Source-directory compatibility imports are export-map aliases, not separate implementations. The documentation and entry manifests are checked against the real public API.
 
 See [project-design.md](project-design.md) for the contracts, [project-testing.md](project-testing.md) for contract test coverage, and [CONTRIBUTING.md](../CONTRIBUTING.md) for generation and release-verification commands.

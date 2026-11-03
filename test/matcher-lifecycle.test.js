@@ -57,7 +57,7 @@ test('predicates retain live closure state across independent operations', () =>
   assert.equal(T.isArrayOf([2], check), true);
 });
 
-test('invalid predicate results are rejected without reading then or coercion hooks', () => {
+test('truthy predicate results are accepted without reading then or coercion hooks', () => {
   let reads = 0;
   const value = Object.defineProperties(
     {},
@@ -76,6 +76,9 @@ test('invalid predicate results are rejected without reading then or coercion ho
       }
     }
   );
-  assert.throws(() => T.isArrayOf([1], () => value), TypeError);
+  assert.equal(
+    T.isArrayOf([1], () => value),
+    true
+  );
   assert.equal(reads, 0);
 });

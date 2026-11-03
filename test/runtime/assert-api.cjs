@@ -11,6 +11,23 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     'isNonNullish',
     'isObjectLike',
     'isNonFunctionObject',
+    'toArrayIf',
+    'toBigIntIf',
+    'toBooleanIf',
+    'toDateIf',
+    'toIntegerIf',
+    'toJsonIf',
+    'toMapIf',
+    'toNumberIf',
+    'toPlainObjectIf',
+    'toSetIf',
+    'toStringIf',
+    'toSymbolIf',
+    'boxIf',
+    'unboxIf',
+    'toRegExpIf',
+    'toPromiseIf',
+    'parseJsonIf',
     'ensureArrayIf',
     'ensureSetIf',
     'ensureMap',
@@ -243,12 +260,29 @@ module.exports = function assertAPI(T, PromiseConstructor) {
         (error) => error.name === 'TypeError'
       );
     }
-    for (const result of [1, new Boolean(true), Promise.resolve(true)]) {
-      assert.throws(
-        () => check(() => result),
-        (error) => error.name === 'TypeError'
+    for (const value of [1, 'false', [], {}, new Boolean(false), LocalPromise.resolve(false)]) {
+      assert.strictEqual(
+        check(() => value),
+        true
       );
     }
+    for (const value of [undefined, null, 0, NaN, ''])
+      assert.strictEqual(
+        check(() => value),
+        false
+      );
+    const opaque = new Proxy(
+      {},
+      {
+        get() {
+          throw Error('must not inspect predicate results');
+        }
+      }
+    );
+    assert.strictEqual(
+      check(() => opaque),
+      true
+    );
     const failure = {};
     assert.throws(
       () =>
@@ -322,20 +356,7 @@ module.exports = function assertAPI(T, PromiseConstructor) {
       () => T.toPlainObject(text),
       (error) => error.name === 'TypeError'
     );
-    assert.throws(
-      () => T.toPlainObjectIf(text, true),
-      (error) => error.name === 'TypeError'
-    );
-    assert.strictEqual(T.toPlainObjectIf(text, false), text);
-    assert.strictEqual(T.toPlainObjectIf(text), text);
-    assert.strictEqual(
-      T.toPlainObjectIf(text, function () {
-        return false;
-      }),
-      text
-    );
   }
-  assert.strictEqual(T.toPlainObjectIf(null, false), null);
   let plainClosed = false;
   assert.throws(
     () =>
@@ -428,42 +449,19 @@ module.exports = function assertAPI(T, PromiseConstructor) {
     }
   };
   for (const entry of conversions) {
-    const name = entry[0],
-      conditional = name + 'If';
+    const name = entry[0];
     checked.add(name);
-    checked.add(conditional);
     assert.strictEqual(entry[2](T[name](entry[1])), entry[3], name);
-    assert.strictEqual(entry[2](T[conditional](entry[1], true)), entry[3], conditional);
-    assert.strictEqual(T[conditional](untouched, false), untouched);
-    assert.strictEqual(
-      T[conditional](untouched, () => false),
-      untouched
-    );
   }
   checked.add('toBigInt');
-  checked.add('toBigIntIf');
-  assert.strictEqual(T.toBigIntIf(untouched, false), untouched);
-  assert.strictEqual(
-    T.toBigIntIf(untouched, () => false),
-    untouched
-  );
   if (typeof BigInt === 'function') {
     assert.strictEqual(T.toBigInt('9007199254740993').toString(), '9007199254740993');
-    assert.strictEqual(T.toBigIntIf('42', true).toString(), '42');
   } else {
     const unsupported = (error) =>
       error.name === 'TypeError' && error.message === 'Native BigInt conversion is unavailable in this runtime.';
     assert.throws(() => T.toBigInt(untouched), unsupported);
-    assert.throws(() => T.toBigIntIf(untouched, true), unsupported);
   }
   const applicationError = Error('application error');
-  assert.throws(
-    () =>
-      T.toNumberIf(untouched, () => {
-        throw applicationError;
-      }),
-    (error) => error === applicationError
-  );
   assert.throws(
     () =>
       T.isArrayOf(

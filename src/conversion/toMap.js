@@ -19,8 +19,8 @@ const mapInput = require('../util/mapInput');
  * Entry validation errors close the outer iterator. Missing native Map throws before conversion;
  * object copying requires symbol-enumeration support.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#tomapvalue
- * @example Array.from(toMap({a: 1, b: 2}));                                               // => [["a",1],["b",2]]
- * @example Array.from(toMap([['a', 1], ['b', 2], ['a', 3]]));                             // => [["a",3],["b",2]]
+ * @example toArray(toMap({a: 1, b: 2}));                                                  // => [["a",1],["b",2]]
+ * @example toArray(toMap([['a', 1], ['b', 2], ['a', 3]]));                                // => [["a",3],["b",2]]
  * @example (() => { const key = Symbol('key'); return toMap({[key]: 2}).get(key); })();   // => 2
  * @example toMap([[undefined, undefined]]).has(undefined);                                // => true
  * @example toMap().size;                                                                  // => 0

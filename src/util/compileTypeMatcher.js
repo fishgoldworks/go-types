@@ -18,14 +18,8 @@ function compileTypeMatcher(matcher) {
     const check = typeChecks[matcher];
     if (check) return check;
   } else if (typeof matcher === 'function') {
-    return (value) => {
-      const result = matcher(value);
-      if (typeof result !== 'boolean') {
-        throw new TypeError('A type predicate must return a synchronous primitive boolean.');
-      }
-      return result;
-    };
+    return (value) => !!matcher(value);
   }
-  throw new TypeError('Expected a native typeof name or a synchronous boolean predicate.');
+  throw new TypeError('Expected a native typeof name or a synchronous predicate.');
 }
 module.exports = compileTypeMatcher;

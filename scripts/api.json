@@ -233,12 +233,16 @@
       {
         "expression": "isEmpty([null])",
         "expected": false
+      },
+      {
+        "expression": "isEmpty(false)",
+        "expected": false
       }
     ],
     "notes": "Strings, Maps and Sets, and validated array-like lengths are checked first. For other inputs, callable iterator methods or `next` take precedence over dictionary keys and cause `TypeError`. These methods are detected but never called. This also applies to plain dictionaries exposing those capabilities.\n\nRemaining plain dictionaries are empty when they have no own enumerable string keys. Unsupported values, such as numbers or Dates, return `false`. Property getters and proxy traps can still run: avoiding iteration does not guarantee a check without side effects.\n\nHandle iteration explicitly when consumption is intended. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
     "summaryReturn": "`true` if the value is nullish, an empty string, or an empty supported collection; otherwise `false`.",
-    "description": "Checks strings and [supported collections](#empty-and-blank-values) without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption.",
-    "tooltip": "Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
+    "description": "Checks strings and [supported collections](#empty-and-blank-values) without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption. Check the expected type first when requiring a non-empty string or collection. Item validity is a separate check.",
+    "tooltip": "Check the expected type before using negation to require contents. Uses lengths, collection sizes or dictionary keys. Unsized iterators and iterables throw `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
     "errors": "`TypeError` for unsized iterators or iterables. Property getters and proxy traps may throw. See [Empty and blank values](#empty-and-blank-values)."
   },
   {
@@ -266,12 +270,16 @@
       {
         "expression": "isBlank(0)",
         "expected": false
+      },
+      {
+        "expression": "isBlank(['   '])",
+        "expected": false
       }
     ],
     "notes": "Uses the same input order and unsized-input errors as `isEmpty`. Map checks examine values, Set checks examine items, and dictionary checks examine own enumerable string-keyed values. Iterator capabilities take precedence over plain-dictionary handling.\n\nThe check is shallow: every inspected value must be `null` or `undefined`. Empty strings and empty objects inside a collection are not nullish. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
     "summaryReturn": "`true` if the value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values; otherwise `false`.",
-    "description": "Accepts nullish values, empty or whitespace-only strings, and [supported collections](#empty-and-blank-values) whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[\"\"]` is not. Unsized iterators and iterables throw instead of being consumed.",
-    "tooltip": "Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
+    "description": "Accepts nullish values, empty or whitespace-only strings, and [supported collections](#empty-and-blank-values) whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[\"\"]` is not. Unsized iterators and iterables throw instead of being consumed. Check for a string before using negation to require text.",
+    "tooltip": "Check for a string before using negation to require text. Shallow and non-consuming. Map checks inspect values. Unsized iterators and iterables throw `TypeError`; getters and proxy traps may run. Unavailable native collection types do not prevent loading or checks of other supported values. If a detected collection lacks the required native size or iteration operation, the check throws `TypeError`.",
     "errors": "`TypeError` for unsized iterators or iterables. Property getters and proxy traps may throw. See [Empty and blank values](#empty-and-blank-values)."
   },
   {
@@ -707,7 +715,7 @@
         "expected": true
       },
       {
-        "expression": "Array.from(ensureSet([1, 2, 1]))",
+        "expression": "toArray(ensureSet([1, 2, 1]))",
         "expected": [1, 2]
       },
       {
@@ -749,9 +757,9 @@
     ],
     "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Length is read once. Empty slots use ordinary indexed reads, including inherited values; a missing value is `undefined`. Matching stops at the first failure.",
     "summaryReturn": "`true` if the value is an array and every element matches the matcher, including an empty array; otherwise `false`.",
-    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
-    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates.",
-    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
+    "description": "Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and have their results evaluated using JavaScript truthiness. Empty collections pass without calling predicates. Returned promises are truthy and are not awaited. The check itself returns a primitive boolean.",
+    "errors": "`TypeError` for invalid or missing matchers. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isArrayLike",
@@ -803,9 +811,9 @@
     ],
     "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Length is read once. Empty slots use ordinary indexed reads, including inherited values; a missing value is `undefined`. Matching stops at the first failure.",
     "summaryReturn": "`true` if the value is array-like and every indexed value matches the matcher, including an empty input; otherwise `false`.",
-    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
-    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates.",
-    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
+    "description": "Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and have their results evaluated using JavaScript truthiness. Empty collections pass without calling predicates. Returned promises are truthy and are not awaited. The check itself returns a primitive boolean.",
+    "errors": "`TypeError` for invalid or missing matchers. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isPair",
@@ -1406,9 +1414,9 @@
     ],
     "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Uses captured native iteration and ignores overridden instance iterators. Iteration is live; predicates must not mutate the collection. Matching stops at the first failure.",
     "summaryReturn": "`true` if the value is a `Set` whose items all match the matcher, including an empty `Set`; otherwise `false`.",
-    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
-    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`.",
-    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
+    "description": "Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and have their results evaluated using JavaScript truthiness. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`. Returned promises are truthy and are not awaited. The check itself returns a primitive boolean.",
+    "errors": "`TypeError` for invalid or missing matchers. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "isMapOf",
@@ -1431,9 +1439,9 @@
     ],
     "notes": "A type-name string uses native `typeof`: `\"object\"` includes `null`, and `\"number\"` excludes Number wrappers. Pass `isNumber` to include Number wrappers. Functions are always predicates; for instance checks, use `value => value instanceof Account`. Uses captured native iteration and ignores overridden instance iterators. Iteration is live; predicates must not mutate the collection. Matching stops at the first failure. Both matchers are validated in key/value order before inspection; each key is checked before its associated value.",
     "summaryReturn": "`true` if the value is a `Map` whose keys and values match their respective matchers, including an empty `Map`; otherwise `false`.",
-    "description": "Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
-    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and must return a synchronous primitive boolean. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`.",
-    "errors": "`TypeError` for invalid or missing matchers, or a non-boolean predicate result. Callback, property-access and native iteration errors propagate."
+    "description": "Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.",
+    "tooltip": "Matchers are required and validated before inspecting the collection. Predicates receive one value with no supplied receiver and have their results evaluated using JavaScript truthiness. Empty collections pass without calling predicates. Unavailable native constructors return `false`; a detected collection without the required native iteration operation throws `TypeError`. Returned promises are truthy and are not awaited. The check itself returns a primitive boolean.",
+    "errors": "`TypeError` for invalid or missing matchers. Callback, property-access and native iteration errors propagate."
   },
   {
     "name": "toArray",
@@ -1470,28 +1478,6 @@
     "errors": "TypeError for nullish or unsupported input, malformed iterators or invalid array-like lengths. Oversized array results can throw RangeError. Getter, proxy and iterator errors propagate. Missing native Array.from throws before conversion; object copying requires symbol-enumeration support."
   },
   {
-    "name": "toArrayIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts supported iterable, plain object or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toArray` contract.",
-    "returns": "Array|*",
-    "examples": [
-      {
-        "expression": "toArrayIf('ab', true)",
-        "expected": ["a", "b"]
-      },
-      {
-        "expression": "toArrayIf('ab', false)",
-        "expected": "ab"
-      }
-    ],
-    "summaryReturn": "A new shallow array when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toArray` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toArray`](#toarrayvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toBigInt",
     "group": "Conversion",
     "params": "value",
@@ -1518,28 +1504,6 @@
     "errors": "`RangeError` for fractional or non-finite numbers; `SyntaxError` for invalid integer text; `TypeError` for nullish values, symbols, or unavailable native BigInt support. Object-coercion errors propagate."
   },
   {
-    "name": "toBigIntIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a primitive bigint when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toBigInt` contract. Skipping also works when native BigInt support is unavailable.",
-    "returns": "bigint|*",
-    "examples": [
-      {
-        "expression": "toBigIntIf('42', true) === 42n",
-        "expected": true
-      },
-      {
-        "expression": "toBigIntIf('42', false)",
-        "expected": "42"
-      }
-    ],
-    "summaryReturn": "The converted primitive bigint when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toBigInt` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`. Only a requested conversion requires native BigInt.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toBigInt`](#tobigintvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toBoolean",
     "group": "Conversion",
     "params": "value",
@@ -1564,28 +1528,6 @@
     "description": "Returns the input’s JavaScript truthiness. It does not parse text: `\"false\"`, `\"0\"`, arrays and boxed `false` values are truthy. Object conversion hooks are not called.",
     "tooltip": "Uses truthiness rather than parsing boolean text. Does not invoke object conversion hooks.",
     "errors": ""
-  },
-  {
-    "name": "toBooleanIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to its JavaScript boolean truthiness when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toBoolean` contract.",
-    "returns": "boolean|*",
-    "examples": [
-      {
-        "expression": "toBooleanIf(0, true)",
-        "expected": false
-      },
-      {
-        "expression": "toBooleanIf('false', false)",
-        "expected": "false"
-      }
-    ],
-    "summaryReturn": "The input’s boolean truthiness when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toBoolean` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toBoolean`](#tobooleanvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
   },
   {
     "name": "toDate",
@@ -1618,28 +1560,6 @@
     "errors": "Symbols, bigints and failed object coercion can throw. Invalid date text can instead produce an invalid `Date`; check with [`isValidDate`](#isvaliddatevalue)."
   },
   {
-    "name": "toDateIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a `Date` when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toDate` contract.",
-    "returns": "Date|*",
-    "examples": [
-      {
-        "expression": "toDateIf(0, true).getTime()",
-        "expected": 0
-      },
-      {
-        "expression": "toDateIf(0, false)",
-        "expected": 0
-      }
-    ],
-    "summaryReturn": "The original `Date` or a new `Date`, possibly invalid, when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toDate` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toDate`](#todatevalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toInteger",
     "group": "Conversion",
     "params": "value",
@@ -1656,7 +1576,7 @@
         "expected": -12
       },
       {
-        "expression": "Number.isNaN(toInteger('12px'))",
+        "expression": "isNaN(toInteger('12px'))",
         "expected": true
       },
       {
@@ -1672,28 +1592,6 @@
     "description": "Uses `Number` followed by `Math.trunc`, so `\"12px\"` becomes `NaN` rather than `12`. Negative fractions move towards zero. The result can still be `NaN`, infinite or outside the safe-integer range.",
     "tooltip": "Does not guarantee a finite or safe integer. Symbols and failing conversion hooks can throw.",
     "errors": "Symbols and failed object conversions can throw. `NaN` and infinity are returned rather than rejected."
-  },
-  {
-    "name": "toIntegerIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a number and truncates it towards zero when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toInteger` contract.",
-    "returns": "number|*",
-    "examples": [
-      {
-        "expression": "toIntegerIf('4.8', true)",
-        "expected": 4
-      },
-      {
-        "expression": "toIntegerIf('4.8', false)",
-        "expected": "4.8"
-      }
-    ],
-    "summaryReturn": "The numeric conversion truncated towards zero, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toInteger` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toInteger`](#tointegervalue) error behaviour; a skipped conversion does not inspect or coerce the value."
   },
   {
     "name": "toJson",
@@ -1746,14 +1644,14 @@
     "notes": "Functions, boxed primitives, Dates and RegExps are rejected before iterator inspection. Plain objects include null-prototype and foreign-realm objects. Own string and symbol keys are captured once in property order; each current descriptor is checked before its enumerable value is read once. Inherited and non-enumerable properties are excluded, deleted or newly hidden keys are skipped, newly added keys are excluded, and nested values retain identity. Numeric property names become string keys; symbol keys stay symbols. An own constructor or length field is ordinary data.\n\nA synchronous iterator takes precedence over object properties on eligible inputs. Its method is read once and called with the original input as receiver. A null or undefined iterator permits object conversion; other non-callable methods throw. Async iterators are never invoked or awaited. A plain async-only object is copied as a record, including enumerable symbol properties. Ordinary promises and native async-only collections without a supported synchronous source are rejected.\n\nEach iterable entry must be an actual array of length exactly two, with own properties at both indices 0 and 1. Explicit undefined keys and values are valid. Holes, inherited-only indices, extra elements, strings and array-like entry objects are rejected. Any key type is allowed, without string coercion. Non-empty strings yield primitive entries and throw; an empty string yields no entries. There is no array-like source fallback.\n\nNative SameValueZero key equality merges repeated NaN keys and treats negative and positive zero as the same key. The last value for a repeated key wins without moving its insertion position. Entry validation and property-access errors inside the loop close the outer iterator; the original error wins over a cleanup error. Native for-of failures while reading next, done or value propagate without an additional close attempt.\n\nFinite one-shot iterators are consumed once; infinite inputs do not finish and no work limit is imposed. Requires native Map. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of dropping possible symbol keys.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
-        "expression": "Array.from(toMap({a: 1, b: 2}))",
+        "expression": "toArray(toMap({a: 1, b: 2}))",
         "expected": [
           ["a", 1],
           ["b", 2]
         ]
       },
       {
-        "expression": "Array.from(toMap([['a', 1], ['b', 2], ['a', 3]]))",
+        "expression": "toArray(toMap([['a', 1], ['b', 2], ['a', 3]]))",
         "expected": [
           ["a", 3],
           ["b", 2]
@@ -1778,60 +1676,6 @@
     ]
   },
   {
-    "name": "toJsonIf",
-    "group": "Conditional conversion",
-    "params": "value, condition, replacer, space",
-    "summary": "Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toJson` contract. The condition is the second argument; replacer and indentation follow it. Skipping does not inspect the value, replacer or indentation. Replacer callbacks retain native JSON receiver and return-value rules; only the condition uses the strict boolean predicate contract.",
-    "returns": "string|undefined|*",
-    "examples": [
-      {
-        "expression": "toJsonIf({a: 1}, true)",
-        "expected": "{\"a\":1}"
-      },
-      {
-        "expression": "toJsonIf({a: 1}, false)",
-        "expected": {
-          "a": 1
-        }
-      },
-      {
-        "expression": "toJsonIf({a: 1, b: 2}, value => value.a === 1, ['a'])",
-        "expected": "{\"a\":1}"
-      }
-    ],
-    "summaryReturn": "JSON text or `undefined` when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toJson` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toJson`](#tojsonvalue-replacer-space) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
-    "name": "toMapIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a plain object or iterable of key/value pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toMap` contract.",
-    "returns": "Map|*",
-    "examples": [
-      {
-        "expression": "Array.from(toMapIf([['key', 1]], true))",
-        "expected": [["key", 1]]
-      },
-      {
-        "expression": "toMapIf(42, false)",
-        "expected": 42
-      },
-      {
-        "expression": "toMapIf({ a: 1 }, true).get('a')",
-        "expected": 1
-      }
-    ],
-    "summaryReturn": "A new Map when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toMap` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toMap`](#tomapvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toNumber",
     "group": "Conversion",
     "params": "value",
@@ -1852,7 +1696,7 @@
         "expected": 0
       },
       {
-        "expression": "Number.isNaN(toNumber('12px'))",
+        "expression": "isNaN(toNumber('12px'))",
         "expected": true
       }
     ],
@@ -1860,28 +1704,6 @@
     "description": "Converts the entire input: `null`, `false` and blank strings become `0`; `true` becomes `1`; `undefined` and invalid numeric text become `NaN`. Text and bigints may lose precision; large magnitudes may overflow and tiny magnitudes may underflow to zero. This does not parse locale-specific numbers or guarantee a finite or safe result.",
     "tooltip": "May return `NaN` or infinity, lose bigint precision, round numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.",
     "errors": "Symbols throw `TypeError`. Object-coercion errors propagate; invalid numeric text returns `NaN`."
-  },
-  {
-    "name": "toNumberIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a primitive number when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toNumber` contract.",
-    "returns": "number|*",
-    "examples": [
-      {
-        "expression": "toNumberIf('12', value => typeof value === 'string')",
-        "expected": 12
-      },
-      {
-        "expression": "toNumberIf('12', false)",
-        "expected": "12"
-      }
-    ],
-    "summaryReturn": "The converted primitive number, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toNumber` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toNumber`](#tonumbervalue) error behaviour; a skipped conversion does not inspect or coerce the value."
   },
   {
     "name": "toPlainObject",
@@ -1914,34 +1736,6 @@
     "errors": "Unsupported inputs, malformed entry pairs and unsupported keys throw TypeError. Getter, proxy and iterator errors propagate without replacement."
   },
   {
-    "name": "toPlainObjectIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Creates a new plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toPlainObject` contract.",
-    "returns": "object|*",
-    "examples": [
-      {
-        "expression": "toPlainObjectIf({a:1}, true)",
-        "expected": {
-          "a": 1
-        }
-      },
-      {
-        "expression": "toPlainObjectIf(null, false)",
-        "expected": null
-      },
-      {
-        "expression": "toPlainObjectIf('{\"a\":1}', false)",
-        "expected": "{\"a\":1}"
-      }
-    ],
-    "summaryReturn": "A fresh plain object when conversion is requested; otherwise the exact original input.",
-    "description": "Uses the same conversion as `toPlainObject` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toPlainObject`](#toplainobjectvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toSet",
     "group": "Conversion",
     "params": "value",
@@ -1954,19 +1748,19 @@
     "notes": "Functions, boxed primitives, Dates and RegExps are rejected before inspecting iterator or length properties; non-string primitives other than nullish input are also unsupported. A synchronous iterator takes precedence over object and indexed data. Its method is read once and called with the original input as receiver; null or undefined permits fallback, while other non-callable methods throw.\n\nPlain objects include null-prototype and foreign-realm objects. Own string and symbol keys are snapshotted in property order, current enumerability is checked, and each included value is read once. Inherited and non-enumerable properties are excluded. A length property is copied as ordinary data. Object copying requires Reflect.ownKeys or Object.getOwnPropertySymbols; missing both throws instead of omitting possible symbol keys.\n\nOnly non-plain array-like inputs use indexed fallback. Length must be a primitive number that is an integer between zero and Number.MAX_SAFE_INTEGER, matching isArrayLike. Length is read once and values are read live; missing slots yield undefined and inherited indices can supply values. Strings yield Unicode code points and Maps yield entry arrays. Values retain their identities.\n\nNative SameValueZero equality merges repeated NaN values and treats negative and positive zero as the same value. Distinct objects remain distinct; repeated references collapse. The result is a fresh local Set.\n\nOrdinary promises and native async-only collections without a supported synchronous source are rejected. Plain async-only objects are copied as data, including enumerable symbol values, without invoking their async iterator. No input is awaited. Iterators are consumed once; infinite iterables do not finish and no work limit is imposed. Requires native Set but does not require Array.from.\n\nIf a copied object has an enumerable nullish Symbol.iterator value, the value captured during source dispatch is reused; its getter is not read a second time. Other selected property values are read live after checking their current descriptor.",
     "examples": [
       {
-        "expression": "Array.from(toSet([3, 1, 3]))",
+        "expression": "toArray(toSet([3, 1, 3]))",
         "expected": [3, 1]
       },
       {
-        "expression": "Array.from(toSet('A😀A'))",
+        "expression": "toArray(toSet('A😀A'))",
         "expected": ["A", "😀"]
       },
       {
-        "expression": "Array.from(toSet({a: 1, b: 2, c: 1}))",
+        "expression": "toArray(toSet({a: 1, b: 2, c: 1}))",
         "expected": [1, 2]
       },
       {
-        "expression": "Array.from(toSet({0: 'x', length: 1}))",
+        "expression": "toArray(toSet({0: 'x', length: 1}))",
         "expected": ["x", 1]
       },
       {
@@ -1978,28 +1772,6 @@
         "expected": 0
       }
     ]
-  },
-  {
-    "name": "toSetIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts supported iterable, plain object or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toSet` contract.",
-    "returns": "Set|*",
-    "examples": [
-      {
-        "expression": "Array.from(toSetIf('aba', true))",
-        "expected": ["a", "b"]
-      },
-      {
-        "expression": "toSetIf('aba', false)",
-        "expected": "aba"
-      }
-    ],
-    "summaryReturn": "A new Set when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toSet` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toSet`](#tosetvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
   },
   {
     "name": "toString",
@@ -2032,28 +1804,6 @@
     "summary": "Converts a value to a primitive string using JavaScript’s `String` conversion."
   },
   {
-    "name": "toStringIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a primitive string when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toString` contract.",
-    "returns": "string|*",
-    "examples": [
-      {
-        "expression": "toStringIf(42, true)",
-        "expected": "42"
-      },
-      {
-        "expression": "toStringIf(42, false)",
-        "expected": 42
-      }
-    ],
-    "summaryReturn": "The converted primitive string when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toString` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toString`](#tostringvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
-  },
-  {
     "name": "toSymbol",
     "group": "Conversion",
     "params": "value",
@@ -2078,28 +1828,6 @@
     "description": "Primitive symbols retain identity, and wrappers are unboxed without invoking their overridden conversion hooks. Other inputs use `Symbol(description)`: repeated descriptions create distinct symbols, and no global registry is used.",
     "tooltip": "Preserves primitive symbol identity and unboxes wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires native `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.",
     "errors": "Native description-conversion errors propagate. Unavailable native `Symbol` support throws `TypeError` before conversion."
-  },
-  {
-    "name": "toSymbolIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a primitive symbol when the condition evaluates to `true`. Otherwise, returns the original value unchanged.",
-    "notes": "A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.\n\nPredicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toSymbol` contract.",
-    "returns": "symbol|*",
-    "examples": [
-      {
-        "expression": "typeof toSymbolIf('key', true)",
-        "expected": "symbol"
-      },
-      {
-        "expression": "toSymbolIf('key', false)",
-        "expected": "key"
-      }
-    ],
-    "summaryReturn": "The original or unboxed symbol, or a new symbol from the description, when conversion is requested; otherwise the original input, unchanged.",
-    "description": "Uses the same conversion as `toSymbol` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.",
-    "tooltip": "Calls a predicate once. A skipped conversion preserves the input without inspection. Invalid conditions or non-boolean predicate results throw `TypeError`.",
-    "errors": "Invalid conditions or non-boolean predicate results throw `TypeError`. Predicate errors propagate. A requested conversion also follows [`toSymbol`](#tosymbolvalue) error behaviour; a skipped conversion does not inspect or coerce the value."
   },
   {
     "name": "box",
@@ -2220,94 +1948,6 @@
     ]
   },
   {
-    "name": "boxIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to `true`. Otherwise, returns the original input unchanged.",
-    "description": "Applies the full `box` contract only when a primitive boolean condition or synchronous predicate requests conversion.",
-    "summaryReturn": "The `box` result when requested; otherwise the exact original input.",
-    "tooltip": "Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and predicate results must be primitive booleans.",
-    "notes": "A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.",
-    "returns": "Object|null|undefined|*",
-    "errors": "Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors propagate; requested conversion follows `box` error behaviour.",
-    "examples": [
-      {
-        "expression": "boxIf(3, false)",
-        "expected": 3
-      },
-      {
-        "expression": "boxIf(3) === 3",
-        "expected": true
-      }
-    ]
-  },
-  {
-    "name": "unboxIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Extracts the primitive value from a wrapper object when the condition evaluates to `true` and native unboxing is available. Otherwise, returns the original input unchanged.",
-    "description": "Applies the full `unbox` contract only when a primitive boolean condition or synchronous predicate requests conversion.",
-    "summaryReturn": "The `unbox` result when requested; otherwise the exact original input.",
-    "tooltip": "Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and predicate results must be primitive booleans.",
-    "notes": "A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.",
-    "returns": "*|*",
-    "errors": "Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors propagate; requested conversion follows `unbox` error behaviour.",
-    "examples": [
-      {
-        "expression": "unboxIf(3, false)",
-        "expected": 3
-      },
-      {
-        "expression": "unboxIf(3) === 3",
-        "expected": true
-      }
-    ]
-  },
-  {
-    "name": "toRegExpIf",
-    "group": "Conditional conversion",
-    "params": "value, condition, flags",
-    "summary": "Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.",
-    "description": "Applies the full `toRegExp` contract only when a primitive boolean condition or synchronous predicate requests conversion.",
-    "summaryReturn": "The `toRegExp` result when requested; otherwise the exact original input.",
-    "tooltip": "Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and predicate results must be primitive booleans.",
-    "notes": "A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.",
-    "returns": "RegExp|*",
-    "errors": "Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors propagate; requested conversion follows `toRegExp` error behaviour.",
-    "examples": [
-      {
-        "expression": "toRegExpIf(3, false)",
-        "expected": 3
-      },
-      {
-        "expression": "toRegExpIf(3) === 3",
-        "expected": true
-      }
-    ]
-  },
-  {
-    "name": "toPromiseIf",
-    "group": "Conditional conversion",
-    "params": "value, condition",
-    "summary": "Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.",
-    "description": "Applies the full `toPromise` contract only when a primitive boolean condition or synchronous predicate requests conversion.",
-    "summaryReturn": "The `toPromise` result when requested; otherwise the exact original input.",
-    "tooltip": "Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and predicate results must be primitive booleans.",
-    "notes": "A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options. The skipped result is the input itself, not a `Promise` wrapper.",
-    "returns": "Promise|*",
-    "errors": "Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors propagate; requested conversion follows `toPromise` error behaviour.",
-    "examples": [
-      {
-        "expression": "toPromiseIf(3, false)",
-        "expected": 3
-      },
-      {
-        "expression": "toPromiseIf(3) === 3",
-        "expected": true
-      }
-    ]
-  },
-  {
     "name": "parseJson",
     "group": "Conversion",
     "params": "value, reviver",
@@ -2344,38 +1984,6 @@
       {
         "expression": "parseJson('1', () => undefined) === undefined",
         "expected": true
-      }
-    ]
-  },
-  {
-    "name": "parseJsonIf",
-    "group": "Conditional conversion",
-    "params": "value, condition, reviver",
-    "summary": "Parses JSON when the condition evaluates to `true`; otherwise returns the original input unchanged.",
-    "description": "Uses the full `parseJson` contract when a primitive boolean condition or synchronous predicate requests conversion.",
-    "returns": "*",
-    "summaryReturn": "The parsed or revived value when requested; otherwise the original input unchanged.",
-    "tooltip": "Calls a predicate once. Omitted or `undefined` conditions skip conversion. Conditions and predicate results must be primitive booleans.",
-    "notes": "The condition is the second argument and the optional reviver follows it. A predicate receives the original input once without an explicit receiver. Deliberate predicate mutation is visible to requested parsing; predicate errors propagate. Skipping inspects neither the input nor the reviver. A requested parse follows native `parseJson` input coercion and reviver behaviour. Only the condition requires a synchronous primitive boolean result; the reviver may return any value without awaiting.",
-    "errors": "Invalid conditions and non-boolean predicate results throw `TypeError`. Predicate errors propagate; requested conversion follows `parseJson` error behaviour.",
-    "examples": [
-      {
-        "expression": "parseJsonIf('{\"a\":1}', true)",
-        "expected": {
-          "a": 1
-        }
-      },
-      {
-        "expression": "parseJsonIf('{\"a\":1}', false)",
-        "expected": "{\"a\":1}"
-      },
-      {
-        "expression": "parseJsonIf('invalid')",
-        "expected": "invalid"
-      },
-      {
-        "expression": "parseJsonIf('2', value => typeof value === 'string', (key, value) => typeof value === 'number' ? value * 2 : value)",
-        "expected": 4
       }
     ]
   }

@@ -1,6 +1,5 @@
 import T = require('go-types');
 import toPlainObject = require('go-types/toPlainObject');
-import toPlainObjectIf = require('go-types/src/conversion/toPlainObjectIf.js');
 type IsAny<V> = 0 extends 1 & V ? true : false;
 function expectFalse<V extends false>(): void {}
 function expectType<V>(_value: V): void {}
@@ -8,14 +7,6 @@ function expectType<V>(_value: V): void {}
 const text: string & { readonly length: number } = '{"a":1}';
 // @ts-expect-error Strings, including intersections, are not conversion sources.
 toPlainObject(text);
-// @ts-expect-error A requested conversion cannot parse JSON text.
-toPlainObjectIf(text, true);
-// @ts-expect-error A dynamic boolean can request an unsupported conversion.
-toPlainObjectIf(text, Math.random() > 0.5);
-expectType<typeof text>(toPlainObjectIf(text, false));
-expectType<typeof text>(toPlainObjectIf(text));
-expectType<typeof text>(toPlainObjectIf(text, undefined));
-expectType<typeof text>(toPlainObjectIf(text, () => false));
 expectType<never>(null as unknown as T.ConvertedPlainObject<string>);
 const symbol = Symbol('field');
 const input = { a: 1, [symbol]: 'text' } as const;
@@ -77,52 +68,11 @@ toPlainObject([['a', 1, 2]] as const);
 toPlainObject([1, 2]);
 // @ts-expect-error missing pair values are unsupported.
 toPlainObject([['a']] as const);
-expectType<Partial<Record<'a', number>>>(toPlainObjectIf([['a', 1]], true));
-expectType<Partial<typeof input>>(toPlainObjectIf(input, true));
-expectType<typeof input>(toPlainObjectIf(input, false));
-expectType<null>(toPlainObjectIf(null, false));
-expectType<undefined>(toPlainObjectIf(undefined));
-expectType<1>(toPlainObjectIf(1 as const, undefined));
-expectType<1>(toPlainObjectIf(1 as const, () => false));
-// @ts-expect-error literal true must reject unsupported inputs.
-toPlainObjectIf(null, true);
-// @ts-expect-error literal true must not box a number.
-toPlainObjectIf(1, true);
-const conditional = toPlainObjectIf(input, function (value) {
-  expectFalse<IsAny<typeof value>>();
-  expectType<typeof input>(value);
-  expectType<undefined>(this);
-  return value.a === 1;
-});
-expectType<typeof input | Partial<typeof input>>(conditional);
-expectType<typeof input | Partial<typeof input>>(toPlainObjectIf(input, Math.random() > 0.5));
-// @ts-expect-error async predicates are unsupported.
-toPlainObjectIf(input, async () => true);
-// @ts-expect-error condition results must be booleans.
-toPlainObjectIf(input, () => 1);
 // @ts-expect-error old unpublished names have no aliases.
 T.toObject(input);
 // @ts-expect-error old unpublished per-function path is removed.
 import oldObject = require('go-types/toObject');
 
-// Scalar conditional callbacks retain their own input, receiver and output types.
-const amount = { text: '12' };
-const maybeBigInt = T.toBigIntIf(amount, (value) => {
-  expectFalse<IsAny<typeof value>>();
-  expectType<string>(value.text);
-  return false;
-});
-expectType<typeof amount | bigint>(maybeBigInt);
-expectType<typeof amount | boolean>(T.toBooleanIf(amount, () => false));
-expectType<typeof amount | Date>(T.toDateIf(amount, () => false));
-expectType<typeof amount | number>(T.toIntegerIf(amount, () => false));
-expectType<typeof amount | number>(T.toNumberIf(amount, () => false));
-expectType<typeof amount | string>(T.toStringIf(amount, () => false));
-expectType<typeof amount | symbol>(T.toSymbolIf(amount, () => false));
-// @ts-expect-error conversion conditions do not await promises.
-T.toStringIf(amount, async () => true);
-// @ts-expect-error condition results are not truthiness-coerced.
-T.toBooleanIf(amount, () => 1);
 // @ts-expect-error Date conversion does not guarantee subtype members.
 void T.toDate(Object.assign(new Date(0), { label: 'kept' })).label;
 

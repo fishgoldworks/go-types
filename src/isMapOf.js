@@ -6,19 +6,19 @@ const entries = typeof Map === 'function' ? Map.prototype.entries : undefined;
  * predicates.
  *
  * Matchers are required and validated before inspecting the collection. Predicates receive one
- * value with no supplied receiver and must return a synchronous primitive boolean. Empty
- * collections pass without calling predicates. Unavailable native constructors return `false`; a
- * detected collection without the required native iteration operation throws `TypeError`.
+ * value with no supplied receiver and have their results evaluated using JavaScript truthiness.
+ * Empty collections pass without calling predicates. Unavailable native constructors return
+ * `false`; a detected collection without the required native iteration operation throws
+ * `TypeError`. Returned promises are truthy and are not awaited. The check itself returns a
+ * primitive boolean.
  *
  * @param {*} value The value to check.
- * @param {*} keyMatcher A required native `typeof` name or synchronous boolean predicate for Map
- * keys.
- * @param {*} valueMatcher A required native `typeof` name or synchronous boolean predicate for Map
- * values.
+ * @param {*} keyMatcher A required native `typeof` name or synchronous predicate for Map keys.
+ * @param {*} valueMatcher A required native `typeof` name or synchronous predicate for Map values.
  * @returns {boolean} `true` if the value is a `Map` whose keys and values match their respective
  * matchers, including an empty `Map`; otherwise `false`.
- * @throws {*} `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
- * Callback, property-access and native iteration errors propagate.
+ * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
+ * iteration errors propagate.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#ismapofvalue-keymatcher-valuematcher
  * @example isMapOf(new Map([["x",1]]), "string", "number");   // => true
  * @example isMapOf(new Map(), "string", "number");            // => true

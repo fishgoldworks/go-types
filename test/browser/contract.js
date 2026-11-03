@@ -38,6 +38,38 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     }
     throw new Error('Expected TypeError');
   }
+  test('JSON parsing preserves revivers, safe keys and error identity', () => {
+    equal(api.parseJson('null'), null);
+    exampleEqual(api.parseJson('[1,2]'), [1, 2]);
+    exampleEqual(
+      api.parseJson('{"a":1,"b":2}', (key, value) => (key === 'a' ? undefined : value)),
+      { b: 2 }
+    );
+    const own = api.parseJson('{"__proto__":{"polluted":true}}');
+    equal(Object.getPrototypeOf(own), Object.prototype);
+    equal(Object.prototype.hasOwnProperty.call(own, '__proto__'), true);
+    equal({}.polluted, undefined);
+    const visits = [];
+    equal(
+      api.parseJson('1', function (key, value) {
+        equal(this[key], value);
+        visits.push(key);
+        return 2;
+      }),
+      2
+    );
+    exampleEqual(visits, ['']);
+    const error = new Error('reviver');
+    let caught;
+    try {
+      api.parseJson('1', () => {
+        throw error;
+      });
+    } catch (failure) {
+      caught = failure;
+    }
+    equal(caught, error);
+  });
   test('normalisation preserves identity and the revised API boundary', () => {
     const empty = api.ensureArray();
     exampleEqual(empty, []);
@@ -49,6 +81,23 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       'isNonNullish',
       'isObjectLike',
       'isNonFunctionObject',
+      'toArrayIf',
+      'toBigIntIf',
+      'toBooleanIf',
+      'toDateIf',
+      'toIntegerIf',
+      'toJsonIf',
+      'toMapIf',
+      'toNumberIf',
+      'toPlainObjectIf',
+      'toSetIf',
+      'toStringIf',
+      'toSymbolIf',
+      'boxIf',
+      'unboxIf',
+      'toRegExpIf',
+      'toPromiseIf',
+      'parseJsonIf',
       'ensureArrayIf',
       'ensureSetIf',
       'ensureMap',
@@ -105,46 +154,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(Object.prototype.hasOwnProperty.call(api, 'createTypeChecker'), false);
     equal(Object.prototype.hasOwnProperty.call(api, 'compileTypeMatcher'), false);
   });
-  test('JSON parsing preserves revivers, safe keys and conditional identity', () => {
-    equal(api.parseJson('null'), null);
-    exampleEqual(api.parseJson('[1,2]'), [1, 2]);
-    exampleEqual(
-      api.parseJson('{"a":1,"b":2}', (key, value) => (key === 'a' ? undefined : value)),
-      { b: 2 }
-    );
-    const own = api.parseJson('{"__proto__":{"polluted":true}}');
-    equal(Object.getPrototypeOf(own), Object.prototype);
-    equal(Object.prototype.hasOwnProperty.call(own, '__proto__'), true);
-    equal({}.polluted, undefined);
-    const visits = [];
-    equal(
-      api.parseJson('1', function (key, value) {
-        equal(this[key], value);
-        visits.push(key);
-        return 2;
-      }),
-      2
-    );
-    exampleEqual(visits, ['']);
-    const error = new Error('reviver');
-    let caught;
-    try {
-      api.parseJson('1', () => {
-        throw error;
-      });
-    } catch (failure) {
-      caught = failure;
-    }
-    equal(caught, error);
-    const revoked = Proxy.revocable({}, {});
-    revoked.revoke();
-    equal(api.parseJsonIf(revoked.proxy, false, revoked.proxy), revoked.proxy);
-    equal(api.parseJsonIf('invalid'), 'invalid');
-    equal(
-      api.parseJsonIf('2', true, (_key, value) => (typeof value === 'number' ? value * 2 : value)),
-      4
-    );
-  });
   test('boxing and unboxing preserve brands and HTMLDDA identity', () => {
     for (const value of [false, 3, -0, NaN, 'text', Symbol('key'), BigInt('12')])
       equal(api.unbox(api.box(value)), value);
@@ -162,8 +171,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     proxy.revoke();
     equal(api.box(proxy.proxy), proxy.proxy);
     equal(api.unbox(proxy.proxy), proxy.proxy);
-    equal(api.boxIf(3, false), 3);
-    equal(api.unboxIf(input, false), input);
   });
   test('RegExp conversion guarantees a brand and native flag semantics', () => {
     const value = /a/g;
@@ -171,7 +178,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(api.toRegExp(value), value);
     equal(value.lastIndex, 2);
     equal(api.toRegExp(value, 'i').lastIndex, 0);
-    equal(api.toRegExpIf('a', true, 'i').test('A'), true);
     const fake = { [Symbol.match]: true, constructor: RegExp, source: 'a', flags: 'i' };
     const converted = api.toRegExp(fake);
     equal(api.isRegExp(converted), true);
@@ -205,8 +211,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       caught = failure;
     }
     equal(caught, error);
-    equal(api.toPromiseIf(3, false), 3);
-    equal(await api.toPromiseIf(3, true), 3);
   });
   test('collection conversions share record, symbol and strict entry rules', () => {
     const key = Symbol('value');
@@ -248,8 +252,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       equal(array[i], input[i]);
       equal(set.has(input[i]), true);
     }
-    equal(api.toArrayIf(input, false), input);
-    equal(api.toSetIf(input, false), input);
   });
   test('JSON serialization preserves native options and unsupported-value rules', () => {
     equal(api.toJson({ a: 1, b: 2 }, ['a'], 2), '{\n  "a": 1\n}');
@@ -298,31 +300,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       api.toJson(undefined, () => 42),
       '42'
     );
-  });
-  test('conditional JSON serialization skips all option inspection and forwards requested options', () => {
-    const poison = new Proxy([], {
-      get() {
-        throw Error('unexpected inspection');
-      }
-    });
-    equal(api.toJsonIf(poison, false, poison, poison), poison);
-    equal(api.toJsonIf(poison), poison);
-    let calls = 0;
-    equal(
-      api.toJsonIf(
-        { a: 1, b: 2 },
-        (value) => {
-          calls++;
-          return value.a === 1;
-        },
-        ['a'],
-        2
-      ),
-      '{\n  "a": 1\n}'
-    );
-    equal(calls, 1);
-    throws(() => api.toJsonIf(poison, async () => false));
-    throws(() => api.toJsonIf(poison, () => 1));
   });
   test('public export names', () => equal(Object.keys(api).sort().join(','), [...names].sort().join(',')));
   test('cycle traversal follows native Map keys, values and Set members', () => {
@@ -713,15 +690,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(special.injected, undefined);
     equal(special.__proto__.injected, true);
     equal(api.toPlainObject(new realm.Map([['a', 1]])).a, 1);
-    equal(api.toPlainObjectIf(null, false), null);
-    throws(() => api.toPlainObjectIf('{"a":1}', true));
-    throws(() => api.toPlainObjectIf('{"a":1}', () => true));
-    equal(api.toPlainObjectIf('{"a":1}', false), '{"a":1}');
-    equal(api.toPlainObjectIf('{"a":1}'), '{"a":1}');
-    equal(
-      api.toPlainObjectIf('{"a":1}', () => false),
-      '{"a":1}'
-    );
     for (const value of [
       null,
       undefined,
@@ -771,7 +739,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
   test('conversion: document.all retains truthiness and skipped identity', () => {
     equal(api.toBoolean(document.all), false);
     throws(() => api.toPlainObject(document.all));
-    equal(api.toPlainObjectIf(document.all, false), document.all);
   });
   test('conversion: foreign Date and Symbol identity', () => {
     const date = new realm.Date(0);
@@ -791,16 +758,6 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     equal(api.toBigInt('9007199254740993'), 9007199254740993n);
     equal(api.toString(Symbol('key')), 'Symbol(key)');
     equal(api.toBoolean('false'), true);
-  });
-  test('conversion: conditional skipping preserves input and rejects async results', () => {
-    const input = {
-      get valueOf() {
-        throw Error('input was inspected');
-      }
-    };
-    equal(api.toNumberIf(input, false), input);
-    equal(api.toNumberIf('2', true), 2);
-    throws(() => api.toNumberIf('2', async () => true));
   });
   test('conversion: Map and Set copy foreign collections into local collections', () => {
     const key = {},
@@ -829,19 +786,9 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
     const foreignRecord = new realm.Object();
     foreignRecord.key = value;
     equal(api.toMap(foreignRecord).get('key'), value);
-    equal(api.toMapIf({ key: 1 }, true).get('key'), 1);
     equal(api.toSet({ 0: 1, length: 1 }).size, 1);
     const revoked = realm.Proxy.revocable({}, {});
     revoked.revoke();
-    equal(api.toMapIf(revoked.proxy, false), revoked.proxy);
-    equal(
-      api.toSetIf(revoked.proxy, () => false),
-      revoked.proxy
-    );
-    equal(api.toMapIf([['key', 1]], true).get('key'), 1);
-    equal(api.toSetIf([1, 1], true).size, 1);
-    throws(() => api.toMapIf([], async () => true));
-    throws(() => api.toSetIf([], () => 1));
   });
   test('numeric text and JSON retain distinct grammar and finite-result policies', () => {
     for (const [text, numeric, json] of [
@@ -932,7 +879,28 @@ globalThis.runGoTypesBrowserTests = async function (api, metadata, names, source
       for (const matcher of [undefined, null, new String('number'), ['number'], { predicate: api.isNumber }]) {
         throws(() => check(matcher));
       }
-      for (const result of [1, new Boolean(true), Promise.resolve(true)]) throws(() => check(() => result));
+      for (const result of [1, 'false', [], {}, new Boolean(false), Promise.resolve(false)])
+        equal(
+          check(() => result),
+          true
+        );
+      for (const result of [undefined, null, 0, NaN, ''])
+        equal(
+          check(() => result),
+          false
+        );
+      const opaque = new Proxy(
+        {},
+        {
+          get() {
+            throw Error('must not inspect');
+          }
+        }
+      );
+      equal(
+        check(() => opaque),
+        true
+      );
       const failure = {};
       let observed;
       try {

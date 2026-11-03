@@ -2,8 +2,6 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const Types = require('../index.js');
 
 for (const name of ['toArray', 'toMap', 'toSet']) {
@@ -106,61 +104,6 @@ for (const name of ['toArray', 'toMap', 'toSet']) {
     assert.equal(Object.getPrototypeOf(result), prototype);
     assert.equal(name === 'toMap' ? result.get('new') : Array.from(result)[0], item);
     assert.equal(calls, 1);
-  });
-
-  test(name + 'If runs a nested conversion without leaking state or reading rejected input', () => {
-    const failure = { reason: 'predicate failed' };
-    let reads = 0;
-    const input = new Proxy(
-      {},
-      {
-        get() {
-          reads++;
-          throw Error('input read');
-        }
-      }
-    );
-    const conditional = Types[name + 'If'];
-    const valid = name === 'toMap' ? [['key', 1]] : [1];
-    const skipped = conditional(input, (value) => {
-      assert.equal(value, input);
-      const nested = conditional(valid, true);
-      assert.equal(name === 'toArray' ? nested.length : nested.size, 1);
-      return false;
-    });
-    assert.equal(skipped, input);
-    const thenable = {
-      get then() {
-        throw Error('condition result assimilated');
-      }
-    };
-    assert.throws(() => conditional(input, () => thenable), TypeError);
-    assert.throws(
-      () =>
-        conditional(input, () => {
-          throw failure;
-        }),
-      (error) => error === failure
-    );
-    assert.equal(reads, 0);
-    const converted = conditional(valid, true);
-    assert.equal(name === 'toArray' ? converted.length : converted.size, 1);
-  });
-
-  test(name + 'If uses a bound receiver but does not supply one to an unbound predicate', () => {
-    const values = name === 'toMap' ? [['key', 1]] : [1];
-    const policy = { enabled: true };
-    let calls = 0;
-    function predicate(value) {
-      calls++;
-      assert.equal(arguments.length, 1);
-      assert.equal(value, values);
-      return this.enabled;
-    }
-    assert.throws(() => Types[name + 'If'](values, predicate), TypeError);
-    const output = Types[name + 'If'](values, predicate.bind(policy));
-    assert.equal(name === 'toArray' ? output.length : output.size, 1);
-    assert.equal(calls, 2);
   });
 }
 
@@ -287,15 +230,3 @@ test('collection conversions retain thenables and cyclic references without awai
   assert.equal(newSet.has(thenable), true);
   assert.equal(newSet.has(set), true);
 });
-
-for (const base of ['toMap', 'toSet']) {
-  test(base + 'If error guidance links to its own base conversion in the generated reference', () => {
-    const reference = fs.readFileSync(path.join(__dirname, '../docs/API.md'), 'utf8');
-    const heading = '### `' + base + 'If(value, condition?)`';
-    const section = reference.split(heading)[1];
-    assert.ok(section, 'Conditional conversion heading exists');
-    const errors = section.split('**Errors**')[1]?.split('**Examples**')[0];
-    assert.ok(errors, 'Conditional conversion error guidance exists');
-    assert.ok(errors.includes('[`' + base + '`](#' + base.toLowerCase() + 'value)'), errors);
-  });
-}

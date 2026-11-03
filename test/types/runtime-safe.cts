@@ -60,7 +60,6 @@ const converted: Date = T.toDate(wrapped);
 assert(converted.getTime() === 0);
 assert(!('label' in converted));
 assert(T.toDate(tagged) === tagged);
-assert(T.toDateIf(tagged, false) === tagged);
 // Structural array/object declarations must not erase values on failed identity checks.
 const copiedArrayInterface: string[] = Object.assign({}, ['x']);
 assert(!T.isArray(copiedArrayInterface));
@@ -79,20 +78,7 @@ function convertWhenEnabled(this: typeof policy, _value: unknown): boolean {
 const boundCondition = convertWhenEnabled.bind(policy);
 const inputNumbers: readonly number[] = [1, 2];
 const inputEntries = [['key', 1]] as const;
-const arrayResult = T.toArrayIf(inputNumbers, boundCondition);
-const mapResult = T.toMapIf(inputEntries, boundCondition);
-const setResult = T.toSetIf(inputNumbers, boundCondition);
-assert(arrayResult !== inputNumbers && arrayResult.length === 2);
-assert(mapResult instanceof Map && mapResult.get('key') === 1);
-assert(setResult instanceof Set && setResult.has(2));
 policy.enabled = false;
-assert(T.toArrayIf(inputNumbers, boundCondition) === inputNumbers);
-assert(T.toMapIf(inputEntries, (value) => value.length > 1) === inputEntries);
-assert(
-  T.toSetIf(inputNumbers, function (value) {
-    return this === undefined && value.length === 0;
-  }) === inputNumbers
-);
 // Collection matchers use the same unbound callback convention as direct checks.
 const matcherPolicy = { allowed: true };
 function allowedItem(this: typeof matcherPolicy, _value: unknown): boolean {
@@ -114,8 +100,6 @@ assert(plainObject.a === 1 && Object.getPrototypeOf(plainObject) === Object.prot
 const recordObject = { a: 1 };
 const copiedObject: Partial<typeof recordObject> = T.toPlainObject(recordObject);
 assert(copiedObject !== recordObject && copiedObject.a === 1);
-assert(T.toPlainObjectIf(null, false) === null);
-assert(T.toPlainObjectIf(recordObject, () => false) === recordObject);
 // Optional/nullable iterators can override numeric indexed values at conversion time.
 interface OptionalArrayIterator extends ArrayLike<number> {
   [Symbol.iterator]?: (() => IterableIterator<string>) | null;
@@ -129,19 +113,9 @@ const optionalArrayInput: OptionalArrayIterator = {
 };
 const iteratedValues: unknown[] = T.toArray(optionalArrayInput);
 assert(iteratedValues.length === 1 && iteratedValues[0] === 'text');
-assert(T.toArrayIf(optionalArrayInput, true)[0] === 'text');
-assert(T.toArrayIf(optionalArrayInput, false) === optionalArrayInput);
-assert(T.toArrayIf(optionalArrayInput) === optionalArrayInput);
 optionalArrayInput[Symbol.iterator] = null;
 const indexedValues: unknown[] = T.toArray(optionalArrayInput);
 assert(indexedValues.length === 3 && indexedValues[0] === 1 && indexedValues[1] === 1 && indexedValues[2] === null);
-const convertedAfterCondition = T.toArrayIf(optionalArrayInput, (value) => {
-  value[Symbol.iterator] = function* () {
-    yield 'changed';
-  };
-  return true;
-});
-assert(Array.isArray(convertedAfterCondition) && convertedAfterCondition[0] === 'changed');
 const definiteArrayLike: ArrayLike<number> = { 0: 7, length: 1 };
 const definiteValues: (number | undefined)[] = T.toArray(definiteArrayLike);
 assert(definiteValues.length === 2 && definiteValues[0] === 7 && definiteValues[1] === 1);

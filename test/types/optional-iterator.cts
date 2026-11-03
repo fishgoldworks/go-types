@@ -1,6 +1,5 @@
 import T = require('go-types');
 import toArray = require('go-types/toArray');
-import toArrayIf = require('go-types/src/conversion/toArrayIf.js');
 
 type Equal<A, B> = (<V>() => V extends A ? 1 : 2) extends <V>() => V extends B ? 1 : 2 ? true : false;
 type Expect<V extends true> = V;
@@ -36,26 +35,10 @@ expectType<number[]>(T.toArray(optional));
 expectType<number[]>(toArray(optional));
 // @ts-expect-error a nullable iterator can also be present when conversion executes.
 expectType<number[]>(toArray(nullable));
-// @ts-expect-error requested conversion does not prove that the iterator is absent.
-expectType<number[]>(toArrayIf(optional, true));
 
 type OptionalElements = Expect<Equal<T.ArrayElement<OptionalIterator>, unknown>>;
 type NullableElements = Expect<Equal<T.ArrayElement<NullableIterator>, unknown>>;
 expectType<unknown[]>(toArray(optional));
-expectType<OptionalIterator>(toArrayIf(optional, false));
-expectType<OptionalIterator>(toArrayIf(optional));
-expectType<OptionalIterator>(toArrayIf(optional, undefined));
-const dynamic = toArrayIf(optional, function (value) {
-  expectFalse<IsAny<typeof value>>();
-  expectType<OptionalIterator>(value);
-  expectType<undefined>(this);
-  // @ts-expect-error optional iteration does not erase the indexed number type in the callback.
-  value[0].toUpperCase();
-  return value.length > 0;
-});
-expectType<OptionalIterator | unknown[]>(dynamic);
-// @ts-expect-error a skipped conversion can retain the original non-array object.
-expectType<unknown[]>(dynamic);
 
 // Definite iteration remains precise; absent iteration includes object values and possible array-like holes.
 const definite: Iterable<string> & ArrayLike<number> = {

@@ -41,7 +41,7 @@ yarn add go-types
 | Browser           | Modern browsers with ES2020 capabilities and the required standard built-ins; see the [runtime guide](docs/runtime.md). Legacy ES3/ES5 browsers are not supported.                                                       |
 | BigInt conversion | Native BigInt support, available in Node.js 10.4 or later. Other functions remain usable when BigInt is unavailable.                                                                                                     |
 
-On Node 8, `toBigInt` and requested `toBigIntIf` conversions throw `TypeError`. Skipped conditional conversions return the original value. Examples using bigint literals, BigInt typed arrays or async generators require those native features.
+On Node 8, `toBigInt` throws `TypeError`. Examples using bigint literals, BigInt typed arrays or async generators require those native features.
 
 The package installs no global polyfills. Browser DOM checks return `false` when their corresponding constructors are absent. See [Development](#development) for the separate contributor runtime requirement.
 
@@ -155,6 +155,21 @@ values.filter(isNotArray);     // => [1, 'hello', null]
 
 These helpers return synchronous boolean predicates: `not` negates a result, `or` stops at the first truthy result, and `and` stops at the first falsy result. Use synchronous callbacks; returned promises are treated as truthy values and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md) for the full contracts.
 
+### Convert conditionally
+
+Use `applyIf` from go-fns 2.0.0 or later to apply a conversion conditionally. This helper is part of the upcoming go-fns 2.0.0 release; its declarations require TypeScript 5.4 or later.
+
+<!-- prettier-ignore -->
+```javascript
+import { applyIf } from 'go-fns';
+import { isBlank, toNumber, parseJson } from 'go-types';
+
+applyIf('42', text => !isBlank(text), toNumber);   // => 42
+applyIf('invalid', false, parseJson);              // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
+```
+
+A truthy predicate result applies the conversion; a falsy result returns the original input unchanged. Direct conditions must be booleans. Predicates are evaluated synchronously; returned promises are truthy and are not awaited. See the [go-fns API reference](https://github.com/koyote130708/go-fns/blob/master/docs/API.md#applyifvalue-condition-transform).
+
 ## API summary
 
 See the **[full API documentation](docs/API.md)** for parameters, return values, errors and examples.
@@ -163,7 +178,7 @@ See the **[full API documentation](docs/API.md)** for parameters, return values,
 
 ## Behaviour
 
-Type checks do not convert their inputs. Scalar conversions follow native coercion: `toBoolean` uses truthiness, `toString` is not JSON serialisation, and numeric/date results can lose precision or be invalid. Conditional conversions require a boolean or synchronous predicate returning a primitive boolean; `false`, omitted or `undefined` conditions leave the input untouched.
+Type checks do not convert their inputs. Scalar conversions follow native coercion: `toBoolean` uses truthiness, `toString` is not JSON serialisation, and numeric/date results can lose precision or be invalid.
 
 `toArray` and `toSet` select synchronous iterable values, then values from own enumerable string and symbol properties, then supported non-plain array-like indices with strict numeric lengths. `toMap` copies object entries (including symbols) or consumes exact two-element array pairs with both own indices. Unsupported inputs throw; see the [conversion guide](docs/conversions.md).
 
@@ -171,7 +186,30 @@ Ordinary failed checks return `false`. Invalid matcher configurations and unsupp
 
 `isEmpty` and `isBlank` inspect [supported collections](docs/API.md#empty-and-blank-values) and reject unsized iterators and iterables without consuming them. Handle iteration explicitly when consumption is intended.
 
-Collection checks accept a required native `typeof` name or synchronous boolean predicate. For example, `isArrayOf(items, 'number')` accepts primitive numbers; `isArrayOf(items, isNumber)` also accepts Number wrappers. Use `value => value instanceof Account` for class instances. Empty collections pass valid checks. See [type specifications](docs/API.md#type-specifications) for callback and traversal rules.
+Collection checks accept a required native `typeof` name or predicate evaluated using JavaScript truthiness. For example, `isArrayOf(items, 'number')` accepts primitive numbers; `isArrayOf(items, isNumber)` also accepts Number wrappers. Use `value => value instanceof Account` for class instances. Empty collections pass valid checks. See [type specifications](docs/API.md#type-specifications) for callback and traversal rules.
+
+### Check required text and tags
+
+Check the expected type before inspecting its contents. A non-empty array can still contain invalid items:
+
+<!-- prettier-ignore -->
+```javascript
+import { isString, isArrayOf, isEmpty, isBlank } from 'go-types';
+
+const hasText = value => isString(value) && !isBlank(value);
+const hasTags = value => isArrayOf(value, hasText) && !isEmpty(value);
+
+hasText('Release notes');        // => true
+hasText('   ');                  // => false
+hasText(42);                     // => false
+hasTags(['urgent', 'review']);   // => true
+hasTags([]);                     // => false
+hasTags(['urgent', '   ']);      // => false
+hasTags([null]);                 // => false
+hasTags('urgent');               // => false
+```
+
+`isArrayOf` checks the array and every item; `!isEmpty` adds the requirement for at least one tag. Collection blankness is shallow: `isBlank(['   '])` is `false`. Use an element predicate to validate text inside a collection. See [empty and blank values](docs/API.md#empty-and-blank-values) for other type/content combinations and mixed-value filtering.
 
 ### Normalise a single item or an array
 
@@ -197,15 +235,15 @@ With no arguments, `ensureArray()` creates an empty array. Arrays are returned u
 
 <!-- prettier-ignore -->
 ```javascript
-import { ensureSet } from 'go-types';
+import { ensureSet, toArray } from 'go-types';
 
-ensureSet('read').has('read');                     // => true
-Array.from(ensureSet(['read', 'write', 'read']));  // => ['read', 'write']
-ensureSet().size;                                  // => 0
-ensureSet(undefined).has(undefined);               // => true
+ensureSet('read').has('read');                   // => true
+toArray(ensureSet(['read', 'write', 'read']));   // => ['read', 'write']
+ensureSet().size;                                // => 0
+ensureSet(undefined).has(undefined);             // => true
 
 const permissions = new Set(['read', 'write']);
-ensureSet(permissions) === permissions;            // => true
+ensureSet(permissions) === permissions;          // => true
 ```
 
 Existing Sets are returned unchanged. Arrays supply members; other supplied values, including strings, Maps, `null` and `undefined`, become one member. Use `toSet` to extract other supported collection contents into a new Set. See [`ensureSet`](docs/API.md#ensuresetvalue) for native API requirements and iteration rules.
@@ -227,45 +265,43 @@ Copying a plain object preserves nested references and includes only its own enu
 
 <!-- prettier-ignore -->
 ```javascript
-import { parseJson, parseJsonIf } from 'go-types';
+import { parseJson } from 'go-types';
 
-parseJson('{"a":1}');            // => ({ a: 1 })
-parseJson('[1,2]');              // => [1, 2]
-parseJson('false');              // => false
-parseJson('null');               // => null
-parseJsonIf('invalid', false);   // => 'invalid' (parsing skipped; otherwise throws SyntaxError)
+parseJson('{"a":1}');          // => ({ a: 1 })
+parseJson('[1,2]');            // => [1, 2]
+parseJson('false');            // => false
+parseJson('null');             // => null
 ```
 
-`parseJson(value, reviver?)` follows native `JSON.parse`, including revivers and parsing errors. Its TypeScript result is `unknown` until validated. The conditional form takes `(value, condition?, reviver?)`. See [JSON parsing](docs/conversions.md#json-parsing) for reviver order, optional source context and coercion rules.
+`parseJson(value, reviver?)` follows native `JSON.parse`, including revivers and parsing errors. Its TypeScript result is `unknown` until validated. See [JSON parsing](docs/conversions.md#json-parsing) for reviver order, optional source context and coercion rules.
 
 ### Serialise JSON
 
 <!-- prettier-ignore -->
 ```javascript
-import { toJson, toJsonIf } from 'go-types';
+import { toJson } from 'go-types';
 
 toJson({ a: 1 });                // => '{"a":1}'
 toJson('hello');                 // => '"hello"'
 toJson({ a: 1, b: 2 }, ['a']);   // => '{"a":1}'
-toJsonIf({ a: 1 }, true);        // => '{"a":1}'
 ```
 
-Native `JSON.stringify` rules apply: the result can be `undefined`, and cycles or unhandled bigints throw. The conditional form takes `(value, condition?, replacer?, space?)`; skipped calls preserve the original input. See [JSON serialisation](docs/conversions.md#json-serialisation) for options, hooks and limitations.
+Native `JSON.stringify` rules apply: the result can be `undefined`, and cycles or unhandled bigints throw. See [JSON serialisation](docs/conversions.md#json-serialisation) for options, hooks and limitations.
 
 ### Box values, create patterns and adopt promises
 
 <!-- prettier-ignore -->
 ```javascript
-import { box, unbox, toRegExp, toPromiseIf } from 'go-types';
+import { box, unbox, toRegExp, toPromise, isPromise } from 'go-types';
 
 box(3).valueOf();                  // => 3
 unbox(new Boolean(false));         // => false
 box(null);                         // => null
 toRegExp('a.b', 'i').test('AxB');  // => true
-toPromiseIf(3, false);             // => 3
+isPromise(toPromise(3));           // => true
 ```
 
-`box` preserves existing objects and nullish input. `unbox` extracts primitive values from wrapper objects without invoking custom conversion methods. `toRegExp` uses native pattern syntax; it does not escape text. `toPromise(value)` adopts values and thenables with native `Promise.resolve` semantics. All four have matching `If` variants; conditions remain synchronous booleans. See the [conversion guide](docs/conversions.md#boxing-and-unboxing) for identity, missing-API and TypeScript details.
+`box` preserves existing objects and nullish input. `unbox` extracts primitive values from wrapper objects without invoking custom conversion methods. `toRegExp` uses native pattern syntax; it does not escape text. `toPromise(value)` adopts values and thenables with native `Promise.resolve` semantics. See the [conversion guide](docs/conversions.md#boxing-and-unboxing) for identity, missing-API and TypeScript details.
 
 ## TypeScript
 

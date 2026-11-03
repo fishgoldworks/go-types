@@ -140,23 +140,6 @@ test('toMap accepts nullish iterator methods as record data but rejects malforme
   );
 });
 
-test('toMapIf applies record conversion after the condition and skips inspection otherwise', () => {
-  const input = { a: 1 };
-  assert.equal(Types.toMapIf(input, false), input);
-  assert.equal(Types.toMapIf(input), input);
-  const output = Types.toMapIf(input, (value) => {
-    value.b = 2;
-    return true;
-  });
-  assert.deepEqual(
-    [...output],
-    [
-      ['a', 1],
-      ['b', 2]
-    ]
-  );
-});
-
 test('toMap validates the native adder before inspecting records or iterables', () => {
   const failure = new Error('adder failed');
   const original = Object.getOwnPropertyDescriptor(Map.prototype, 'set');

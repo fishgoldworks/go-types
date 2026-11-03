@@ -30,7 +30,7 @@ Type checks do not convert values. For example, `isNumber('42')` returns `false`
 
 `box` preserves nullish input and existing objects; `unbox` extracts primitive values from wrapper objects without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
 
-Conditional converters evaluate a boolean condition or synchronous predicate once. A `false`, omitted or `undefined` condition returns the original input without inspecting or converting it. See the [conversion guide](conversions.md) for identity, coercion and precision details.
+For conditional conversion, use `applyIf` from go-fns 2.0.0 or later. See [conditional conversions](conversions.md#conditional-conversions) for examples and version availability.
 
 ### Errors and side effects
 
@@ -50,12 +50,51 @@ Handle iteration explicitly when consumption is intended.
 
 Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values; Set blankness checks items.
 
+Check the expected type first when a value must be a particular kind of input:
+
+| Requirement              | Check                                     |
+| ------------------------ | ----------------------------------------- |
+| A non-empty array        | `isArray(value) && !isEmpty(value)`       |
+| A non-empty Map          | `isMap(value) && !isEmpty(value)`         |
+| A non-empty Set          | `isSet(value) && !isEmpty(value)`         |
+| A non-empty plain object | `isPlainObject(value) && !isEmpty(value)` |
+| Non-blank text           | `isString(value) && !isBlank(value)`      |
+
+`isString` accepts primitive strings and boxed `String` objects. Use `typeof value === 'string'` when only primitive strings are acceptable. Negation alone does not establish a type or validate collection items. See [required text and tags](../README.md#check-required-text-and-tags) for element validation.
+
+To remove recognised empty values from mixed settings while retaining `0` and `false`:
+
+<!-- prettier-ignore -->
+```javascript
+const settings = [null, undefined, false, 0, '', [], 'hello'];
+
+settings.filter(value => !isEmpty(value));   // => [false, 0, 'hello']
+```
+
+This filtering keeps other values; it does not restrict the result to strings or collections.
+
+For reusable predicates, the same checks can be composed with go-fns:
+
+<!-- prettier-ignore -->
+```javascript
+import { isArray, isString, isEmpty, isBlank } from 'go-types';
+import { and, not } from 'go-fns';
+
+const hasArrayItems = and(isArray, not(isEmpty));
+const hasText = and(isString, not(isBlank));
+
+hasArrayItems(['report.pdf']);               // => true
+hasArrayItems(false);                        // => false
+hasText('Project notes');                    // => true
+hasText('   ');                              // => false
+```
+
 ### Type specifications
 
 The four collection checks accept a required type-name string or predicate:
 
 - **Type-name string:** One of the native `typeof` names: `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` or `'function'`. Names are case-sensitive. As with `typeof`, `'object'` includes `null`.
-- **Predicate:** A synchronous function returning a primitive boolean. It receives one value without a supplied `this` receiver. Bind methods that require a receiver, or use an arrow function.
+- **Predicate:** A function whose result is evaluated using JavaScript truthiness. It receives one value without a supplied `this` receiver. Bind methods that require a receiver, or use an arrow function.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -65,14 +104,14 @@ isArrayOf([1, 2], 'number');                                     // => true
 isArrayOf([1, new Number(2)], 'number');                         // => false
 isArrayOf([1, new Number(2)], isNumber);                         // => true
 isArrayLikeOf({ 0: 'a', length: 1 }, 'string');                  // => true
-isSetOf(new Set([null]), value => value === null);               // => true
+isSetOf(new Set([null]), isNull);                                // => true
 isMapOf(new Map([['score', 1]]), 'string', isNumber);            // => true
 isArrayOf([new Account()], value => value instanceof Account);   // => true
 ```
 
-Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise Date objects from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
+Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise Date objects from other realms. Combine checks with an ordinary predicate, such as `value => isNumber(value) || isNull(value)`, or with the logic utilities in go-fns. `isNumber` also accepts Number wrappers; use native `typeof` when only primitive numbers are wanted.
 
-Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
+Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Truthy results match and falsy results do not. Returned promises are truthy and are not awaited; callback exceptions propagate unchanged.
 
 See [Matcher specification contract](#matcher-specification-contract) for traversal and callback rules.
 
@@ -101,7 +140,7 @@ Use native `typeof` checks for primitive narrowing. `isNotNullish` also narrows 
 
 `toDate()` returns `Date`; it does not promise to preserve extra input properties during conversion. See the [runtime guide](runtime.md#typescript-boundaries) for declaration boundaries.
 
-`toArray()`, `toSet()` and `toMap()` infer definite iterable contents before object or indexed contents. Known symbol properties contribute to inferred values and Map keys. A visibly optional or nullable iterator that may be callable keeps inferred contents conservative because it can override the fallback source; an iterator declared only as `null`/`undefined` permits fallback inference. Structural types cannot prove a plain prototype, enumerability or complete pair indices. Skipped conversions preserve the original input type.
+`toArray()`, `toSet()` and `toMap()` infer definite iterable contents before object or indexed contents. Known symbol properties contribute to inferred values and Map keys. A visibly optional or nullable iterator that may be callable keeps inferred contents conservative because it can override the fallback source; an iterator declared only as `null`/`undefined` permits fallback inference. Structural types cannot prove a plain prototype, enumerability or complete pair indices.
 
 Root and focused CommonJS declarations support strict consumers targeting ES2017 with ES2017 libraries and `skipLibCheck: false`. Runtime support for optional native features remains separate: selecting a newer compiler library does not add BigInt to Node 8. See the [runtime guide](runtime.md#typescript-boundaries) for declaration details.
 
@@ -119,6 +158,6 @@ Matchers are required for `isArrayOf(value, matcher)`, `isArrayLikeOf(value, mat
 
 Indexed checks read length once and then use ordinary property reads. Empty slots therefore match `'undefined'` unless an inherited indexed value is present. Matching stops at the first failure. Map checks test each key before its associated value; Map and Set checks use captured native iteration. Iteration is live, so predicates must not mutate those collections.
 
-Predicate results are checked as primitive booleans without coercion, awaiting or thenable inspection. Results are not cached: each reached value is passed to the predicate. Callback closures and instance hooks inside explicit predicates retain their live state. There is no built-in work limit for collection traversal or callback work.
+Predicate results use JavaScript truthiness without coercion hooks, awaiting or thenable inspection. Results are not cached: each reached value is passed to the predicate. Callback closures and instance hooks inside explicit predicates retain their live state. There is no built-in work limit for collection traversal or callback work.
 
-The shared `TypeMatcher` declaration accepts `TypeName | ((this: undefined, value: unknown) => boolean)`. Callback input remains `unknown`, including for typed collections; explicit incompatible receiver requirements are rejected. TypeScript cannot recover a receiver requirement erased from a function type. All four checks return `boolean` and do not narrow either branch.
+The shared `TypeMatcher` declaration accepts `TypeName | ((this: undefined, value: unknown) => unknown)`. Callback input remains `unknown`, including for typed collections; explicit incompatible receiver requirements are rejected. TypeScript cannot recover a receiver requirement erased from a function type. All four checks return `boolean` and do not narrow either branch.

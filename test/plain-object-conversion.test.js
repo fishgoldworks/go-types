@@ -263,50 +263,6 @@ for (const [backend, api] of backends.entries()) {
       assert.throws(() => api.toPlainObject({ [Symbol.iterator]: method }), typeError);
     assert.equal(api.toPlainObject({ a: 1, [Symbol.iterator]: undefined }).a, 1);
   });
-  test('plain conversion: condition identity and strict predicates, backend ' + backend, () => {
-    const revoked = Proxy.revocable({}, {});
-    revoked.revoke();
-    for (const value of [revoked.proxy, null, undefined, -0, NaN, new Date(), '{', '{"a":1}']) {
-      assert.equal(api.toPlainObjectIf(value), value);
-      assert.equal(api.toPlainObjectIf(value, false), value);
-      assert.equal(api.toPlainObjectIf(value, undefined), value);
-      assert.equal(
-        api.toPlainObjectIf(value, () => false),
-        value
-      );
-    }
-    let calls = 0;
-    const input = { a: 1 };
-    assert.equal(
-      api.toPlainObjectIf(input, function (v) {
-        assert.equal(this, undefined);
-        assert.equal(v, input);
-        calls++;
-        v.a = 2;
-        return true;
-      }).a,
-      2
-    );
-    assert.equal(calls, 1);
-    for (const invalid of [null, 1, 'true', {}, new Boolean(true)])
-      assert.throws(() => api.toPlainObjectIf(input, invalid), typeError);
-    for (const invalid of [undefined, null, 1, {}, Promise.resolve(true)])
-      assert.throws(() => api.toPlainObjectIf(input, () => invalid), typeError);
-    assert.throws(() => api.toPlainObjectIf(null, true), typeError);
-    for (const text of ['{"a":1}', '[["a",1]]', '{', 'ordinary text']) {
-      for (const condition of [true, () => true]) {
-        assert.throws(() => api.toPlainObjectIf(text, condition), typeError);
-      }
-    }
-    const error = new Error('predicate');
-    assert.throws(
-      () =>
-        api.toPlainObjectIf(input, () => {
-          throw error;
-        }),
-      (e) => e === error
-    );
-  });
 }
 
 test('plain conversion captures safe property creation before reassignment', () => {

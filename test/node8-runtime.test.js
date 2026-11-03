@@ -17,13 +17,12 @@ function inHost(body) {
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stdout + result.stderr);
 }
-test('missing BigInt does not prevent importing the API or skipping conversion', () =>
+test('missing BigInt does not prevent importing the API or using unrelated functions', () =>
   inHost(() => {
     delete globalThis.BigInt;
     const T = require('./index.js');
     assert.deepEqual(Object.keys(T).sort(), require('./scripts/exports.json').slice().sort());
     assert.equal(T.toJson({ a: 1 }), '{"a":1}');
-    assert.equal(T.toJsonIf({ a: 1 }, true), '{"a":1}');
     assert.equal(T.toNumber('42'), 42);
     assert.equal(T.isBigInt(42), false);
     const value = {
@@ -31,22 +30,9 @@ test('missing BigInt does not prevent importing the API or skipping conversion',
         throw Error('must not coerce');
       }
     };
-    for (const condition of [false, undefined, () => false]) assert.equal(T.toBigIntIf(value, condition), value);
-    assert.equal(T.toBigIntIf(value), value);
     const unsupported = (error) =>
       error instanceof TypeError && error.message === 'Native BigInt conversion is unavailable in this runtime.';
     assert.throws(() => T.toBigInt(value), unsupported);
-    assert.throws(() => T.toBigIntIf(value, true), unsupported);
-    assert.throws(() => T.toBigIntIf(value, () => true), unsupported);
-    const failure = Error('predicate failure');
-    assert.throws(
-      () =>
-        T.toBigIntIf(value, () => {
-          throw failure;
-        }),
-      (error) => error === failure
-    );
-    assert.throws(() => T.toBigIntIf(value, () => 1), /boolean/);
   }));
 test('collection predicates work without optional array flatMap', () =>
   inHost(() => {

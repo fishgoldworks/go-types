@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const { toJson, toJsonIf } = require('../index.js');
+const { toJson } = require('../index.js');
 
 // Literal expectations distinguish serialization from String conversion or JSON parsing.
 for (const [label, input, expected] of [
@@ -134,66 +134,4 @@ test('toJson does not await promises or asynchronous serialization hooks', () =>
     toJson(1, async () => 2),
     '{}'
   );
-});
-
-test('toJsonIf forwards both options after evaluating its condition exactly once', () => {
-  const input = { a: 1, b: 2 };
-  let calls = 0;
-  const result = toJsonIf(
-    input,
-    function (value) {
-      assert.equal(this, undefined);
-      assert.equal(arguments.length, 1);
-      assert.equal(value, input);
-      calls++;
-      value.a = 3;
-      return true;
-    },
-    ['a'],
-    2
-  );
-  assert.equal(result, '{\n  "a": 3\n}');
-  assert.equal(calls, 1);
-  assert.equal(
-    toJsonIf({ a: 1 }, true, (_key, value) => (typeof value === 'number' ? 2 : value)),
-    '{"a":2}'
-  );
-  assert.equal(toJsonIf(undefined, true), undefined);
-});
-
-test('toJsonIf skips input, replacer and spacing inspection for false or omitted conditions', () => {
-  const poison = new Proxy([], {
-    get() {
-      throw Error('unexpected inspection');
-    }
-  });
-  for (const condition of [false, undefined, () => false]) {
-    assert.equal(toJsonIf(poison, condition, poison, poison), poison);
-  }
-  assert.equal(toJsonIf(poison), poison);
-  assert.equal(toJsonIf(), undefined);
-  assert.equal(toJsonIf(1n, false), 1n);
-});
-
-test('toJsonIf rejects invalid conditions before touching serialization input or options', () => {
-  const poison = new Proxy(
-    {},
-    {
-      get() {
-        throw Error('unexpected inspection');
-      }
-    }
-  );
-  for (const condition of [null, 0, 1, 'false', new Boolean(false), () => undefined, () => 1, async () => false]) {
-    assert.throws(() => toJsonIf(poison, condition), TypeError);
-  }
-  const failure = new Error('predicate failure');
-  assert.throws(
-    () =>
-      toJsonIf(poison, () => {
-        throw failure;
-      }),
-    (error) => error === failure
-  );
-  assert.throws(() => toJsonIf(1n, true), TypeError);
 });

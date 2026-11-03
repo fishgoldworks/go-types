@@ -39,7 +39,7 @@ module.exports = function generateEntries(destination) {
     'index.d.mts',
     "import Types from './index.js';\nexport default Types;\nexport { " +
       names.join(', ') +
-      " } from './index.js';\nexport type { TypeName, TypeMatcher, TypeGuard, TypedArray, ConversionCondition, ArrayElement, Boxed, Unboxed, ConvertedMap, ConvertedPlainObject, ConvertedSet } from './index.js';\n"
+      " } from './index.js';\nexport type { TypeName, TypeMatcher, TypeGuard, TypedArray, ArrayElement, Boxed, Unboxed, ConvertedMap, ConvertedPlainObject, ConvertedSet } from './index.js';\n"
   );
   const exportsMap = {
     '.': {

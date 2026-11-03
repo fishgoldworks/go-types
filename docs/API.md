@@ -16,7 +16,6 @@ Conversion behaviour is also summarised in the [conversion guide](conversions.md
 - [DOM](#dom)
 - [Binary](#binary)
 - [Conversion](#conversion)
-- [Conditional conversion](#conditional-conversion)
 - [Behaviour](#behaviour)
   - [Checks and conversions](#checks-and-conversions)
   - [Errors and side effects](#errors-and-side-effects)
@@ -28,13 +27,13 @@ Conversion behaviour is also summarised in the [conversion guide](conversions.md
 
 ## API summary
 
-All **91 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
+All **74 public functions** are documented below. The summaries link to each function's parameters, return value, examples and behavioural notes.
 
 Examples assume the named functions have been imported from `go-types`, unless an import is shown. DOM examples run in a web browser. `// =>` comments show expected results or exceptions.
 
 Parameter tables describe accepted JavaScript values. `unknown` accepts any JavaScript value; `T` preserves the input type. `?` marks an optional argument; **—** means no explicit default is supplied. See [TypeScript](#typescript) for declaration and narrowing behaviour, and [Errors and side effects](#errors-and-side-effects) for shared error rules.
 
-[Primitive](#primitive) · [Utility](#utility) · [Number](#number) · [Object](#object) · [Array](#array) · [Collection](#collection) · [DOM](#dom) · [Binary](#binary) · [Conversion](#conversion) · [Conditional conversion](#conditional-conversion)
+[Primitive](#primitive) · [Utility](#utility) · [Number](#number) · [Object](#object) · [Array](#array) · [Collection](#collection) · [DOM](#dom) · [Binary](#binary) · [Conversion](#conversion)
 
 **Primitive**
 
@@ -155,29 +154,7 @@ Parameter tables describe accepted JavaScript values. `unknown` accepts any Java
 | [`toString(value?)`](#tostringvalue) | Converts a value to a primitive string using JavaScript’s `String` conversion. | **`string`**<br><br>The converted primitive string; nullish inputs become their literal text. |
 | [`toSymbol(value?)`](#tosymbolvalue) | Converts a value to a primitive symbol, preserving existing symbols and unboxing `Symbol` wrappers. | **`symbol`**<br><br>The original or unboxed symbol, or a new symbol created from the description. |
 
-**Conditional conversion**
-
-| API | Description | Returns |
-| --- | --- | --- |
-| [`boxIf(value, condition?)`](#boxifvalue-condition) | Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| Boxed<T>`**<br><br>The `box` result when requested; otherwise the exact original input. |
-| [`unboxIf(value, condition?)`](#unboxifvalue-condition) | Extracts the primitive value from a wrapper object when the condition evaluates to `true` and native unboxing is available. Otherwise, returns the original input unchanged. | **`T \| Unboxed<T>`**<br><br>The `unbox` result when requested; otherwise the exact original input. |
-| [`toRegExpIf(value, condition?, flags?)`](#toregexpifvalue-condition-flags) | Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| RegExp`**<br><br>The `toRegExp` result when requested; otherwise the exact original input. |
-| [`toPromiseIf(value, condition?)`](#topromiseifvalue-condition) | Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise, returns the original input unchanged. | **`T \| Promise<Awaited<T>>`**<br><br>The `toPromise` result when requested; otherwise the exact original input. |
-| [`toArrayIf(value, condition?)`](#toarrayifvalue-condition) | Converts supported iterable, plain object or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ArrayElement<T>[]`**<br><br>A new shallow array when conversion is requested; otherwise the original input, unchanged. |
-| [`toBigIntIf(value, condition?)`](#tobigintifvalue-condition) | Converts a value to a primitive bigint when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| bigint`**<br><br>The converted primitive bigint when conversion is requested; otherwise the original input, unchanged. |
-| [`toBooleanIf(value, condition?)`](#tobooleanifvalue-condition) | Converts a value to its JavaScript boolean truthiness when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| boolean`**<br><br>The input’s boolean truthiness when conversion is requested; otherwise the original input, unchanged. |
-| [`toDateIf(value, condition?)`](#todateifvalue-condition) | Converts a value to a `Date` when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| Date`**<br><br>The original `Date` or a new `Date`, possibly invalid, when conversion is requested; otherwise the original input, unchanged. |
-| [`toIntegerIf(value, condition?)`](#tointegerifvalue-condition) | Converts a value to a number and truncates it towards zero when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| number`**<br><br>The numeric conversion truncated towards zero, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged. |
-| [`toJsonIf(value, condition?, replacer?, space?)`](#tojsonifvalue-condition-replacer-space) | Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| string \| undefined`**<br><br>JSON text or `undefined` when conversion is requested; otherwise the original input, unchanged. |
-| [`parseJsonIf(value, condition?, reviver?)`](#parsejsonifvalue-condition-reviver) | Parses JSON when the condition evaluates to `true`; otherwise returns the original input unchanged. | **`T \| unknown`**<br><br>The parsed or revived value when requested; otherwise the original input unchanged. |
-| [`toMapIf(value, condition?)`](#tomapifvalue-condition) | Converts a plain object or iterable of key/value pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedMap<T>`**<br><br>A new Map when conversion is requested; otherwise the original input, unchanged. |
-| [`toNumberIf(value, condition?)`](#tonumberifvalue-condition) | Converts a value to a primitive number when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| number`**<br><br>The converted primitive number, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged. |
-| [`toPlainObjectIf(value, condition?)`](#toplainobjectifvalue-condition) | Creates a new plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedPlainObject<T>`**<br><br>A fresh plain object when conversion is requested; otherwise the exact original input. |
-| [`toSetIf(value, condition?)`](#tosetifvalue-condition) | Converts supported iterable, plain object or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| ConvertedSet<T>`**<br><br>A new Set when conversion is requested; otherwise the original input, unchanged. |
-| [`toStringIf(value, condition?)`](#tostringifvalue-condition) | Converts a value to a primitive string when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| string`**<br><br>The converted primitive string when conversion is requested; otherwise the original input, unchanged. |
-| [`toSymbolIf(value, condition?)`](#tosymbolifvalue-condition) | Converts a value to a primitive symbol when the condition evaluates to `true`. Otherwise, returns the original value unchanged. | **`T \| symbol`**<br><br>The original or unboxed symbol, or a new symbol from the description, when conversion is requested; otherwise the original input, unchanged. |
-
-`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Conditional conversions retain `T` when skipped; literal conditions select the corresponding declaration overload. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).
+`T` is the input type. `ArrayElement<T>[]` preserves inferred iterable elements and record values, with conservative array-like inference, `ConvertedMap<T>` and `ConvertedSet<T>` preserve inferred collection types, and `ConvertedPlainObject<T>` describes fresh plain objects with optional inferred properties and unknown JSON values. Checks return boolean values, with narrowing available only where described under [TypeScript](#typescript).
 
 ## Primitive
 
@@ -463,7 +440,7 @@ The generic declaration narrows to `NonNullable<T>`. Values such as `0`, `false`
 
 Checks whether a value is nullish, an empty string, or an empty supported collection.
 
-Checks strings and [supported collections](#empty-and-blank-values) without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption.
+Checks strings and [supported collections](#empty-and-blank-values) without consuming an iterator. `null` and `undefined` count as empty; `[null]` does not. Unsized iterators and iterables throw because their contents cannot be checked without consumption. Check the expected type first when requiring a non-empty string or collection. Item validity is a separate check.
 
 **Parameters**
 
@@ -482,11 +459,26 @@ Checks strings and [supported collections](#empty-and-blank-values) without cons
 **Examples**
 
 ```javascript
-isEmpty(null);                 // => true
-isEmpty([]);                   // => true
-isEmpty(new Map());            // => true
-isEmpty(Object.create(null));  // => true
-isEmpty([null]);               // => false
+const hasSelection = value => isArray(value) && !isEmpty(value);
+
+hasSelection(['report.pdf']);                // => true
+hasSelection([]);                            // => false
+hasSelection(false);                         // => false
+hasSelection([null]);                        // => true
+
+const settings = [null, undefined, false, 0, '', [], 'hello'];
+settings.filter(value => !isEmpty(value));   // => [false, 0, 'hello']
+```
+
+**Additional examples**
+
+```javascript
+isEmpty(null);                               // => true
+isEmpty([]);                                 // => true
+isEmpty(new Map());                          // => true
+isEmpty(Object.create(null));                // => true
+isEmpty([null]);                             // => false
+isEmpty(false);                              // => false
 ```
 
 **Notes**
@@ -503,7 +495,7 @@ Handle iteration explicitly when consumption is intended. Unavailable native col
 
 Checks whether a value is nullish, an empty or whitespace-only string, or a supported collection containing only nullish values.
 
-Accepts nullish values, empty or whitespace-only strings, and [supported collections](#empty-and-blank-values) whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[""]` is not. Unsized iterators and iterables throw instead of being consumed.
+Accepts nullish values, empty or whitespace-only strings, and [supported collections](#empty-and-blank-values) whose contents are all `null` or `undefined`. The check is shallow: `[null]` is blank, but `[""]` is not. Unsized iterators and iterables throw instead of being consumed. Check for a string before using negation to require text.
 
 **Parameters**
 
@@ -522,11 +514,28 @@ Accepts nullish values, empty or whitespace-only strings, and [supported collect
 **Examples**
 
 ```javascript
-isBlank(" \t\n");                  // => true
-isBlank([null,undefined]);         // => true
-isBlank(new Map([["key",null]]));  // => true
-isBlank([""]);                     // => false
-isBlank(0);                        // => false
+const hasLabel = value => isString(value) && !isBlank(value);
+
+hasLabel('Release notes');               // => true
+hasLabel('   ');                         // => false
+hasLabel('');                            // => false
+hasLabel(42);                            // => false
+hasLabel(new String('Release notes'));   // => true
+hasLabel(new String('   '));             // => false
+
+isBlank(['   ']);                        // => false
+isBlank([null]);                         // => true
+```
+
+**Additional examples**
+
+```javascript
+isBlank(" \t\n");                        // => true
+isBlank([null,undefined]);               // => true
+isBlank(new Map([["key",null]]));        // => true
+isBlank([""]);                           // => false
+isBlank(0);                              // => false
+isBlank(['   ']);                        // => false
 ```
 
 **Notes**
@@ -1336,20 +1345,20 @@ Uses the `Array.isArray` function captured when the module loads. This retains n
 
 Checks whether a value is an array whose items match a type-name string or predicate.
 
-Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
+Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
 
 **Parameters**
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
-| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous boolean predicate for collection items. |
+| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous predicate for collection items. |
 
 **Returns:** `boolean` — `true` if the value is an array and every element matches the matcher, including an empty array; otherwise `false`.
 
 **Errors**
 
-- `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
+- `TypeError` for invalid or missing matchers.
 - Callback, property-access and native iteration errors propagate.
 
 **Examples**
@@ -1412,20 +1421,20 @@ The `length` must already be a primitive number in the accepted range; boxed len
 
 Checks whether an array-like value contains only items matching a type-name string or predicate.
 
-Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
+Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
 
 **Parameters**
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
-| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous boolean predicate for collection items. |
+| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous predicate for collection items. |
 
 **Returns:** `boolean` — `true` if the value is array-like and every indexed value matches the matcher, including an empty input; otherwise `false`.
 
 **Errors**
 
-- `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
+- `TypeError` for invalid or missing matchers.
 - Callback, property-access and native iteration errors propagate.
 
 **Examples**
@@ -1511,21 +1520,21 @@ Uses native collection identity across realms without enumerating or changing th
 
 Checks whether a value is a native Map whose keys and values match their type-name strings or predicates.
 
-Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
+Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
 
 **Parameters**
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
-| `keyMatcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous boolean predicate for Map keys. |
-| `valueMatcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous boolean predicate for Map values. |
+| `keyMatcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous predicate for Map keys. |
+| `valueMatcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous predicate for Map values. |
 
 **Returns:** `boolean` — `true` if the value is a `Map` whose keys and values match their respective matchers, including an empty `Map`; otherwise `false`.
 
 **Errors**
 
-- `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
+- `TypeError` for invalid or missing matchers.
 - Callback, property-access and native iteration errors propagate.
 
 **Examples**
@@ -1573,20 +1582,20 @@ Uses native collection identity across realms without enumerating or changing th
 
 Checks whether a value is a native Set whose items match a type-name string or predicate.
 
-Accepts a native `typeof` name or a synchronous predicate returning a primitive boolean. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
+Accepts a native `typeof` name or a predicate whose result is evaluated using JavaScript truthiness. Valid empty collections pass without calling predicates. Invalid or missing matchers throw before the input is inspected.
 
 **Parameters**
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `value` | `unknown` | The value to check. |
-| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous boolean predicate for collection items. |
+| `matcher` | [`TypeMatcher`](#type-specifications) | A required native `typeof` name or synchronous predicate for collection items. |
 
 **Returns:** `boolean` — `true` if the value is a `Set` whose items all match the matcher, including an empty `Set`; otherwise `false`.
 
 **Errors**
 
-- `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
+- `TypeError` for invalid or missing matchers.
 - Callback, property-access and native iteration errors propagate.
 
 **Examples**
@@ -2274,11 +2283,11 @@ Uses `Number` followed by `Math.trunc`, so `"12px"` becomes `NaN` rather than `1
 **Examples**
 
 ```javascript
-toInteger('12.9');                 // => 12
-toInteger(-12.9);                  // => -12
-Number.isNaN(toInteger('12px'));   // => true
-Object.is(toInteger(-0.5), -0);    // => true
-toInteger('1e3');                  // => 1000
+toInteger('12.9');               // => 12
+toInteger(-12.9);                // => -12
+isNaN(toInteger('12px'));        // => true
+Object.is(toInteger(-0.5), -0);  // => true
+toInteger('1e3');                // => 1000
 ```
 
 **Notes**
@@ -2397,8 +2406,8 @@ Copies own enumerable string and symbol properties of plain objects, or consumes
 **Examples**
 
 ```javascript
-Array.from(toMap({a: 1, b: 2}));                                               // => [["a",1],["b",2]]
-Array.from(toMap([['a', 1], ['b', 2], ['a', 3]]));                             // => [["a",3],["b",2]]
+toArray(toMap({a: 1, b: 2}));                                                  // => [["a",1],["b",2]]
+toArray(toMap([['a', 1], ['b', 2], ['a', 3]]));                                // => [["a",3],["b",2]]
 (() => { const key = Symbol('key'); return toMap({[key]: 2}).get(key); })();   // => 2
 toMap([[undefined, undefined]]).has(undefined);                                // => true
 toMap().size;                                                                  // => 0
@@ -2443,10 +2452,10 @@ Converts the entire input: `null`, `false` and blank strings become `0`; `true` 
 **Examples**
 
 ```javascript
-toNumber('12.5');                // => 12.5
-toNumber('0x10');                // => 16
-toNumber(null);                  // => 0
-Number.isNaN(toNumber('12px'));  // => true
+toNumber('12.5');              // => 12.5
+toNumber('0x10');              // => 16
+toNumber(null);                // => 0
+isNaN(toNumber('12px'));       // => true
 ```
 
 **Notes**
@@ -2531,12 +2540,12 @@ Uses the same source order as toArray: synchronous iterable values, then values 
 **Examples**
 
 ```javascript
-Array.from(toSet([3, 1, 3]));            // => [3,1]
-Array.from(toSet('A😀A'));               // => ["A","😀"]
-Array.from(toSet({a: 1, b: 2, c: 1}));   // => [1,2]
-Array.from(toSet({0: 'x', length: 1}));  // => ["x",1]
-toSet().size;                            // => 0
-toSet(null).size;                        // => 0
+toArray(toSet([3, 1, 3]));             // => [3,1]
+toArray(toSet('A😀A'));                // => ["A","😀"]
+toArray(toSet({a: 1, b: 2, c: 1}));    // => [1,2]
+toArray(toSet({0: 'x', length: 1}));   // => ["x",1]
+toSet().size;                          // => 0
+toSet(null).size;                      // => 0
 ```
 
 **Notes**
@@ -2580,7 +2589,7 @@ Use this for inputs that accept one item, an array or a Set. Strings remain whol
 ```javascript
 ensureSet().size;                                                          // => 0
 ensureSet("read").has("read");                                             // => true
-Array.from(ensureSet([1, 2, 1]));                                          // => [1, 2]
+toArray(ensureSet([1, 2, 1]));                                             // => [1, 2]
 ensureSet(null).has(null);                                                 // => true
 ensureSet(undefined).has(undefined);                                       // => true
 
@@ -2593,7 +2602,7 @@ ensureSet(permissions) === permissions;                                    // =>
 ```javascript
 ensureSet().size;                                                          // => 0
 ensureSet("read").has("read");                                             // => true
-Array.from(ensureSet([1, 2, 1]));                                          // => [1,2]
+toArray(ensureSet([1, 2, 1]));                                             // => [1,2]
 ensureSet(null).has(null);                                                 // => true
 ensureSet(undefined).has(undefined);                                       // => true
 (()=>{const values=new Set([1,2]);return ensureSet(values)===values;})();  // => true
@@ -2693,659 +2702,6 @@ Symbol wrappers, including those from another realm, are unboxed without calling
 
 Each description creates a fresh symbol; `Symbol.for` is never called implicitly. An existing registry symbol keeps its identity when passed in. Omitted or `undefined` input creates a symbol without a description. Requires native `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
 
-## Conditional conversion
-
-Each `If` function accepts a boolean or synchronous boolean-returning predicate. A `false`, omitted, or `undefined` condition returns the input unchanged without converting or inspecting it.
-
-### `boxIf(value, condition?)`
-
-Wraps non-nullish primitives in their native wrapper objects when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
-
-Applies the full `box` contract only when a primitive boolean condition or synchronous predicate requests conversion.
-
-Requested conversion uses `box`. Does not call conversion hooks. Existing objects and functions, `null` and `undefined` are returned unchanged.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | Boxed<T>` — The `box` result when requested; otherwise the exact original input.
-
-**Errors**
-
-- Invalid conditions and non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate; requested conversion follows `box` error behaviour.
-
-**Examples**
-
-```javascript
-boxIf(3, false);               // => 3
-boxIf(3) === 3;                // => true
-```
-
-**Notes**
-
-A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
-
----
-
-### `unboxIf(value, condition?)`
-
-Extracts the primitive value from a wrapper object when the condition evaluates to `true` and native unboxing is available. Otherwise, returns the original input unchanged.
-
-Applies the full `unbox` contract only when a primitive boolean condition or synchronous predicate requests conversion.
-
-Requested conversion uses `unbox`. Uses captured native `valueOf` intrinsics without calling custom conversion hooks. Missing `Symbol` or `BigInt` unboxing support leaves those wrappers unchanged.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | Unboxed<T>` — The `unbox` result when requested; otherwise the exact original input.
-
-**Errors**
-
-- Invalid conditions and non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate; requested conversion follows `unbox` error behaviour.
-
-**Examples**
-
-```javascript
-unboxIf(3, false);             // => 3
-unboxIf(3) === 3;              // => true
-```
-
-**Notes**
-
-A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
-
----
-
-### `toRegExpIf(value, condition?, flags?)`
-
-Converts a pattern and optional flags to a `RegExp` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
-
-Applies the full `toRegExp` contract only when a primitive boolean condition or synchronous predicate requests conversion.
-
-Requested conversion uses `toRegExp`. Uses native `RegExp` syntax and `flags`. May reuse a local `RegExp` object without explicit `flags`; copied expressions start with `lastIndex` zero.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-| `flags?` | `string` | `undefined` | Native RegExp flags. Omitted or `undefined` preserves a RegExp input’s flags; explicit flags replace them. |
-
-**Returns:** `T | RegExp` — The `toRegExp` result when requested; otherwise the exact original input.
-
-**Errors**
-
-- Invalid conditions and non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate; requested conversion follows `toRegExp` error behaviour.
-
-**Examples**
-
-```javascript
-toRegExpIf(3, false);          // => 3
-toRegExpIf(3) === 3;           // => true
-```
-
-**Notes**
-
-A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options.
-
----
-
-### `toPromiseIf(value, condition?)`
-
-Converts a value to a native `Promise` when the condition evaluates to `true`. Otherwise, returns the original input unchanged.
-
-Applies the full `toPromise` contract only when a primitive boolean condition or synchronous predicate requests conversion.
-
-Requested conversion uses `toPromise`. Preserves ordinary local `Promise` identity, assimilates thenables and wraps other values. Requires native `Promise.resolve`; functions are values, not callbacks.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | Promise<Awaited<T>>` — The `toPromise` result when requested; otherwise the exact original input.
-
-**Errors**
-
-- Invalid conditions and non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate; requested conversion follows `toPromise` error behaviour.
-
-**Examples**
-
-```javascript
-toPromiseIf(3, false);         // => 3
-toPromiseIf(3) === 3;          // => true
-```
-
-**Notes**
-
-A predicate receives the original input once without an explicit receiver. Predicate errors propagate, and deliberate mutation is visible to a requested conversion. No asynchronous predicate is awaited. Skipping reads neither the input nor conversion options. The skipped result is the input itself, not a `Promise` wrapper.
-
----
-
-### `toArrayIf(value, condition?)`
-
-Converts supported iterable, plain object or array-like input to a new shallow array when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toArray` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toArray`. Consumes iterable input, copies values from own enumerable string and symbol properties, or reads supported array-like indices. Array-like lengths must already be numeric safe integers at least zero. Nullish and unsupported inputs throw. Requires native `Array.from`; missing support throws `TypeError` before inspecting the input.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | ArrayElement<T>[]` — A new shallow array when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toArray`](#toarrayvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toArrayIf('ab', true);         // => ["a","b"]
-toArrayIf('ab', false);        // => "ab"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toArray` contract.
-
----
-
-### `toBigIntIf(value, condition?)`
-
-Converts a value to a primitive bigint when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toBigInt` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toBigInt`. Requires native BigInt. Fractional numbers and invalid integer text throw; input conversion hooks may run.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | bigint` — The converted primitive bigint when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toBigInt`](#tobigintvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-Examples using bigint literals require native BigInt support.
-
-```javascript
-toBigIntIf('42', true);                                // => 42n
-toBigIntIf('42', false);                               // => '42'
-toBigIntIf('42');                                      // => '42'
-toBigIntIf('42', value => typeof value === 'string');  // => 42n
-```
-
-**Additional examples**
-
-```javascript
-toBigIntIf('42', true) === 42n;                        // => true
-toBigIntIf('42', false);                               // => "42"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toBigInt` contract. Skipping also works when native BigInt support is unavailable.
-
----
-
-### `toBooleanIf(value, condition?)`
-
-Converts a value to its JavaScript boolean truthiness when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toBoolean` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toBoolean`. Uses truthiness rather than parsing boolean text. Does not invoke object conversion hooks.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | boolean` — The input’s boolean truthiness when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toBoolean`](#tobooleanvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toBooleanIf(0, true);          // => false
-toBooleanIf('false', false);   // => "false"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toBoolean` contract.
-
----
-
-### `toDateIf(value, condition?)`
-
-Converts a value to a `Date` when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toDate` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toDate`. Preserves existing Date objects. May return an invalid Date; omitted input does not mean the current time. Symbols, bigints and conversion hooks can throw.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | Date` — The original `Date` or a new `Date`, possibly invalid, when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toDate`](#todatevalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toDateIf(0, true).getTime();   // => 0
-toDateIf(0, false);            // => 0
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toDate` contract.
-
----
-
-### `toIntegerIf(value, condition?)`
-
-Converts a value to a number and truncates it towards zero when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toInteger` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toInteger`. Does not guarantee a finite or safe integer. Symbols and failing conversion hooks can throw.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | number` — The numeric conversion truncated towards zero, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toInteger`](#tointegervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toIntegerIf('4.8', true);      // => 4
-toIntegerIf('4.8', false);     // => "4.8"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toInteger` contract.
-
----
-
-### `toJsonIf(value, condition?, replacer?, space?)`
-
-Serialises a value to JSON text when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toJson` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toJson`. May return `undefined`. Does not transform Maps, Sets or bigints automatically. Cycles and unhandled bigints throw; getters, `toJSON` methods and replacer callbacks can run.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-| `replacer?` | `((this: unknown, key: string, value: unknown) => unknown) \| readonly (string \| number)[] \| null` | `undefined` | A native JSON replacer callback or property-name list. Callbacks receive the containing object as `this`; omitted or `null` uses ordinary serialisation. |
-| `space?` | `string \| number` | `undefined` | Native JSON indentation, capped at ten spaces or ten string code units. |
-
-**Returns:** `T | string | undefined` — JSON text or `undefined` when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toJson`](#tojsonvalue-replacer-space) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toJsonIf({a: 1}, true);                                  // => "{\"a\":1}"
-toJsonIf({a: 1}, false);                                 // => {"a":1}
-toJsonIf({a: 1, b: 2}, value => value.a === 1, ['a']);   // => "{\"a\":1}"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toJson` contract. The condition is the second argument; replacer and indentation follow it. Skipping does not inspect the value, replacer or indentation. Replacer callbacks retain native JSON receiver and return-value rules; only the condition uses the strict boolean predicate contract.
-
----
-
-### `parseJsonIf(value, condition?, reviver?)`
-
-Parses JSON when the condition evaluates to `true`; otherwise returns the original input unchanged.
-
-Uses the full `parseJson` contract when a primitive boolean condition or synchronous predicate requests conversion.
-
-Requested conversion uses `parseJson`. Uses captured native `JSON.parse`, including input coercion, reviver order and errors. Parsing does not validate an application schema; reviver results are not awaited.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-| `reviver?` | `((this: unknown, key: string, value: unknown, context?: { source?: string }) => unknown) \| null` | `undefined` | A native JSON reviver, called for children before parents and finally for the root. Returning `undefined` deletes a property or replaces the root with `undefined`. Newer hosts may supply optional source context. |
-
-**Returns:** `T | unknown` — The parsed or revived value when requested; otherwise the original input unchanged.
-
-**Errors**
-
-- Invalid conditions and non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate; requested conversion follows `parseJson` error behaviour.
-
-**Examples**
-
-```javascript
-parseJsonIf('{"a":1}', true);                                                                                          // => {"a":1}
-parseJsonIf('{"a":1}', false);                                                                                         // => "{\"a\":1}"
-parseJsonIf('invalid');                                                                                                // => "invalid"
-parseJsonIf('2', value => typeof value === 'string', (key, value) => typeof value === 'number' ? value * 2 : value);   // => 4
-```
-
-**Notes**
-
-The condition is the second argument and the optional reviver follows it. A predicate receives the original input once without an explicit receiver. Deliberate predicate mutation is visible to requested parsing; predicate errors propagate. Skipping inspects neither the input nor the reviver. A requested parse follows native `parseJson` input coercion and reviver behaviour. Only the condition requires a synchronous primitive boolean result; the reviver may return any value without awaiting.
-
----
-
-### `toMapIf(value, condition?)`
-
-Converts a plain object or iterable of key/value pairs to a new Map when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toMap` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toMap`. Plain object entries come from own enumerable properties with string or symbol keys. Iterable pairs must be exact two-element arrays with both own indices present. Duplicate keys keep their first position and take the last value. Nullish input creates an empty Map. Requires native `Map`; missing support throws before inspecting the input.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | ConvertedMap<T>` — A new Map when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toMap`](#tomapvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-Array.from(toMapIf([['key', 1]], true));   // => [["key",1]]
-toMapIf(42, false);                        // => 42
-toMapIf({ a: 1 }, true).get('a');          // => 1
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toMap` contract.
-
----
-
-### `toNumberIf(value, condition?)`
-
-Converts a value to a primitive number when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toNumber` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toNumber`. May return `NaN` or infinity, lose bigint precision, round numeric text, underflow to zero, or invoke object conversion hooks. Symbols throw.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | number` — The converted primitive number, possibly `NaN` or infinite, when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toNumber`](#tonumbervalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toNumberIf('12', value => typeof value === 'string');  // => 12
-toNumberIf('12', false);                               // => "12"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toNumber` contract.
-
----
-
-### `toPlainObjectIf(value, condition?)`
-
-Creates a new plain object when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toPlainObject` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toPlainObject`. Returns a fresh ordinary object. Copies own enumerable string and symbol properties, preserving nested references. Entry pairs must be two-element arrays with string or symbol keys. Strings and nullish input throw.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | ConvertedPlainObject<T>` — A fresh plain object when conversion is requested; otherwise the exact original input.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toPlainObject`](#toplainobjectvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toPlainObjectIf({a:1}, true);        // => {"a":1}
-toPlainObjectIf(null, false);        // => null
-toPlainObjectIf('{"a":1}', false);   // => "{\"a\":1}"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toPlainObject` contract.
-
----
-
-### `toSetIf(value, condition?)`
-
-Converts supported iterable, plain object or array-like input to a new shallow Set when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toSet` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toSet`. Copies iterable values, values from own enumerable string and symbol properties, or supported array-like indices. Lengths must be numeric safe integers at least zero. Nullish input creates an empty Set; unsupported inputs throw. Requires native `Set`, independently of `Array.from`; missing support throws before inspecting the input.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | ConvertedSet<T>` — A new Set when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toSet`](#tosetvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-Array.from(toSetIf('aba', true));  // => ["a","b"]
-toSetIf('aba', false);             // => "aba"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toSet` contract.
-
----
-
-### `toStringIf(value, condition?)`
-
-Converts a value to a primitive string when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toString` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toString`. May invoke conversion hooks and throw, including for boxed symbols. Does not perform JSON serialisation.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | string` — The converted primitive string when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toString`](#tostringvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-toStringIf(42, true);          // => "42"
-toStringIf(42, false);         // => 42
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toString` contract.
-
----
-
-### `toSymbolIf(value, condition?)`
-
-Converts a value to a primitive symbol when the condition evaluates to `true`. Otherwise, returns the original value unchanged.
-
-Uses the same conversion as `toSymbol` when requested. A primitive boolean is used directly; a predicate receives the original input once and must return a primitive boolean. A `false`, omitted or `undefined` condition returns the input unchanged without inspecting or converting it.
-
-Requested conversion uses `toSymbol`. Preserves primitive symbol identity and unboxes wrappers. Other inputs create a new symbol and may invoke description-conversion hooks. Requires native `Symbol`; missing support does not prevent loading. Requested conversion throws `TypeError` before inspecting the input when it is unavailable.
-
-**Parameters**
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `value` | `T` | — | The value to convert. |
-| `condition?` | `boolean \| ((this: undefined, value: T) => boolean)` | `undefined` | A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean. |
-
-**Returns:** `T | symbol` — The original or unboxed symbol, or a new symbol from the description, when conversion is requested; otherwise the original input, unchanged.
-
-**Errors**
-
-- Invalid conditions or non-boolean predicate results throw `TypeError`.
-- Predicate errors propagate.
-- A requested conversion also follows [`toSymbol`](#tosymbolvalue) error behaviour; a skipped conversion does not inspect or coerce the value.
-
-**Examples**
-
-```javascript
-typeof toSymbolIf('key', true);  // => "symbol"
-toSymbolIf('key', false);        // => "key"
-```
-
-**Notes**
-
-A predicate receives the original value once, without an explicit `this` receiver. It must return a primitive boolean; other results, including Promises, throw `TypeError`. Promise results are not awaited and no rejection handler is attached.
-
-Predicate errors propagate. A predicate can mutate its input; a requested conversion then sees that mutation. No clone or rollback is introduced. A skipped conversion does not inspect the input. When requested, conversion follows the full `toSymbol` contract.
-
 ## Behaviour
 
 ### Checks and conversions
@@ -3356,7 +2712,7 @@ Type checks do not convert values. For example, `isNumber('42')` returns `false`
 
 `box` preserves nullish input and existing objects; `unbox` extracts primitive values from wrapper objects without custom coercion. `toRegExp` uses native patterns and flags without literal escaping. `toPromise` adopts values and thenables through native `Promise.resolve`; its resolution failures reject, while some native errors can throw synchronously.
 
-Conditional converters evaluate a boolean condition or synchronous predicate once. A `false`, omitted or `undefined` condition returns the original input without inspecting or converting it. See the [conversion guide](conversions.md) for identity, coercion and precision details.
+For conditional conversion, use `applyIf` from go-fns 2.0.0 or later. See [conditional conversions](conversions.md#conditional-conversions) for examples and version availability.
 
 ### Errors and side effects
 
@@ -3376,12 +2732,51 @@ Handle iteration explicitly when consumption is intended.
 
 Blankness is shallow. `[null, undefined]` is blank, but `['']` and `[{}]` are not. Map blankness checks values; Set blankness checks items.
 
+Check the expected type first when a value must be a particular kind of input:
+
+| Requirement              | Check                                     |
+| ------------------------ | ----------------------------------------- |
+| A non-empty array        | `isArray(value) && !isEmpty(value)`       |
+| A non-empty Map          | `isMap(value) && !isEmpty(value)`         |
+| A non-empty Set          | `isSet(value) && !isEmpty(value)`         |
+| A non-empty plain object | `isPlainObject(value) && !isEmpty(value)` |
+| Non-blank text           | `isString(value) && !isBlank(value)`      |
+
+`isString` accepts primitive strings and boxed `String` objects. Use `typeof value === 'string'` when only primitive strings are acceptable. Negation alone does not establish a type or validate collection items. See [required text and tags](../README.md#check-required-text-and-tags) for element validation.
+
+To remove recognised empty values from mixed settings while retaining `0` and `false`:
+
+<!-- prettier-ignore -->
+```javascript
+const settings = [null, undefined, false, 0, '', [], 'hello'];
+
+settings.filter(value => !isEmpty(value));   // => [false, 0, 'hello']
+```
+
+This filtering keeps other values; it does not restrict the result to strings or collections.
+
+For reusable predicates, the same checks can be composed with go-fns:
+
+<!-- prettier-ignore -->
+```javascript
+import { isArray, isString, isEmpty, isBlank } from 'go-types';
+import { and, not } from 'go-fns';
+
+const hasArrayItems = and(isArray, not(isEmpty));
+const hasText = and(isString, not(isBlank));
+
+hasArrayItems(['report.pdf']);               // => true
+hasArrayItems(false);                        // => false
+hasText('Project notes');                    // => true
+hasText('   ');                              // => false
+```
+
 ### Type specifications
 
 The four collection checks accept a required type-name string or predicate:
 
 - **Type-name string:** One of the native `typeof` names: `'undefined'`, `'object'`, `'boolean'`, `'number'`, `'bigint'`, `'string'`, `'symbol'` or `'function'`. Names are case-sensitive. As with `typeof`, `'object'` includes `null`.
-- **Predicate:** A synchronous function returning a primitive boolean. It receives one value without a supplied `this` receiver. Bind methods that require a receiver, or use an arrow function.
+- **Predicate:** A function whose result is evaluated using JavaScript truthiness. It receives one value without a supplied `this` receiver. Bind methods that require a receiver, or use an arrow function.
 
 <!-- prettier-ignore -->
 ```javascript
@@ -3391,14 +2786,14 @@ isArrayOf([1, 2], 'number');                                     // => true
 isArrayOf([1, new Number(2)], 'number');                         // => false
 isArrayOf([1, new Number(2)], isNumber);                         // => true
 isArrayLikeOf({ 0: 'a', length: 1 }, 'string');                  // => true
-isSetOf(new Set([null]), value => value === null);               // => true
+isSetOf(new Set([null]), isNull);                                // => true
 isMapOf(new Map([['score', 1]]), 'string', isNumber);            // => true
 isArrayOf([new Account()], value => value instanceof Account);   // => true
 ```
 
-Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise Date objects from other realms. Combine checks with an ordinary predicate, such as `value => typeof value === 'number' || value === null`, or with the logic utilities in go-fns.
+Functions are always predicates. A local `instanceof` predicate follows native realm rules; pass `isDate` to recognise Date objects from other realms. Combine checks with an ordinary predicate, such as `value => isNumber(value) || isNull(value)`, or with the logic utilities in go-fns. `isNumber` also accepts Number wrappers; use native `typeof` when only primitive numbers are wanted.
 
-Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Non-boolean results, including promises, throw when the predicate runs; callback exceptions propagate unchanged.
+Invalid or missing matchers throw `TypeError` before the collection is inspected, even for empty collections or values of the wrong type. Boxed strings, matcher arrays and descriptor objects are not accepted. Valid empty collections pass without calling predicates. Truthy results match and falsy results do not. Returned promises are truthy and are not awaited; callback exceptions propagate unchanged.
 
 See [Matcher specification contract](#matcher-specification-contract) for traversal and callback rules.
 
@@ -3427,7 +2822,7 @@ Use native `typeof` checks for primitive narrowing. `isNotNullish` also narrows 
 
 `toDate()` returns `Date`; it does not promise to preserve extra input properties during conversion. See the [runtime guide](runtime.md#typescript-boundaries) for declaration boundaries.
 
-`toArray()`, `toSet()` and `toMap()` infer definite iterable contents before object or indexed contents. Known symbol properties contribute to inferred values and Map keys. A visibly optional or nullable iterator that may be callable keeps inferred contents conservative because it can override the fallback source; an iterator declared only as `null`/`undefined` permits fallback inference. Structural types cannot prove a plain prototype, enumerability or complete pair indices. Skipped conversions preserve the original input type.
+`toArray()`, `toSet()` and `toMap()` infer definite iterable contents before object or indexed contents. Known symbol properties contribute to inferred values and Map keys. A visibly optional or nullable iterator that may be callable keeps inferred contents conservative because it can override the fallback source; an iterator declared only as `null`/`undefined` permits fallback inference. Structural types cannot prove a plain prototype, enumerability or complete pair indices.
 
 Root and focused CommonJS declarations support strict consumers targeting ES2017 with ES2017 libraries and `skipLibCheck: false`. Runtime support for optional native features remains separate: selecting a newer compiler library does not add BigInt to Node 8. See the [runtime guide](runtime.md#typescript-boundaries) for declaration details.
 
@@ -3445,6 +2840,6 @@ Matchers are required for `isArrayOf(value, matcher)`, `isArrayLikeOf(value, mat
 
 Indexed checks read length once and then use ordinary property reads. Empty slots therefore match `'undefined'` unless an inherited indexed value is present. Matching stops at the first failure. Map checks test each key before its associated value; Map and Set checks use captured native iteration. Iteration is live, so predicates must not mutate those collections.
 
-Predicate results are checked as primitive booleans without coercion, awaiting or thenable inspection. Results are not cached: each reached value is passed to the predicate. Callback closures and instance hooks inside explicit predicates retain their live state. There is no built-in work limit for collection traversal or callback work.
+Predicate results use JavaScript truthiness without coercion hooks, awaiting or thenable inspection. Results are not cached: each reached value is passed to the predicate. Callback closures and instance hooks inside explicit predicates retain their live state. There is no built-in work limit for collection traversal or callback work.
 
-The shared `TypeMatcher` declaration accepts `TypeName | ((this: undefined, value: unknown) => boolean)`. Callback input remains `unknown`, including for typed collections; explicit incompatible receiver requirements are rejected. TypeScript cannot recover a receiver requirement erased from a function type. All four checks return `boolean` and do not narrow either branch.
+The shared `TypeMatcher` declaration accepts `TypeName | ((this: undefined, value: unknown) => unknown)`. Callback input remains `unknown`, including for typed collections; explicit incompatible receiver requirements are rejected. TypeScript cannot recover a receiver requirement erased from a function type. All four checks return `boolean` and do not narrow either branch.

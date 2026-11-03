@@ -32,12 +32,12 @@ T.isArrayOf([], undefined);
 T.isArrayOf([], new String('number'));
 // @ts-expect-error Arrays of alternatives are not matchers.
 T.isArrayOf([], ['number', 'string']);
-// @ts-expect-error Predicates must return a primitive boolean.
+// Predicate results use truthiness.
 T.isArrayOf([], () => 1);
-// @ts-expect-error Async predicates are not supported.
+// Promise results are truthy without awaiting.
 T.isArrayOf([], async () => true);
 // @ts-expect-error A class must be used through an explicit predicate.
-T.isArrayOf([], Date);
+T.isArrayOf([], class Account {});
 function checkNarrowing(value: unknown): void {
   if (T.isArrayOf(value, (item): item is number => typeof item === 'number')) {
     // @ts-expect-error Collection checks return boolean, including with a type guard.

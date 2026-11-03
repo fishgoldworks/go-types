@@ -5,16 +5,17 @@ const compileTypeMatcher = require('./util/compileTypeMatcher');
  * Checks whether a value is an array whose items match a type-name string or predicate.
  *
  * Matchers are required and validated before inspecting the collection. Predicates receive one
- * value with no supplied receiver and must return a synchronous primitive boolean. Empty
- * collections pass without calling predicates.
+ * value with no supplied receiver and have their results evaluated using JavaScript truthiness.
+ * Empty collections pass without calling predicates. Returned promises are truthy and are not
+ * awaited. The check itself returns a primitive boolean.
  *
  * @param {*} value The value to check.
- * @param {*} matcher A required native `typeof` name or synchronous boolean predicate for
- * collection items.
+ * @param {*} matcher A required native `typeof` name or synchronous predicate for collection
+ * items.
  * @returns {boolean} `true` if the value is an array and every element matches the matcher,
  * including an empty array; otherwise `false`.
- * @throws {*} `TypeError` for invalid or missing matchers, or a non-boolean predicate result.
- * Callback, property-access and native iteration errors propagate.
+ * @throws {*} `TypeError` for invalid or missing matchers. Callback, property-access and native
+ * iteration errors propagate.
  * @see https://github.com/koyote130708/go-types/blob/master/docs/API.md#isarrayofvalue-matcher
  * @example isArrayOf([1,2], "number");    // => true
  * @example isArrayOf([1,"x"], "number");  // => false

@@ -4,7 +4,6 @@ const result: number[] = [1, 'x', null].filter(check);
 const present: (number | string)[] = [1, '', null, undefined].filter(Types.isNotNullish);
 const valid: boolean = Types.isMapOf(new Map([['x', 1]]), 'string', 'number');
 const converted: number = Types.toNumber('1');
-const conditional: string | number = Types.toNumberIf('1', () => true);
 import convert = require('go-types/src/conversion/toNumber');
 const fromSubpath: number = convert('2');
 

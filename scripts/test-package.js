@@ -33,6 +33,33 @@ function verifyFiles(directory, pkg, sourceOnly) {
     assert.deepEqual(pkg[field], metadata[field], 'Consumer dependency metadata differs: ' + field);
   }
   for (const retired of [
+    ...[
+      'toArrayIf',
+      'toBigIntIf',
+      'toBooleanIf',
+      'toDateIf',
+      'toIntegerIf',
+      'toJsonIf',
+      'toMapIf',
+      'toNumberIf',
+      'toPlainObjectIf',
+      'toSetIf',
+      'toStringIf',
+      'toSymbolIf',
+      'boxIf',
+      'unboxIf',
+      'toRegExpIf',
+      'toPromiseIf',
+      'parseJsonIf'
+    ].flatMap((name) => [
+      name + '.js',
+      'conversion/' + name + '.js',
+      'src/' + name + '.js',
+      'src/conversion/' + name + '.js',
+      'esm/' + name + '.mjs',
+      'types/' + name + '.d.ts',
+      'types/' + name + '.d.mts'
+    ]),
     'asArray.js',
     'src/asArray.js',
     'esm/asArray.mjs',
@@ -110,7 +137,7 @@ function verifyFiles(directory, pkg, sourceOnly) {
   const expected = ['.', './package.json', './dist/go-types.js', './dist/go-types.min.js', './dist/go-types.mjs'];
   for (const name of names) {
     expected.push('./' + name, './src/' + name, './src/' + name + '.js');
-    if (name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'parseJson', 'parseJsonIf'].includes(name))
+    if (name.startsWith('to') || ['box', 'unbox', 'parseJson'].includes(name))
       for (const prefix of ['./conversion/', './src/conversion/']) expected.push(prefix + name, prefix + name + '.js');
   }
   assert.deepEqual(Object.keys(pkg.exports).sort(), expected.sort(), 'Public alias set changed.');

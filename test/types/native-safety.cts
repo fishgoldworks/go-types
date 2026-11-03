@@ -207,10 +207,6 @@ const converted: Date = T.toDate(wrapper);
 T.toDate(wrapper).label.toUpperCase();
 // @ts-expect-error actual Date identity is not established by a generic structural type.
 const retained: typeof wrapper = T.toDate(wrapper);
-const unchanged: typeof tagged = T.toDateIf(tagged, false);
-const conditional: Date = T.toDateIf(wrapper, true);
-// @ts-expect-error condition true cannot promise structural subtype preservation either.
-void T.toDateIf(wrapper, true).label;
 // Exact primitive checking and nullish filtering retain narrowing.
 const values: number[] = [1, 'x', null].filter((value: unknown): value is number => typeof value === 'number');
 const present: (number | string)[] = [1, 'x', null, undefined].filter(T.isNotNullish);

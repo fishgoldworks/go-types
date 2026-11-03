@@ -49,7 +49,6 @@ function anchor(item) {
     .replace(/ /g, '-');
 }
 function returnType(item) {
-  if (item.name.endsWith('If')) return 'T | ' + returnType({ name: item.name.slice(0, -2) });
   return conversionTypes[item.name] || 'boolean';
 }
 function parameters(item) {
@@ -57,22 +56,20 @@ function parameters(item) {
     const optional = signature(item).includes(name + '?');
     let type, description;
     if (name === 'value') {
-      type =
-        item.name.endsWith('If') ||
-        [
-          'ensureArray',
-          'ensureSet',
-          'box',
-          'unbox',
-          'toPromise',
-          'toArray',
-          'toMap',
-          'toPlainObject',
-          'toSet',
-          'isNotNullish'
-        ].includes(item.name)
-          ? 'T'
-          : 'unknown';
+      type = [
+        'ensureArray',
+        'ensureSet',
+        'box',
+        'unbox',
+        'toPromise',
+        'toArray',
+        'toMap',
+        'toPlainObject',
+        'toSet',
+        'isNotNullish'
+      ].includes(item.name)
+        ? 'T'
+        : 'unknown';
       description =
         'The value to ' +
         (['ensureArray', 'ensureSet'].includes(item.name)
@@ -81,10 +78,6 @@ function parameters(item) {
             ? 'convert'
             : 'check') +
         '.';
-    } else if (name === 'condition') {
-      type = 'boolean | ((this: undefined, value: T) => boolean)';
-      description =
-        'A boolean or synchronous predicate called once with the original value. Omitted or `undefined` skips conversion; a predicate must return a primitive boolean.';
     } else if (name === 'flags') {
       type = 'string';
       description =
@@ -103,7 +96,7 @@ function parameters(item) {
     } else {
       type = 'TypeMatcher';
       const scope = name === 'keyMatcher' ? 'Map keys' : name === 'valueMatcher' ? 'Map values' : 'collection items';
-      description = 'A required native `typeof` name or synchronous boolean predicate for ' + scope + '.';
+      description = 'A required native `typeof` name or synchronous predicate for ' + scope + '.';
     }
     if (['ensureArray', 'ensureSet'].includes(item.name) && name === 'value')
       description +=
@@ -123,17 +116,9 @@ function wrap(text, width = 96) {
   }
   return lines;
 }
-function conversionDetails(item) {
-  if (!item.name.endsWith('If')) return '';
-  const base = api.find((candidate) => candidate.name === item.name.slice(0, -2));
-  if (!base) throw Error('Missing base conversion documentation: ' + item.name);
-  return 'Requested conversion uses `' + base.name + '`. ' + base.tooltip;
-}
 function comment(item, { source = false, indent = '' } = {}) {
   const lines = [...wrap(item.summary)];
   if (item.tooltip) lines.push('', ...wrap(item.tooltip));
-  const conversion = conversionDetails(item);
-  if (conversion) lines.push('', ...wrap(conversion));
   lines.push('');
   for (const parameter of parameters(item)) {
     // Source inputs accept arbitrary JavaScript values. The declarations own narrowing and overload types.
@@ -171,4 +156,4 @@ function declarations(source) {
   if (seen.size !== api.length) throw Error('Missing public declarations for documentation');
   return output;
 }
-module.exports = { signature, anchor, returnType, parameters, conversionDetails, comment, declarations };
+module.exports = { signature, anchor, returnType, parameters, comment, declarations };

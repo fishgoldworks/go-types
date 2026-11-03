@@ -8,6 +8,23 @@ const excludedHelpers = [
   'isNonNullish',
   'isObjectLike',
   'isNonFunctionObject',
+  'toArrayIf',
+  'toBigIntIf',
+  'toBooleanIf',
+  'toDateIf',
+  'toIntegerIf',
+  'toJsonIf',
+  'toMapIf',
+  'toNumberIf',
+  'toPlainObjectIf',
+  'toSetIf',
+  'toStringIf',
+  'toSymbolIf',
+  'boxIf',
+  'unboxIf',
+  'toRegExpIf',
+  'toPromiseIf',
+  'parseJsonIf',
   'ensureArrayIf',
   'ensureSetIf',
   'ensureMap',
@@ -90,9 +107,7 @@ test('private and unknown imports are not public entry points', () => {
   }
 });
 
-for (const name of names.filter(
-  (name) => name.startsWith('to') || ['box', 'boxIf', 'unbox', 'unboxIf', 'parseJson', 'parseJsonIf'].includes(name)
-)) {
+for (const name of names.filter((name) => name.startsWith('to') || ['box', 'unbox', 'parseJson'].includes(name))) {
   for (const prefix of ['conversion/', 'src/conversion/']) {
     for (const extension of ['', '.js']) {
       const request = 'go-types/' + prefix + name + extension;
@@ -146,5 +161,41 @@ test('ESM rejects unsupported helpers and private compilation modules', async ()
     'src/util/compileTypeMatcher'
   ]) {
     await assert.rejects(import('go-types/' + name), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+  }
+});
+
+test('retired conditional conversion routes cannot be imported', async () => {
+  for (const name of [
+    'toArrayIf',
+    'toBigIntIf',
+    'toBooleanIf',
+    'toDateIf',
+    'toIntegerIf',
+    'toJsonIf',
+    'toMapIf',
+    'toNumberIf',
+    'toPlainObjectIf',
+    'toSetIf',
+    'toStringIf',
+    'toSymbolIf',
+    'boxIf',
+    'unboxIf',
+    'toRegExpIf',
+    'toPromiseIf',
+    'parseJsonIf'
+  ]) {
+    for (const route of [
+      name,
+      name + '.js',
+      'src/' + name,
+      'src/' + name + '.js',
+      'conversion/' + name,
+      'conversion/' + name + '.js',
+      'src/conversion/' + name,
+      'src/conversion/' + name + '.js'
+    ]) {
+      assert.throws(() => require('go-types/' + route), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+      await assert.rejects(import('go-types/' + route), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+    }
   }
 });

@@ -106,21 +106,6 @@ declare const unknownInput: unknown;
 expectType<unknown[]>(toArray(unknownInput));
 expectType<Set<unknown>>(toSet(unknownInput));
 expectType<Map<unknown, unknown>>(toMap(unknownInput));
-expectType<null>(T.toArrayIf(null, false));
-expectType<1>(T.toSetIf(1 as const));
-expectType<1>(T.toMapIf(1 as const, undefined));
-// @ts-expect-error definite conversion must validate the array input.
-T.toArrayIf(null, true);
-// @ts-expect-error definite conversion must validate the set input.
-T.toSetIf(1, true);
-// @ts-expect-error definite conversion must validate tuple entries.
-T.toMapIf([['key', 1, 2]] as const, true);
-expectType<typeof record | (1 | 'answer' | true)[]>(T.toArrayIf(record, Math.random() > 0.5));
-expectType<typeof record | Set<1 | 'answer' | true>>(T.toSetIf(record, (value) => value.a === 1));
-expectType<typeof record | Map<string | typeof token, 1 | 'answer' | true>>(T.toMapIf(record, (value) => value[token]));
-expectType<1 | unknown[]>(T.toArrayIf(1 as const, () => false));
-expectType<1 | Set<unknown>>(T.toSetIf(1 as const, () => false));
-expectType<1 | Map<unknown, unknown>>(T.toMapIf(1 as const, () => false));
 
 const iterableDate = Object.assign(new Date(), {
   *[Symbol.iterator]() {
@@ -129,8 +114,6 @@ const iterableDate = Object.assign(new Date(), {
 });
 // @ts-expect-error Dates remain unsupported even when they advertise iterable entries.
 toMap(iterableDate);
-// @ts-expect-error definite conditional conversion keeps the same forbidden-source rule.
-T.toMapIf(iterableDate, true);
 // @ts-expect-error iterable augmentation does not turn a Date into an array source.
 toArray(iterableDate);
 // @ts-expect-error iterable augmentation does not turn a Date into a set source.

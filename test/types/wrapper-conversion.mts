@@ -11,8 +11,6 @@ const unboxed = T.unbox(3 as const);
 const uncertain = T.unbox(input);
 const promise = T.toPromise(Promise.resolve(3));
 const omitted = T.toPromise();
-const conditional = T.toPromiseIf(3 as const, false);
-const dynamic = T.toPromiseIf(3, (value) => value > 0);
 const regex = T.toRegExp('a', 'i');
 type A = Expect<Equal<typeof boxed, Number>>;
 type B = Expect<Equal<typeof empty, undefined>>;
@@ -22,8 +20,6 @@ type E = Expect<Equal<typeof unboxed, 3>>;
 type F = Expect<Equal<typeof uncertain, typeof input | string | number | boolean | symbol | bigint>>;
 type G = Expect<Equal<typeof promise, Promise<number>>>;
 type H = Expect<Equal<typeof omitted, Promise<undefined>>>;
-type I = Expect<Equal<typeof conditional, 3>>;
-type J = Expect<Equal<typeof dynamic, number | Promise<number>>>;
 type K = Expect<Equal<typeof regex, RegExp>>;
 // @ts-expect-error structural properties cannot prove a genuine wrapper payload
 const unsafe: number = T.unbox(new Number(3));
@@ -31,8 +27,6 @@ const unsafe: number = T.unbox(new Number(3));
 T.toPromise<number>();
 // @ts-expect-error omitted input is undefined
 T.box<number>();
-// @ts-expect-error predicates are synchronous booleans
-T.toPromiseIf(3, async () => true);
 // @ts-expect-error flags are strings
 T.toRegExp('a', 3);
 // @ts-expect-error explicit conversion loses input-only properties
@@ -45,14 +39,12 @@ declare const booleanId: boolean & { readonly [brand]: 'Id' };
 declare const symbolId: symbol & { readonly [brand]: 'Id' };
 declare const bigintId: bigint & { readonly [brand]: 'Id' };
 const boxedId = T.box(numberId);
-const convertedId = T.boxIf(numberId, true);
 const boxedTextId = T.box(stringId);
 const boxedBoolId = T.box(booleanId);
 const boxedSymbolId = T.box(symbolId);
 const boxedBigIntId = T.box(bigintId);
 const unboxedId = T.unbox(numberId);
 type BrandedNumber = Expect<Equal<typeof boxedId, Number>>;
-type BrandedConditional = Expect<Equal<typeof convertedId, Number>>;
 type BrandedString = Expect<Equal<typeof boxedTextId, String>>;
 type BrandedBoolean = Expect<Equal<typeof boxedBoolId, Boolean>>;
 type BrandedSymbol = Expect<Equal<typeof boxedSymbolId, Symbol>>;

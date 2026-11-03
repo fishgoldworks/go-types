@@ -54,30 +54,17 @@ for (const [name, Native] of [
         (error) => error === failure
       );
   });
-  test(name + ' consumes a one-shot iterable only when conversion is requested', () => {
+  test(name + ' consumes a one-shot iterable exactly once', () => {
     let calls = 0;
     function* items() {
       calls++;
       yield name === 'toMap' ? ['key', 1] : 1;
     }
     const input = items();
-    assert.equal(Types[name + 'If'](input, false), input);
     assert.equal(calls, 0);
-    assert.equal(Types[name + 'If'](input, true).size, 1);
+    assert.equal(Types[name](input).size, 1);
     assert.equal(calls, 1);
     assert.equal(Types[name](input).size, 0);
-  });
-  test(name + 'If sees predicate mutations and never inspects skipped invalid input', () => {
-    const input = [];
-    const output = Types[name + 'If'](input, (value) => {
-      value.push(name === 'toMap' ? ['key', 1] : 1);
-      return true;
-    });
-    assert.equal(output.size, 1);
-    const invalid = 42;
-    assert.equal(Types[name + 'If'](invalid), invalid);
-    assert.throws(() => Types[name + 'If'](invalid, true), TypeError);
-    assert.equal(Types[name + 'If'](null, true).size, 0);
   });
 }
 
